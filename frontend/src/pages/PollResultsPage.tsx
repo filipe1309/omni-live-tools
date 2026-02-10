@@ -572,26 +572,6 @@ export function PollResultsPage () {
         </div>
       )}
 
-      {/* Countdown Overlay */}
-      {pollState.countdown !== undefined && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="text-center animate-pulse">
-            {pollState.countdown === 0 ? (
-              <div className="text-9xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
-                {t.poll.go}
-              </div>
-            ) : (
-              <>
-                <div className="text-2xl text-slate-300 mb-4">{t.poll.startingIn}</div>
-                <div className="text-[12rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
-                  {pollState.countdown}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="flex-1 flex flex-col gap-4">
         {/* Setup Section - Above Results */}
         <div className="p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30">
@@ -637,6 +617,26 @@ export function PollResultsPage () {
         <div className="flex-1 space-y-3 relative">
           {/* Spotlight + Trophy Celebration - positioned within Results Section */}
           {showCelebration && <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />}
+
+          {/* Countdown Overlay - positioned within Results Section */}
+          {pollState.countdown !== undefined && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden rounded-xl">
+              <div className="text-center animate-pulse">
+                {pollState.countdown === 0 ? (
+                  <div className="text-7xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
+                    {t.poll.go}
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-xl text-slate-300 mb-3">{t.poll.startingIn}</div>
+                    <div className="text-[8rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
+                      {pollState.countdown}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Question */}
           <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
