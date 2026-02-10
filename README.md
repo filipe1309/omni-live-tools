@@ -168,6 +168,7 @@ MIT License
 
 ## 🙏 Credits
 
+- [tikTok-chat-reader-jb](https://github.com/filipe1309/tiktok-chat-reader-jb)
 - [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)
 - [Twurple](https://twurple.js.org/) - Modern Twitch API library
 - Original project by [zerodytrash](https://github.com/zerodytrash/TikTok-Chat-Reader)
