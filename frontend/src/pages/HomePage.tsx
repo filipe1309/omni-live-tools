@@ -76,10 +76,10 @@ export function HomePage() {
         <p>
           Source:{' '}
           <a
-            href="https://github.com/filipe1309/omni-chat-reader-jb"
+            href="https://github.com/filipe1309/omni-live-chat-reader"
             className="text-tiktok-cyan hover:underline"
           >
-            https://github.com/filipe1309/omni-chat-reader-jb
+            https://github.com/filipe1309/omni-live-chat-reader
           </a>
         </p>
       </footer>
