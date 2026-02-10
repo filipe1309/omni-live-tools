@@ -4,6 +4,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-black.svg)](https://socket.io/)
+[![Electron](https://img.shields.io/badge/Electron-25.x-purple.svg)](https://www.electronjs.org/)
 
 A multi-platform chat reader and poll application for **TikTok LIVE** and **Twitch** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
@@ -13,14 +14,15 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 
 - [Features](#-features)
 - [Supported Platforms](#-supported-platforms)
+- [Language Support](#-language-support)
+- [Main Features](#-main-features)
+   - [Poll Feature](#-poll-feature)
+   - [Real-time Chat Reading](#-real-time-chat-reading)
 - [Quick Start](#-quick-start)
+- [Make Commands](#-make-commands)
 - [Development](#-development)
 - [Configuration](#-configuration)
-- [Building Desktop App](#-building-desktop-app-electron)
-- [Web Pages](#-web-pages)
-- [Poll Feature](#-poll-feature)
-- [Language Support](#-language-support)
-- [Troubleshooting](#-troubleshooting)
+- [Building Desktop App (Electron)](#-building-desktop-app-electron)
 - [License](#-license)
 - [Credits](#-credits)
 
@@ -193,15 +195,6 @@ Installers are created in `./release/`:
 make electron-dev     # Build & launch Electron in dev mode
 ```
 
-## 🌐 Web Pages
-
-| Page | URL |
-|------|-----|
-| Main | `http://localhost:8081/` |
-| OBS Overlay | `http://localhost:8081/obs.html` |
-| Live Poll | `http://localhost:8081/poll.html` |
-
-
 ## 📝 License
 
 MIT License
@@ -209,8 +202,6 @@ MIT License
 ## 🙏 Credits
 
 - [tikTok-chat-reader-jb](https://github.com/filipe1309/tiktok-chat-reader-jb)
-- [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)
-- [Twurple](https://twurple.js.org/) - Modern Twitch API library
 - Original project by [zerodytrash](https://github.com/zerodytrash/TikTok-Chat-Reader)
 
 ---
