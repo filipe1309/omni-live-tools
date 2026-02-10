@@ -1,0 +1,59 @@
+appId: com.tiktok-chat-reader.app
+productName: TikTok Chat Reader
+copyright: Copyright © 2024
+
+directories:
+  output: release
+  buildResources: electron/build-resources
+
+# Files to include in the Electron package
+files:
+  - backend/dist/**/*
+  - backend/node_modules/**/*
+  - electron/dist-electron/**/*
+  - public-react/**/*
+  - node_modules/**/*
+  - package.json
+
+# Electron main entry point (compiled from electron/main.ts)
+# electron-builder reads "main" from package.json, but we override here
+extraMetadata:
+  main: electron/dist-electron/main.js
+
+# ─── macOS ────────────────────────────────────────────────────────────
+mac:
+  category: public.app-category.social-networking
+  target:
+    # DMG disabled due to hdiutil conflicts on Apple Silicon
+    # Users can extract the app from the ZIP file instead
+    - target: zip
+      arch:
+        - x64
+        - arm64
+
+# ─── Windows ──────────────────────────────────────────────────────────
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: electron/build-resources/icon.ico
+  uninstallerIcon: electron/build-resources/icon.ico
+
+# ─── Linux (optional) ────────────────────────────────────────────────
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  category: Network

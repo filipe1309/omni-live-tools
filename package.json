@@ -1,0 +1,38 @@
+{
+  "name": "tiktok-chat-reader",
+  "version": "2.0.0",
+  "description": "TikTok LIVE Chat Reader - Electron Desktop App",
+  "main": "electron/dist-electron/main.js",
+  "scripts": {
+    "backend:install": "cd backend && npm install",
+    "backend:build": "cd backend && npm run build",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:dev:watch": "cd backend && npm run dev:watch",
+    "backend:test": "cd backend && npm test",
+    "backend:test:coverage": "cd backend && npm run test:coverage",
+    "backend:lint": "cd backend && npm run lint",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:dev": "cd frontend && npm run dev",
+    "install:all": "npm install && npm run backend:install && npm run frontend:install",
+    "build:all": "npm run backend:build && npm run frontend:build",
+    "electron:build-ts": "tsc -p electron/tsconfig.json",
+    "electron:dev": "npm run backend:build && npm run electron:build-ts && electron electron/dist-electron/main.js",
+    "electron:dist": "bash build-exe-electron.sh"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.2",
+    "socket.io": "^4.4.1",
+    "tiktok-live-connector": "^2.1.1-beta1",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-900 text-gray-100 min-h-screen;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-tiktok-red to-tiktok-cyan 
+           text-white font-bold rounded-xl 
+           hover:scale-105 hover:shadow-lg hover:shadow-tiktok-red/30
+           transition-all duration-200 
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-danger {
+    @apply px-6 py-3 bg-gradient-to-r from-red-600 to-red-500
+           text-white font-bold rounded-xl 
+           hover:scale-105 hover:shadow-lg hover:shadow-red-500/30
+           transition-all duration-200 
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-slate-700 text-white font-medium rounded-lg
+           hover:bg-slate-600 transition-colors duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-field {
+    @apply px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg
+           text-white placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-tiktok-cyan focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-slate-800 rounded-xl p-6 shadow-lg;
+  }
+
+  .chat-container {
+    @apply overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded-full;
+  }
+  
+  .scrollbar-track-slate-800::-webkit-scrollbar-track {
+    @apply bg-slate-800;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  /* Poll Animations */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse-fast {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes winner-glow {
+    0%, 100% { 
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+      transform: scale(1.01);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-pulse-fast {
+    animation: pulse-fast 0.5s infinite alternate;
+  }
+
+  .animate-winner-glow {
+    animation: winner-glow 1.5s ease-in-out infinite;
+  }
+
+  /* Timer Warning States */
+  .timer-warning {
+    @apply text-yellow-400;
+    animation: pulse-fast 0.5s infinite alternate;
+  }
+
+  .timer-critical {
+    @apply text-red-500;
+    animation: pulse-fast 0.3s infinite alternate;
+  }
+}
