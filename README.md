@@ -52,13 +52,15 @@ The application supports multiple languages with easy switching:
 | Portuguese (Brazil) | PT-BR | ✅ Default |
 | English | EN | ✅ Available |
 
-## 🗳️ Poll Feature
+## ⭐ Main Features
+
+### 🗳️ Poll Feature
 
 The poll feature allows viewers to vote by typing numbers in chat from **TikTok LIVE** and/or **Twitch**.
 
 ![Poll Feature Demo](docs/tcrjb_poll.gif)
 
-### How It Works
+#### How It Works
 
 1. Select which platforms to use (TikTok, Twitch, or both)
 2. Connect to the live stream(s):
@@ -70,7 +72,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 6. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
 7. Results update in real-time with platform badges showing vote sources
 
-### Features
+#### Features
 
 - **Multi-platform voting** - Collect votes from TikTok and Twitch simultaneously
 - **One vote per user per platform** - Each viewer can only vote once per poll per platform
@@ -78,6 +80,31 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 - **Platform badges** - Visual indicators show which platform each vote came from
 - **Vote logging** - Optional detailed log of each vote with platform info
 - **Timer display** - Countdown shows remaining time
+
+### 💬 Real-time Chat Reading
+
+The application reads chat messages from TikTok LIVE and Twitch in real-time, displaying them on a web page or OBS overlay.
+
+![Chat Reading Demo](docs/omni-chat.gif)
+
+#### How It Works
+
+1. Connect to the live stream(s):
+   - **TikTok**: Enter the streamer's @username
+   - **Twitch**: Enter the channel name
+2. Chat messages from the selected platforms will appear in real-time on the main page and OBS overlay
+3. Customize the display settings to show/hide usernames, badges, timestamps, etc.
+
+#### Features
+
+- **Multi-platform support** - Connect to TikTok and Twitch simultaneously
+- **Customizable display** - Show/hide usernames, badges, timestamps, etc.
+- **OBS overlay** - Dedicated page optimized for streaming software
+- **Rate limiting** - Protect against excessive requests
+- **Multi-language support** - Display messages in Portuguese (PT-BR) or English (
+EN)
+
+
 
 
 ## 🚀 Quick Start
