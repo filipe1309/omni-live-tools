@@ -198,3 +198,7 @@ MIT License
 - [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)
 - [Twurple](https://twurple.js.org/) - Modern Twitch API library
 - Original project by [zerodytrash](https://github.com/zerodytrash/TikTok-Chat-Reader)
+
+---
+
+Made with ❤️ by [Filipe](https://github.com/filipe1309)
