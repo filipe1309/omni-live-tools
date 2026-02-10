@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useMultiPlatformConnection, useToast } from '@/hooks';
+import { useLanguage, interpolate } from '@/i18n';
 import { RoomStats, ChatContainer, GiftContainer, MultiPlatformConnectionForm } from '@/components';
 import type { ChatItem, GiftMessage, ChatMessage, LikeMessage, MemberMessage, SocialMessage, UnifiedChatMessage, PlatformType } from '@/types';
 
@@ -26,6 +27,7 @@ export function ChatPage() {
   const [currentTwitchChannel, setCurrentTwitchChannel] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>(['tiktok'] as PlatformType[]);
   const toast = useToast();
+  const { t } = useLanguage();
 
   // Add chat item helper
   const addChatItem = useCallback((
@@ -123,10 +125,10 @@ export function ChatPage() {
     
     try {
       await connection.tiktok.connect(username, { enableExtendedGiftInfo: true });
-      toast.success(`TikTok conectado a @${username}`);
+      toast.success(interpolate(t.toast.tiktokConnected, { username }));
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(`Erro ao conectar TikTok: ${errorMessage}`);
+      toast.error(interpolate(t.toast.errorConnectingTikTok, { error: errorMessage }));
     }
   };
 
@@ -135,10 +137,10 @@ export function ChatPage() {
     
     try {
       await connection.twitch.connect(channel);
-      toast.success(`Twitch conectado a #${channel}`);
+      toast.success(interpolate(t.toast.twitchConnected, { channel }));
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(`Erro ao conectar Twitch: ${errorMessage}`);
+      toast.error(interpolate(t.toast.errorConnectingTwitch, { error: errorMessage }));
     }
   };
 
@@ -179,8 +181,8 @@ export function ChatPage() {
       )}
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <ChatContainer items={chatItems} title="💬 Chats" />
-        <GiftContainer gifts={gifts} title="🎁 Gifts" />
+        <ChatContainer items={chatItems} title={`💬 ${t.chat.chats}`} />
+        <GiftContainer gifts={gifts} title={`🎁 ${t.chat.gifts}`} />
       </div>
     </div>
   );

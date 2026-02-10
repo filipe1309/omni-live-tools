@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { GiftCard } from './GiftCard';
+import { useLanguage } from '@/i18n';
 import type { GiftMessage } from '@/types';
 
 interface GiftData extends GiftMessage {
@@ -15,6 +16,7 @@ interface GiftContainerProps {
 
 export function GiftContainer({ gifts, title, maxHeight = 'calc(100vh - 320px)' }: GiftContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   // Auto-scroll to bottom when new gifts arrive
   useEffect(() => {
@@ -39,7 +41,7 @@ export function GiftContainer({ gifts, title, maxHeight = 'calc(100vh - 320px)' 
       >
         {gifts.length === 0 ? (
           <div className="text-center text-slate-500 py-8">
-            No gifts yet...
+            {t.chat.noGifts}
           </div>
         ) : (
           gifts.map((gift) => (

@@ -4,6 +4,7 @@ import type { PollState, PollOption } from '@/types';
 import type { SerializablePollState, SetupConfig } from '@/hooks/usePoll';
 import { PollSetup } from '@/components/poll/PollSetup';
 import { CONFETTI, POLL_TIMER, DEFAULT_QUESTION, TIMER_THRESHOLDS } from '@/constants';
+import { useLanguage } from '@/i18n';
 
 // Confetti celebration function
 const triggerConfetti = () => {
@@ -88,6 +89,7 @@ const LEADER_HEARTBEAT_INTERVAL = 2000;
 const LEADER_TIMEOUT = 5000;
 
 export function PollResultsPage() {
+  const { t } = useLanguage();
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
   const [isWaiting, setIsWaiting] = useState(true);
@@ -350,12 +352,12 @@ export function PollResultsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5">
         <div className="text-center mb-5">
-          <h1 className="text-4xl font-bold text-white">📊 Resultados da Enquete</h1>
+          <h1 className="text-4xl font-bold text-white">{t.pollResults.title}</h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-slate-400">
             <div className="text-8xl mb-4 animate-spin">🔄</div>
-            <div className="text-3xl">Aguardando dados da enquete...</div>
+            <div className="text-3xl">{t.pollResults.waitingForData}</div>
           </div>
         </div>
       </div>
@@ -380,12 +382,12 @@ export function PollResultsPage() {
               <>
                 <div className="text-6xl mb-6 animate-spin">🔄</div>
                 <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-                  {isAutoReconnectEnabled ? 'Reconexão Automática...' : 'Reconectando...'}
+                  {isAutoReconnectEnabled ? t.pollResults.autoReconnectTitle : t.pollResults.reconnecting}
                 </h2>
                 <p className="text-slate-400 text-lg mb-8">
                   {isAutoReconnectEnabled 
-                    ? 'A reconexão automática está ativada. Tentando reconectar...'
-                    : 'Tentando restabelecer conexão com o TikTok.'}
+                    ? t.pollResults.autoReconnectActive
+                    : t.pollResults.attemptingReconnect}
                 </p>
                 <div className="flex justify-center gap-2">
                   <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -394,7 +396,7 @@ export function PollResultsPage() {
                 </div>
                 {isAutoReconnectEnabled && (
                   <p className="text-slate-500 text-sm mt-6">
-                    ✓ Reconexão automática ativada na página principal
+                    {t.pollResults.autoReconnectEnabledMainPage}
                   </p>
                 )}
               </>
@@ -402,19 +404,19 @@ export function PollResultsPage() {
               <>
                 <div className="text-6xl mb-6">⚠️</div>
                 <h2 className="text-3xl font-bold text-red-400 mb-4">
-                  Desconectado do TikTok
+                  {t.pollResults.disconnected}
                 </h2>
                 <p className="text-slate-400 text-lg mb-8">
-                  A conexão com o TikTok foi perdida. Clique no botão abaixo para reconectar.
+                  {t.pollResults.connectionLost}
                 </p>
                 <button
                   onClick={sendReconnect}
                   className="px-10 py-4 text-xl font-bold rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
                 >
-                  🔄 Reconectar
+                  {t.pollResults.reconnectButton}
                 </button>
                 <p className="text-slate-500 text-sm mt-6">
-                  💡 Dica: Ative a reconexão automática na página principal
+                  {t.pollResults.autoReconnectTip}
                 </p>
               </>
             )}
@@ -446,20 +448,20 @@ export function PollResultsPage() {
             disabled={!isConnected || pollState.isRunning}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ▶️ Iniciar
+            {t.pollResults.start}
           </button>
           <button 
             onClick={() => sendCommand('stop')}
             disabled={!pollState.isRunning}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ⏹️ Parar
+            {t.pollResults.stop}
           </button>
           <button 
             onClick={() => sendCommand('reset')}
             className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600"
           >
-            🔄 Reiniciar
+            {t.pollResults.restart}
           </button>
         </div>
 
@@ -505,7 +507,7 @@ export function PollResultsPage() {
                       ? 'text-yellow-300'
                       : 'text-white'
                   : 'text-white'
-              }`}>{displayQuestion || 'Vote agora!'}</h3>
+              }`}>{displayQuestion || t.pollResults.voteNow}</h3>
             </div>
           </div>
 
@@ -554,7 +556,7 @@ export function PollResultsPage() {
                     
                     <div className="text-right flex-shrink-0">
                       <span className={`font-bold text-3xl ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'}`}>
-                        {votes} votos
+                        {votes} {t.pollResults.votesUnit}
                       </span>
                       <span className="text-slate-400 text-2xl ml-2">
                         ({percentageFixed}%)

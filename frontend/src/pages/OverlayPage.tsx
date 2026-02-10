@@ -1,11 +1,5 @@
 import { useState } from 'react';
-
-const FONT_SIZE_OPTIONS = [
-  { value: '1em', label: 'Pequeno (1em)' },
-  { value: '1.3em', label: 'Médio (1.3em)' },
-  { value: '1.6em', label: 'Grande (1.6em)' },
-  { value: '2em', label: 'Extra Grande (2em)' },
-];
+import { useLanguage } from '@/i18n';
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -19,6 +13,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 export function OverlayPage() {
+  const { t } = useLanguage();
   const [username, setUsername] = useState('jamesbonfim');
   const [settings, setSettings] = useState({
     showChats: true,
@@ -32,6 +27,13 @@ export function OverlayPage() {
   const [fontColor, setFontColor] = useState('#e3e5eb');
   const [fontSize, setFontSize] = useState('1.3em');
   const [copied, setCopied] = useState(false);
+
+  const FONT_SIZE_OPTIONS = [
+    { value: '1em', label: `${t.overlay.fontSizes.small} (1em)` },
+    { value: '1.3em', label: `${t.overlay.fontSizes.medium} (1.3em)` },
+    { value: '1.6em', label: `${t.overlay.fontSizes.large} (1.6em)` },
+    { value: '2em', label: `${t.overlay.fontSizes.extraLarge} (2em)` },
+  ];
 
   const baseUrl = window.location.origin;
   
@@ -71,23 +73,22 @@ export function OverlayPage() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       <div className="card mb-6">
-        <h2 className="text-2xl font-bold mb-6">🎬 Gerar URL do Overlay</h2>
+        <h2 className="text-2xl font-bold mb-6">🎬 {t.overlay.title}</h2>
         <p className="text-slate-400 mb-6">
-          Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming.
-          O overlay conectará automaticamente e exibirá os eventos da LIVE do TikTok especificada.
+          {t.overlay.description}
         </p>
 
         <div className="space-y-6">
           {/* Username Input */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Usuário do TikTok
+              {t.overlay.tiktokUser}
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Digite o @usuário"
+              placeholder={t.overlay.userPlaceholder}
               className="input-field w-full"
             />
           </div>
@@ -95,16 +96,16 @@ export function OverlayPage() {
           {/* Settings Toggles */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-3">
-              Exibir Eventos
+              {t.overlay.displayEvents}
             </label>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { key: 'showChats', label: '💬 Mensagens', checked: settings.showChats },
-                { key: 'showGifts', label: '🎁 Presentes', checked: settings.showGifts },
-                { key: 'showLikes', label: '❤️ Curtidas', checked: settings.showLikes },
-                { key: 'showJoins', label: '👋 Entradas', checked: settings.showJoins },
-                { key: 'showFollows', label: '➕ Seguidores', checked: settings.showFollows },
-                { key: 'showShares', label: '🔗 Compartilhamentos', checked: settings.showShares },
+                { key: 'showChats', label: `💬 ${t.overlay.events.messages}`, checked: settings.showChats },
+                { key: 'showGifts', label: `🎁 ${t.overlay.events.gifts}`, checked: settings.showGifts },
+                { key: 'showLikes', label: `❤️ ${t.overlay.events.likes}`, checked: settings.showLikes },
+                { key: 'showJoins', label: `👋 ${t.overlay.events.joins}`, checked: settings.showJoins },
+                { key: 'showFollows', label: `➕ ${t.overlay.events.follows}`, checked: settings.showFollows },
+                { key: 'showShares', label: `🔗 ${t.overlay.events.shares}`, checked: settings.showShares },
               ].map((item) => (
                 <label
                   key={item.key}
@@ -125,7 +126,7 @@ export function OverlayPage() {
           {/* Appearance Settings */}
           <div className="border-t border-slate-700 pt-6">
             <label className="block text-sm font-medium text-slate-300 mb-3">
-              Aparência
+              {t.overlay.appearance}
             </label>
             
             <div className="space-y-4">
@@ -133,7 +134,7 @@ export function OverlayPage() {
                 {/* Background Color */}
                 <div>
                   <label className="block text-sm text-slate-400 mb-2">
-                    Cor de Fundo
+                    {t.overlay.backgroundColor}
                   </label>
                   <div className="flex gap-3 items-center">
                     <input
@@ -154,7 +155,7 @@ export function OverlayPage() {
                 {/* Font Color */}
                 <div>
                   <label className="block text-sm text-slate-400 mb-2">
-                    Cor da Fonte
+                    {t.overlay.fontColor}
                   </label>
                   <div className="flex gap-3 items-center">
                     <input
@@ -176,7 +177,7 @@ export function OverlayPage() {
               {/* Font Size */}
               <div>
                 <label className="block text-sm text-slate-400 mb-2">
-                  Tamanho da Fonte
+                  {t.overlay.fontSize}
                 </label>
                 <select
                   value={fontSize}
@@ -196,7 +197,7 @@ export function OverlayPage() {
           {/* Preview */}
           <div className="border-t border-slate-700 pt-6">
             <label className="block text-sm font-medium text-slate-300 mb-3">
-              Pré-visualização
+              {t.overlay.preview}
             </label>
             <div 
               className="p-4 rounded-lg"
@@ -209,13 +210,13 @@ export function OverlayPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0" />
                 <span>
-                  <strong>usuario</strong>: Mensagem de exemplo
+                  <strong>user</strong>: {t.overlay.previewMessage}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0" />
                 <span style={{ color: '#ff005e' }}>
-                  <strong>seguidor</strong>: seguiu o host
+                  <strong>follower</strong>: {t.overlay.previewFollow}
                 </span>
               </div>
             </div>
@@ -226,7 +227,7 @@ export function OverlayPage() {
       {/* Generated URL */}
       {username && (
         <div className="card">
-          <h3 className="text-lg font-bold mb-4">📋 Sua URL do Overlay</h3>
+          <h3 className="text-lg font-bold mb-4">📋 {t.overlay.yourOverlayUrl}</h3>
           <div className="flex gap-3">
             <input
               type="text"
@@ -235,24 +236,24 @@ export function OverlayPage() {
               className="input-field flex-1 font-mono text-sm"
             />
             <button onClick={copyToClipboard} className="btn-secondary">
-              {copied ? '✅ Copiado!' : '📋 Copiar'}
+              {copied ? `✅ ${t.common.copied}` : `📋 ${t.common.copy}`}
             </button>
             <button 
               onClick={() => window.open(overlayUrl, '_blank')}
               className="btn-primary"
             >
-              🚀 Abrir
+              🚀 {t.common.open}
             </button>
           </div>
           
           <div className="mt-6 p-4 bg-slate-700/50 rounded-lg">
-            <h4 className="font-bold text-white mb-2">Como usar:</h4>
+            <h4 className="font-bold text-white mb-2">{t.overlay.howToUse}</h4>
             <ol className="text-sm text-slate-300 space-y-2 list-decimal list-inside">
-              <li>Copie a URL acima</li>
-              <li>No OBS, adicione uma nova <strong>Fonte de Navegador</strong></li>
-              <li>Cole a URL e defina as dimensões (ex: 400x600)</li>
-              <li>Ative <strong>Desligar fonte quando não visível</strong></li>
-              <li>O overlay conectará automaticamente quando a fonte estiver ativa</li>
+              <li>{t.overlay.steps.step1}</li>
+              <li>{t.overlay.steps.step2} <strong>{t.overlay.steps.browserSource}</strong></li>
+              <li>{t.overlay.steps.step3}</li>
+              <li>{t.overlay.steps.step4} <strong>{t.overlay.steps.turnOffWhenNotVisible}</strong></li>
+              <li>{t.overlay.steps.step5}</li>
             </ol>
           </div>
         </div>

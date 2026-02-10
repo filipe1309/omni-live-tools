@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useMultiPlatformConnection, usePoll, useToast } from '@/hooks';
+import { useLanguage, interpolate } from '@/i18n';
 import { MultiPlatformConnectionForm, PollSetup, PollResults, VoteLog } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
@@ -9,7 +10,7 @@ import { safeSetItem } from '@/utils';
 export function PollPage() {
   const { pollState, voteLog, startPoll, stopPoll, resetPoll, processVote, clearVoteLog, getTotalVotes, getPercentage, openResultsPopup, broadcastSetupConfig, setConnectionStatus, onConfigUpdate, onReconnect } = usePoll();
   const toast = useToast();
-  
+  const { t } = useLanguage();
   // Track current username in the input field for reconnection (TikTok)
   const [currentUsername, setCurrentUsername] = useState(() => {
     const saved = localStorage.getItem('tiktok-poll-uniqueId');
@@ -239,7 +240,7 @@ export function PollPage() {
           console.log('[PollPage] Attempting TikTok auto-reconnect to:', currentUsernameRef.current);
           connection.tiktok.connect(currentUsernameRef.current, { enableExtendedGiftInfo: false })
             .then(() => {
-              toast.success(`TikTok reconectado a @${currentUsernameRef.current}`);
+              toast.success(interpolate(t.toast.tiktokReconnected, { username: currentUsernameRef.current }));
             })
             .catch((error: unknown) => {
               console.error('[PollPage] TikTok auto-reconnect failed:', error);
@@ -251,7 +252,7 @@ export function PollPage() {
           console.log('[PollPage] Attempting Twitch auto-reconnect to:', currentTwitchChannelRef.current);
           connection.twitch.connect(currentTwitchChannelRef.current)
             .then(() => {
-              toast.success(`Twitch reconectado a #${currentTwitchChannelRef.current}`);
+              toast.success(interpolate(t.toast.twitchReconnected, { channel: currentTwitchChannelRef.current }));
             })
             .catch((error: unknown) => {
               console.error('[PollPage] Twitch auto-reconnect failed:', error);
@@ -289,7 +290,7 @@ export function PollPage() {
         connection.tiktok.connect(currentUsernameRef.current, { enableExtendedGiftInfo: false })
           .then(() => {
             console.log('[PollPage] TikTok auto-reconnect successful!');
-            toast.success(`TikTok reconectado a @${currentUsernameRef.current}`);
+            toast.success(interpolate(t.toast.tiktokReconnected, { username: currentUsernameRef.current }));
           })
           .catch((error: unknown) => {
             console.log('[PollPage] TikTok auto-reconnect failed, will retry:', error);
@@ -302,7 +303,7 @@ export function PollPage() {
         connection.twitch.connect(currentTwitchChannelRef.current)
           .then(() => {
             console.log('[PollPage] Twitch auto-reconnect successful!');
-            toast.success(`Twitch reconectado a #${currentTwitchChannelRef.current}`);
+            toast.success(interpolate(t.toast.twitchReconnected, { channel: currentTwitchChannelRef.current }));
           })
           .catch((error: unknown) => {
             console.log('[PollPage] Twitch auto-reconnect failed, will retry:', error);
@@ -342,10 +343,10 @@ export function PollPage() {
     
     try {
       await connection.tiktok.connect(uniqueId, { enableExtendedGiftInfo: false });
-      toast.success(`TikTok conectado a @${uniqueId}`);
+      toast.success(interpolate(t.toast.tiktokConnected, { username: uniqueId }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(`Erro ao conectar TikTok: ${errorMessage}`);
+      toast.error(interpolate(t.toast.errorConnectingTikTok, { error: errorMessage }));
     }
   };
 
@@ -358,10 +359,10 @@ export function PollPage() {
     
     try {
       await connection.twitch.connect(channel);
-      toast.success(`Twitch conectado a #${channel}`);
+      toast.success(interpolate(t.toast.twitchConnected, { channel }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(`Erro ao conectar Twitch: ${errorMessage}`);
+      toast.error(interpolate(t.toast.errorConnectingTwitch, { error: errorMessage }));
     }
   };
 
@@ -375,7 +376,7 @@ export function PollPage() {
     setAutoReconnect(enabled);
     localStorage.setItem('tiktok-poll-autoReconnect', String(enabled));
     if (enabled) {
-      toast.success('Reconexão automática ativada');
+      toast.success(t.connection.autoReconnectEnabled);
     }
   };
 
@@ -421,10 +422,10 @@ export function PollPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
-            🗳️ Enquete Multi-Plataforma
+            🗳️ {t.poll.title}
           </h1>
           <p className="text-slate-400 text-lg">
-            Sistema de votação interativo para Lives do TikTok e Twitch
+            {t.poll.description}
           </p>
         </div>
 
@@ -436,7 +437,7 @@ export function PollPage() {
         }`}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-white">🔗 Conexão</h2>
+              <h2 className="text-xl font-bold text-white">🔗 {t.poll.connection}</h2>
               {/* Connection Status Indicator */}
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                 connection.isAnyConnected 
@@ -449,8 +450,8 @@ export function PollPage() {
                     : 'bg-slate-500'
                 }`} />
                 {connection.isAnyConnected 
-                  ? `${connection.connectedPlatforms.length} plataforma(s)` 
-                  : 'Desconectado'}
+                  ? `${connection.connectedPlatforms.length} ${t.common.platforms}` 
+                  : t.common.disconnected}
               </div>
             </div>
           </div>
@@ -481,7 +482,7 @@ export function PollPage() {
         {/* Configuration Section */}
         <div className={`card mb-6 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
           <h2 className="text-xl font-bold text-white mb-4 pb-4 border-b border-slate-700/50">
-            ⚙️ Configuração da Enquete
+            ⚙️ {t.poll.configuration}
           </h2>
           <PollSetup
             onStart={handleStartPoll}
@@ -508,20 +509,20 @@ export function PollPage() {
               disabled={!connection.isAnyConnected || pollState.isRunning}
               className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ▶️ Iniciar Enquete
+              ▶️ {t.poll.startPoll}
             </button>
             <button 
               onClick={stopPoll}
               disabled={!pollState.isRunning}
               className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ⏹️ Parar Enquete
+              ⏹️ {t.poll.stopPoll}
             </button>
             <button 
               onClick={resetPoll}
               className="btn-secondary px-8 py-3 text-lg"
             >
-              🔄 Reiniciar Enquete
+              🔄 {t.poll.resetPoll}
             </button>
           </div>
         </div>
@@ -529,13 +530,13 @@ export function PollPage() {
         {/* Results Section */}
         <div className={`card mb-6 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
-            <h2 className="text-xl font-bold text-white">📊 Resultados da Enquete</h2>
+            <h2 className="text-xl font-bold text-white">📊 {t.poll.results}</h2>
             <button 
               onClick={openResultsPopup}
               className="btn-secondary text-sm"
-              title="Abrir resultados em nova janela"
+              title={t.poll.popoutTitle}
             >
-              🖥️ Pop-out
+              🖥️ {t.poll.popout}
             </button>
           </div>
           
@@ -563,7 +564,7 @@ export function PollPage() {
         {/* Vote Log Section */}
         <div className={`card border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
           <h2 className="text-xl font-bold text-white mb-4 pb-4 border-b border-slate-700/50">
-            📝 Registro de Votos
+            📝 {t.poll.voteLog}
           </h2>
           <VoteLog 
             entries={voteLog} 

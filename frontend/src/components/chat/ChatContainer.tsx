@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { ChatMessage } from './ChatMessage';
+import { useLanguage } from '@/i18n';
 import type { ChatItem } from '@/types';
 
 interface ChatContainerProps {
@@ -10,6 +11,7 @@ interface ChatContainerProps {
 
 export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)' }: ChatContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   // Auto-scroll to bottom when new items arrive
   useEffect(() => {
@@ -34,7 +36,7 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)' 
       >
         {items.length === 0 ? (
           <div className="text-center text-slate-500 py-8">
-            No messages yet...
+            {t.chat.noMessages}
           </div>
         ) : (
           items.map((item) => (

@@ -1,5 +1,6 @@
 import { useRef, FormEvent, KeyboardEvent } from 'react';
 import type { ConnectionStatus } from '@/hooks';
+import { useLanguage } from '@/i18n';
 import { PlatformType } from '@/types';
 import { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
 
@@ -30,25 +31,6 @@ interface MultiPlatformConnectionFormProps {
   onAutoReconnectChange?: (enabled: boolean) => void;
 }
 
-const statusConfig = {
-  disconnected: {
-    text: 'Desconectado',
-    className: 'bg-red-500/20 text-red-400 border-red-500',
-  },
-  connecting: {
-    text: 'Conectando...',
-    className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500 animate-pulse',
-  },
-  connected: {
-    text: 'Conectado',
-    className: 'bg-green-500/20 text-green-400 border-green-500',
-  },
-  error: {
-    text: 'Erro',
-    className: 'bg-red-500/20 text-red-400 border-red-500',
-  },
-};
-
 /**
  * Multi-platform connection form for TikTok and Twitch
  * Allows users to connect to one or both platforms simultaneously
@@ -63,6 +45,26 @@ export function MultiPlatformConnectionForm({
 }: MultiPlatformConnectionFormProps) {
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
+
+  const statusConfig = {
+    disconnected: {
+      text: t.common.disconnected,
+      className: 'bg-red-500/20 text-red-400 border-red-500',
+    },
+    connecting: {
+      text: t.common.connecting,
+      className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500 animate-pulse',
+    },
+    connected: {
+      text: t.common.connected,
+      className: 'bg-green-500/20 text-green-400 border-green-500',
+    },
+    error: {
+      text: t.common.error,
+      className: 'bg-red-500/20 text-red-400 border-red-500',
+    },
+  };
 
   const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
   const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
@@ -133,7 +135,7 @@ export function MultiPlatformConnectionForm({
               {autoReconnect && '✓'}
             </button>
             <span className="text-sm text-slate-300">
-              🔄 Reconexão automática
+              🔄 {t.connection.autoReconnect}
             </span>
           </div>
         )}
@@ -163,7 +165,7 @@ export function MultiPlatformConnectionForm({
                 value={tiktok.username}
                 onChange={(e) => tiktok.onUsernameChange(e.target.value)}
                 onKeyUp={handleTikTokKeyUp}
-                placeholder="@usuario"
+                placeholder={t.connection.userPlaceholder}
                 className="input-field flex-1"
                 disabled={tiktok.status === 'connecting'}
               />
@@ -176,7 +178,7 @@ export function MultiPlatformConnectionForm({
                     : 'bg-tiktok-cyan text-black hover:bg-tiktok-cyan/80'
                 }`}
               >
-                {tiktok.status === 'connecting' ? '...' : tiktok.status === 'connected' ? 'Desconectar' : 'Conectar'}
+                {tiktok.status === 'connecting' ? '...' : tiktok.status === 'connected' ? t.common.disconnect : t.common.connect}
               </button>
             </form>
 
@@ -190,7 +192,7 @@ export function MultiPlatformConnectionForm({
             {/* Connected indicator */}
             {tiktok.status === 'connected' && (
               <div className="mt-2 text-sm text-tiktok-cyan">
-                Conectado a @{tiktok.username}
+                {t.chat.connectedTo} @{tiktok.username}
               </div>
             )}
           </div>
@@ -218,7 +220,7 @@ export function MultiPlatformConnectionForm({
                 value={twitch.channel}
                 onChange={(e) => twitch.onChannelChange(e.target.value)}
                 onKeyUp={handleTwitchKeyUp}
-                placeholder="canal"
+                placeholder={t.connection.channelPlaceholder}
                 className="input-field flex-1"
                 disabled={twitch.status === 'connecting'}
               />
@@ -231,7 +233,7 @@ export function MultiPlatformConnectionForm({
                     : 'bg-purple-600 text-white hover:bg-purple-500'
                 }`}
               >
-                {twitch.status === 'connecting' ? '...' : twitch.status === 'connected' ? 'Desconectar' : 'Conectar'}
+                {twitch.status === 'connecting' ? '...' : twitch.status === 'connected' ? t.common.disconnect : t.common.connect}
               </button>
             </form>
 
@@ -245,7 +247,7 @@ export function MultiPlatformConnectionForm({
             {/* Connected indicator */}
             {twitch.status === 'connected' && (
               <div className="mt-2 text-sm text-purple-400">
-                Conectado a #{twitch.channel}
+                {t.chat.connectedTo} #{twitch.channel}
               </div>
             )}
           </div>

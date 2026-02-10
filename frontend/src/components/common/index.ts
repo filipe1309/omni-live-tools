@@ -5,3 +5,4 @@ export { RoomStats } from './RoomStats';
 export { Username } from './Username';
 export { ToastContainer } from './ToastContainer';
 export { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
+export { LanguageSelector } from './LanguageSelector';

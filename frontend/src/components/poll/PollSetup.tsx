@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage, interpolate } from '@/i18n';
 import { 
   POLL_TIMER, 
   POLL_OPTIONS, 
@@ -70,6 +71,7 @@ export function PollSetup({
   const [selectedOptions, setSelectedOptions] = useState<boolean[]>(initialSelectedOptions);
   const [timer, setTimer] = useState(initialTimer);
   const hasSentInitialChange = useRef(false);
+  const { t } = useLanguage();
   
   // Question history state
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -290,7 +292,7 @@ export function PollSetup({
         {/* Question Input */}
         <div className="flex-1 min-w-[300px] relative">
           <label className="block text-sm font-medium text-slate-300 mb-1">
-            Pergunta da Enquete {loadQuestionHistory().length > 0 && <span className="text-slate-500 text-xs">(histórico disponível)</span>}
+            {t.poll.question} {loadQuestionHistory().length > 0 && <span className="text-slate-500 text-xs">({t.poll.historyAvailable})</span>}
           </label>
           <div className="relative">
             <input
@@ -300,7 +302,7 @@ export function PollSetup({
               onChange={(e) => handleQuestionChange(e.target.value)}
               onFocus={handleQuestionFocus}
               onBlur={handleQuestionBlur}
-              placeholder="Digite sua pergunta aqui..."
+              placeholder={t.poll.questionPlaceholder}
               className="input-field w-full pr-8"
               disabled={disabled}
               autoComplete="off"
@@ -342,7 +344,7 @@ export function PollSetup({
         {/* Timer */}
         <div className="min-w-[200px]">
           <label className="block text-sm font-medium text-slate-300 mb-1">
-            Tempo (segundos)
+            {t.poll.timer}
           </label>
           <div className="flex items-center gap-2">
             <button
@@ -377,7 +379,7 @@ export function PollSetup({
       {/* Options Grid with Checkboxes */}
       <div>
         <label className="block text-sm font-medium text-slate-300 mb-1">
-          Opções (marque as opções que deseja incluir na enquete)
+          {t.poll.options} ({t.poll.optionsHint})
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {options.map((option, index) => (
@@ -412,7 +414,7 @@ export function PollSetup({
                 type="text"
                 value={option}
                 onChange={(e) => updateOption(index, e.target.value)}
-                placeholder={`Opção ${index + 1}`}
+                placeholder={`${t.poll.optionPlaceholder} ${index + 1}`}
                 className="input-field flex-1 min-w-0 py-1 text-sm"
                 disabled={disabled}
               />
@@ -421,7 +423,7 @@ export function PollSetup({
         </div>
         {selectedCount < POLL_OPTIONS.MIN_SELECTED && (
           <p className="text-red-400 text-sm mt-2">
-            ⚠️ Selecione pelo menos {POLL_OPTIONS.MIN_SELECTED} opções para a enquete
+            ⚠️ {interpolate(t.poll.minOptionsWarning, { count: POLL_OPTIONS.MIN_SELECTED })}
           </p>
         )}
       </div>
@@ -432,7 +434,7 @@ export function PollSetup({
           disabled={!isValid || disabled}
           className="w-full text-lg py-4 px-6 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold rounded-xl hover:from-green-500 hover:to-blue-600 hover:scale-105 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          ▶️ Iniciar Enquete
+          ▶️ {t.poll.startPoll}
         </button>
       )}
     </div>

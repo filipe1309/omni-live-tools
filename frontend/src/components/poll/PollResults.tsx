@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
 import { CONFETTI, TIMER_THRESHOLDS } from '@/constants';
 
@@ -48,6 +49,7 @@ const triggerConfetti = () => {
 export function PollResults({ pollState, getPercentage, getTotalVotes, showStatusBar = true, compact = false }: PollResultsProps) {
   const totalVotes = getTotalVotes();
   const hasTriggeredConfetti = useRef(false);
+  const { t } = useLanguage();
 
   // Find winner(s) - only when poll is finished
   const maxVotes = Math.max(...Object.values(pollState.votes), 0);
@@ -83,12 +85,12 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
   // Get status display
   const getStatusDisplay = () => {
     if (pollState.isRunning) {
-      return { text: 'Em Andamento', className: 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' };
+      return { text: t.poll.status.inProgress, className: 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' };
     }
     if (pollState.finished) {
-      return { text: 'Finalizada', className: 'bg-blue-500/20 text-blue-400 border-blue-500' };
+      return { text: t.poll.status.finished, className: 'bg-blue-500/20 text-blue-400 border-blue-500' };
     }
-    return { text: 'Aguardando', className: 'bg-slate-500/20 text-slate-400 border-slate-500' };
+    return { text: t.poll.status.waiting, className: 'bg-slate-500/20 text-slate-400 border-slate-500' };
   };
 
   const status = getStatusDisplay();
@@ -99,13 +101,13 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
       {showStatusBar && (
         <div className="flex items-center justify-around flex-wrap gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
           <div className="text-center">
-            <span className="block text-xs text-slate-400 mb-1">{pollState.isRunning ? 'Tempo Restante' : 'Tempo Configurado'}</span>
+            <span className="block text-xs text-slate-400 mb-1">{pollState.isRunning ? t.poll.timeRemaining : t.poll.configuredTime}</span>
             <span className={`font-mono text-3xl font-bold ${getTimerClasses()}`}>
               {pollState.isRunning ? `${pollState.timeLeft}s` : (pollState.timer > 0 ? `${pollState.timer}s` : '--')}
             </span>
           </div>
           <div className="text-center">
-            <span className="block text-xs text-slate-400 mb-1">Total de Votos</span>
+            <span className="block text-xs text-slate-400 mb-1">{t.poll.totalVotes}</span>
             <span className="font-bold text-purple-400 text-3xl">{totalVotes}</span>
           </div>
           <div className="text-center">
@@ -208,7 +210,7 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
                 
                 <div className="text-right flex-shrink-0">
                   <span className={`font-bold ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'} ${compact ? 'text-xl' : 'text-2xl'}`}>
-                    {votes} votos
+                    {votes} {t.poll.votes}
                   </span>
                   <span className="text-slate-400 text-xl ml-2">
                     ({percentageFixed}%)
@@ -235,9 +237,9 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
       {/* Footer stats */}
       {!compact && (
         <div className="text-center text-slate-400 text-xl pt-4 border-t border-slate-700">
-          Total de Votos: <span className="font-bold text-white">{totalVotes}</span>
+          {t.poll.totalVotes}: <span className="font-bold text-white">{totalVotes}</span>
           <span className="mx-3">•</span>
-          Votantes Únicos: <span className="font-bold text-white">{pollState.voters.size}</span>
+          {t.poll.uniqueVoters}: <span className="font-bold text-white">{pollState.voters.size}</span>
         </div>
       )}
     </div>

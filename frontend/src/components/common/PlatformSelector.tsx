@@ -1,4 +1,5 @@
 import { PlatformType } from '@/types';
+import { useLanguage } from '@/i18n';
 
 interface PlatformSelectorProps {
   selectedPlatforms: PlatformType[];
@@ -19,6 +20,7 @@ export function PlatformSelector({
   tiktokConnected = false,
   twitchConnected = false,
 }: PlatformSelectorProps) {
+  const { t } = useLanguage();
   const isTikTokSelected = selectedPlatforms.includes(PlatformType.TIKTOK);
   const isTwitchSelected = selectedPlatforms.includes(PlatformType.TWITCH);
 
@@ -36,7 +38,7 @@ export function PlatformSelector({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-400 mr-2">Plataformas:</span>
+      <span className="text-sm text-slate-400 mr-2">{t.connection.platformsLabel}:</span>
       
       {/* TikTok Button */}
       <button

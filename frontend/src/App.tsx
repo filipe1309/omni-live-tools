@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header, ToastContainer } from './components';
 import { ToastProvider } from './hooks';
+import { LanguageProvider } from './i18n';
 import { HomePage, ChatPage, PollPage, PollResultsPage, OverlayPage, ObsOverlayPage } from './pages';
 
 function App() {
   return (
-    <ToastProvider>
-      <BrowserRouter>
+    <LanguageProvider>
+      <ToastProvider>
+        <BrowserRouter>
         <Routes>
           {/* OBS Overlay - No header */}
           <Route path="/obs" element={<ObsOverlayPage />} />
@@ -35,6 +37,7 @@ function App() {
         <ToastContainer />
       </BrowserRouter>
     </ToastProvider>
+    </LanguageProvider>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { ProfilePicture, TikTokIcon, TwitchIcon } from '../common';
+import { useLanguage } from '@/i18n';
 import type { VoteEntry } from '@/types';
 
 interface VoteLogProps {
@@ -30,6 +31,7 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' }) {
 export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showVotes, setShowVotes] = useState(true);
+  const { t } = useLanguage();
 
   // Auto-scroll to top when new entries arrive (newest first)
   useEffect(() => {
@@ -52,14 +54,14 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
             onChange={(e) => setShowVotes(e.target.checked)}
             className="w-4 h-4 rounded bg-slate-700 border-slate-600 text-tiktok-cyan focus:ring-tiktok-cyan focus:ring-offset-slate-800"
           />
-          Mostrar votos individuais
+          {t.poll.showIndividualVotes}
         </label>
         {onClear && (
           <button 
             onClick={onClear}
             className="btn-secondary text-sm px-3 py-1.5"
           >
-            🗑️ Limpar Registro
+            🗑️ {t.poll.clearLog}
           </button>
         )}
       </div>
@@ -73,7 +75,7 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
         >
           {entries.length === 0 ? (
             <div className="text-center text-slate-500 py-8">
-              Nenhum voto ainda...
+              {t.poll.noVotesYet}
             </div>
           ) : (
             <div className="space-y-2">
@@ -97,7 +99,7 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
                     }`}>
                       {entry.platform === 'twitch' ? '' : '@'}{entry.user.uniqueId}
                     </span>
-                    <span className="text-slate-400">votou em</span>
+                    <span className="text-slate-400">{t.poll.votedFor}</span>
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded text-purple-300 font-semibold">
                       <span className="w-5 h-5 flex items-center justify-center bg-purple-500 rounded-full text-white text-xs">
                         {entry.optionId}
@@ -118,7 +120,7 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
 
       {!showVotes && (
         <div className="text-center text-slate-500 py-4 bg-slate-900/30 rounded-lg">
-          Votos ocultos
+          {t.poll.votesHidden}
         </div>
       )}
     </div>

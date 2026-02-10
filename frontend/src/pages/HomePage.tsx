@@ -1,58 +1,54 @@
 import { Link } from 'react-router-dom';
-
-interface MenuCard {
-  to: string;
-  icon: string;
-  title: string;
-  description: string;
-}
-
-const menuCards: MenuCard[] = [
-  {
-    to: '/chat',
-    icon: '💬',
-    title: 'Leitor de Chat',
-    description: 'Visualize mensagens do chat, presentes e eventos em tempo real',
-  },
-  {
-    to: '/overlay',
-    icon: '🎬',
-    title: 'URL de Overlay',
-    description: 'Gere uma URL de overlay para OBS ou software de streaming',
-  },
-  {
-    to: '/poll',
-    icon: '🗳️',
-    title: 'Enquete ao Vivo',
-    description: 'Crie enquetes interativas para sua audiência ao vivo',
-  },
-];
+import { useLanguage } from '@/i18n';
 
 export function HomePage() {
+  const { t } = useLanguage();
+
+  const menuCards = [
+    {
+      to: '/chat',
+      icon: '💬',
+      title: t.home.cards.chatReader.title,
+      description: t.home.cards.chatReader.description,
+    },
+    {
+      to: '/overlay',
+      icon: '🎬',
+      title: t.home.cards.overlay.title,
+      description: t.home.cards.overlay.description,
+    },
+    {
+      to: '/poll',
+      icon: '🗳️',
+      title: t.home.cards.poll.title,
+      description: t.home.cards.poll.description,
+    },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-tiktok-red to-tiktok-cyan bg-clip-text text-transparent mb-4">
-          Ferramentas Omni LIVE
+          {t.home.title}
         </h1>
         <p className="text-slate-400 max-w-2xl mx-auto">
-          Uma coleção de ferramentas para{' '}
+          {t.home.description}{' '}
           <a href="https://www.tiktok.com/live" className="text-tiktok-cyan hover:underline">
             TikTok LIVE
           </a>{' '}
-          utilizando{' '}
+          {t.home.using}{' '}
           <a href="https://github.com/zerodytrash/TikTok-Live-Connector" className="text-tiktok-cyan hover:underline">
             TikTok-Live-Connector
           </a>{' '}
-          e{' '}
+          {t.home.and}{' '}
           <a href="https://socket.io/" className="text-tiktok-cyan hover:underline">
             Socket.IO
           </a>{' '}
-          e{' '}
+          {t.home.and}{' '}
           <a href="https://twurple.js.org/" className="text-tiktok-cyan hover:underline">
             Twurple
           </a>{' '}
-          para Twitch.
+          {t.home.for} Twitch.
         </p>
       </div>
 
@@ -74,7 +70,7 @@ export function HomePage() {
 
       <footer className="text-center mt-16 text-slate-500 text-sm">
         <p>
-          Source:{' '}
+          {t.home.footer.source}{' '}
           <a
             href="https://github.com/filipe1309/omni-live-chat-reader"
             className="text-tiktok-cyan hover:underline"
