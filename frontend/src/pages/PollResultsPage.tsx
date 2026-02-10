@@ -1,43 +1,177 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import type { PollState, PollOption } from '@/types';
 import type { SerializablePollState, SetupConfig } from '@/hooks/usePoll';
 import { PollSetup } from '@/components/poll/PollSetup';
 import { CONFETTI, POLL_TIMER, DEFAULT_QUESTION, TIMER_THRESHOLDS } from '@/constants';
 import { useLanguage } from '@/i18n';
 
-// Confetti celebration function
-const triggerConfetti = () => {
-  const animationEnd = Date.now() + CONFETTI.DURATION;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+// Spotlight + Trophy celebration component
+const SpotlightTrophyCelebration = ({ onComplete, winnerText }: { onComplete: () => void; winnerText: string }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, CONFETTI.DURATION);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
-  const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+  return (
+    <div className="absolute inset-0 z-[9999] pointer-events-none overflow-hidden rounded-xl">
+      {/* Dark overlay with spotlight gradient */}
+      <div
+        className="absolute inset-0 animate-fade-in"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0.92) 50%, rgba(0,0,0,0.98) 100%)',
+        }}
+      />
 
-  const interval = setInterval(() => {
-    const timeLeft = animationEnd - Date.now();
+      {/* Spotlight beam effect */}
+      <div
+        className="absolute inset-0 animate-pulse"
+        style={{
+          background: 'radial-gradient(ellipse 30% 40% at center 40%, rgba(255,215,0,0.15) 0%, transparent 70%)',
+        }}
+      />
 
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
+      {/* Sparkles around trophy */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-3xl animate-sparkle"
+            style={{
+              transform: `rotate(${i * 45}deg) translateY(-100px)`,
+              animationDelay: `${i * 100}ms`,
+            }}
+          >
+            ✨
+          </div>
+        ))}
+      </div>
 
-    const particleCount = CONFETTI.PARTICLE_COUNT_MULTIPLIER * (timeLeft / CONFETTI.DURATION);
+      {/* Trophy zoom animation */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="animate-trophy-zoom text-center">
+          <div
+            className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow"
+          >
+            🏆
+          </div>
+          <div className="text-3xl font-black text-yellow-400 mt-2 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+            WINNER!
+          </div>
+          <div className="text-4xl font-black text-white mt-3 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-winner-text">
+            {winnerText}
+          </div>
+        </div>
+      </div>
 
-    // Confetti from left side
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      colors: CONFETTI.COLORS,
-    });
+      {/* Light rays */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-[150%] bg-gradient-to-t from-transparent via-yellow-400/20 to-transparent animate-ray"
+            style={{
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${i * 50}ms`,
+            }}
+          />
+        ))}
+      </div>
 
-    // Confetti from right side
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      colors: CONFETTI.COLORS,
-    });
-  }, CONFETTI.INTERVAL);
+      {/* CSS for animations */}
+      <style>{`
+        @keyframes trophy-zoom {
+          0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.2) rotate(10deg);
+          }
+          70% {
+            transform: scale(0.9) rotate(-5deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes trophy-glow {
+          0%, 100% {
+            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
+          }
+          50% {
+            filter: drop-shadow(0 0 100px rgba(255,215,0,1)) drop-shadow(0 0 150px rgba(255,215,0,0.5));
+          }
+        }
+        
+        @keyframes sparkle {
+          0%, 100% {
+            opacity: 0;
+            transform: rotate(var(--rotation)) translateY(-100px) scale(0.5);
+          }
+          50% {
+            opacity: 1;
+            transform: rotate(var(--rotation)) translateY(-120px) scale(1.2);
+          }
+        }
+        
+        @keyframes ray {
+          0%, 100% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
+        
+        @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        
+        .animate-trophy-zoom {
+          animation: trophy-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        .animate-trophy-glow {
+          animation: trophy-glow 1.5s ease-in-out infinite;
+        }
+        
+        .animate-sparkle {
+          animation: sparkle 1.2s ease-in-out infinite;
+        }
+        
+        .animate-ray {
+          animation: ray 2s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+        
+        @keyframes winner-text {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        .animate-winner-text {
+          animation: winner-text 0.5s ease-out 0.6s forwards;
+          opacity: 0;
+        }
+      `}</style>
+    </div>
+  );
 };
 
 const DEFAULT_OPTIONS: PollOption[] = [
@@ -331,22 +465,35 @@ export function PollResultsPage () {
       .map(opt => opt.id);
   }, [pollState.finished, pollState.votes, displayOptions, totalVotes, maxVotes]);
 
-  // Confetti celebration when poll finishes
-  const hasTriggeredConfetti = useRef(false);
+  // Get winner option text for celebration display
+  const winnerText = useMemo(() => {
+    if (winnerIds.length === 0) return '';
+    const winners = displayOptions.filter(opt => winnerIds.includes(opt.id));
+    return winners.map(w => w.text).join(' & ');
+  }, [winnerIds, displayOptions]);
+
+  // Spotlight + Trophy celebration when poll finishes
+  const [showCelebration, setShowCelebration] = useState(false);
+  const hasTriggeredCelebration = useRef(false);
 
   useEffect(() => {
-    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredConfetti.current) {
-      hasTriggeredConfetti.current = true;
-      triggerConfetti();
+    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredCelebration.current) {
+      hasTriggeredCelebration.current = true;
+      setShowCelebration(true);
     }
   }, [pollState.finished, totalVotes, winnerIds.length]);
 
-  // Reset confetti flag when countdown starts (new poll) or poll starts running
+  // Reset celebration flag when countdown starts (new poll) or poll starts running
   useEffect(() => {
     if (pollState.isRunning || pollState.countdown !== undefined) {
-      hasTriggeredConfetti.current = false;
+      hasTriggeredCelebration.current = false;
+      setShowCelebration(false);
     }
   }, [pollState.isRunning, pollState.countdown]);
+
+  const handleCelebrationComplete = useCallback(() => {
+    setShowCelebration(false);
+  }, []);
 
   const displayQuestion = pollState.isRunning ? pollState.question : (setupConfig?.question || DEFAULT_QUESTION);
 
@@ -376,8 +523,8 @@ export function PollResultsPage () {
 
           {/* Modal Content */}
           <div className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${isReconnecting || isAutoReconnectEnabled
-              ? 'border-yellow-500/50 shadow-yellow-500/20'
-              : 'border-red-500/50 shadow-red-500/20 animate-pulse'
+            ? 'border-yellow-500/50 shadow-yellow-500/20'
+            : 'border-red-500/50 shadow-red-500/20 animate-pulse'
             }`}>
             {isReconnecting || isAutoReconnectEnabled ? (
               <>
@@ -487,24 +634,27 @@ export function PollResultsPage () {
         </div>
 
         {/* Results Section */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-3 relative">
+          {/* Spotlight + Trophy Celebration - positioned within Results Section */}
+          {showCelebration && <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />}
+
           {/* Question */}
           <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
-              ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
-                : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                  ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
-                  : 'bg-green-500/10 border-green-500'
-              : 'bg-purple-500/10 border-purple-500'
+            ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+              ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
+              : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
+                : 'bg-green-500/10 border-green-500'
+            : 'bg-purple-500/10 border-purple-500'
             }`}>
             {/* Animated Timer Bar */}
             {pollState.isRunning && pollState.timer > 0 && (
               <div
                 className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                    ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
-                    : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                      : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
+                  ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
+                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                    : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
                   }`}
                 style={{
                   width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
@@ -519,12 +669,12 @@ export function PollResultsPage () {
             )}
             <div className="text-center py-5 px-6">
               <h3 className={`text-5xl font-bold transition-colors duration-500 ${pollState.isRunning
-                  ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                    ? 'text-red-300'
-                    : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                      ? 'text-yellow-300'
-                      : 'text-white'
-                  : 'text-white'
+                ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+                  ? 'text-red-300'
+                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                    ? 'text-yellow-300'
+                    : 'text-white'
+                : 'text-white'
                 }`}>{displayQuestion || t.pollResults.voteNow}</h3>
             </div>
           </div>
@@ -541,15 +691,15 @@ export function PollResultsPage () {
                 <div
                   key={option.id}
                   className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
-                      ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
-                      : 'border-slate-700/50 bg-slate-800/50'
+                    ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
+                    : 'border-slate-700/50 bg-slate-800/50'
                     }`}
                 >
                   {/* Background Progress Bar */}
                   <div
                     className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
-                        ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
-                        : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
+                      ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
+                      : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
                       }`}
                     style={{ width: `${percentage}%` }}
                   />
@@ -558,8 +708,8 @@ export function PollResultsPage () {
                   <div className="relative flex items-center justify-between p-5">
                     <div className="flex items-center gap-5">
                       <span className={`w-16 h-16 flex items-center justify-center rounded-full font-bold text-white text-3xl flex-shrink-0 ${isWinner
-                          ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
-                          : 'bg-gradient-to-br from-purple-600 to-purple-400'
+                        ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
+                        : 'bg-gradient-to-br from-purple-600 to-purple-400'
                         }`}>
                         {option.id}
                       </span>
@@ -583,8 +733,8 @@ export function PollResultsPage () {
                   <div className="h-2 bg-slate-900/50">
                     <div
                       className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
-                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                          : 'bg-gradient-to-r from-purple-600 to-purple-400'
+                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                        : 'bg-gradient-to-r from-purple-600 to-purple-400'
                         }`}
                       style={{ width: `${percentage}%` }}
                     />

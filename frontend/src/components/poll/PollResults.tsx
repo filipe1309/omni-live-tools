@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
 import { CONFETTI, TIMER_THRESHOLDS } from '@/constants';
@@ -12,43 +11,179 @@ interface PollResultsProps {
   compact?: boolean;
 }
 
-// Confetti celebration function
-const triggerConfetti = () => {
-  const animationEnd = Date.now() + CONFETTI.DURATION;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+// Spotlight + Trophy celebration component
+const SpotlightTrophyCelebration = ({ onComplete, winnerText }: { onComplete: () => void; winnerText: string }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, CONFETTI.DURATION);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
-  const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+  return (
+    <div className="absolute inset-0 z-[9999] pointer-events-none overflow-hidden rounded-xl">
+      {/* Dark overlay with spotlight gradient */}
+      <div
+        className="absolute inset-0 animate-fade-in"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0.92) 50%, rgba(0,0,0,0.98) 100%)',
+        }}
+      />
 
-  const interval = setInterval(() => {
-    const timeLeft = animationEnd - Date.now();
+      {/* Spotlight beam effect */}
+      <div
+        className="absolute inset-0 animate-pulse"
+        style={{
+          background: 'radial-gradient(ellipse 30% 40% at center 40%, rgba(255,215,0,0.15) 0%, transparent 70%)',
+        }}
+      />
 
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
+      {/* Sparkles around trophy */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-3xl animate-sparkle"
+            style={{
+              transform: `rotate(${i * 45}deg) translateY(-100px)`,
+              animationDelay: `${i * 100}ms`,
+            }}
+          >
+            ✨
+          </div>
+        ))}
+      </div>
 
-    const particleCount = CONFETTI.PARTICLE_COUNT_MULTIPLIER * (timeLeft / CONFETTI.DURATION);
+      {/* Trophy zoom animation */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="animate-trophy-zoom text-center">
+          <div
+            className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow"
+          >
+            🏆
+          </div>
+          <div className="text-3xl font-black text-yellow-400 mt-2 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+            WINNER!
+          </div>
+          <div className="text-4xl font-black text-white mt-3 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-winner-text">
+            {winnerText}
+          </div>
+        </div>
+      </div>
 
-    // Confetti from left side
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      colors: CONFETTI.COLORS,
-    });
+      {/* Light rays */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-[150%] bg-gradient-to-t from-transparent via-yellow-400/20 to-transparent animate-ray"
+            style={{
+              transform: `rotate(${i * 30}deg)`,
+              animationDelay: `${i * 50}ms`,
+            }}
+          />
+        ))}
+      </div>
 
-    // Confetti from right side
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      colors: CONFETTI.COLORS,
-    });
-  }, CONFETTI.INTERVAL);
+      {/* CSS for animations */}
+      <style>{`
+        @keyframes trophy-zoom {
+          0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.2) rotate(10deg);
+          }
+          70% {
+            transform: scale(0.9) rotate(-5deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes trophy-glow {
+          0%, 100% {
+            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
+          }
+          50% {
+            filter: drop-shadow(0 0 100px rgba(255,215,0,1)) drop-shadow(0 0 150px rgba(255,215,0,0.5));
+          }
+        }
+        
+        @keyframes sparkle {
+          0%, 100% {
+            opacity: 0;
+            transform: rotate(var(--rotation)) translateY(-100px) scale(0.5);
+          }
+          50% {
+            opacity: 1;
+            transform: rotate(var(--rotation)) translateY(-120px) scale(1.2);
+          }
+        }
+        
+        @keyframes ray {
+          0%, 100% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 0.6;
+          }
+        }
+        
+        @keyframes fade-in {
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes winner-text {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        .animate-trophy-zoom {
+          animation: trophy-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        .animate-trophy-glow {
+          animation: trophy-glow 1.5s ease-in-out infinite;
+        }
+        
+        .animate-sparkle {
+          animation: sparkle 1.2s ease-in-out infinite;
+        }
+        
+        .animate-ray {
+          animation: ray 2s ease-in-out infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+        
+        .animate-winner-text {
+          animation: winner-text 0.5s ease-out 0.6s forwards;
+          opacity: 0;
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export function PollResults ({ pollState, getPercentage, getTotalVotes, showStatusBar = true, compact = false }: PollResultsProps) {
   const totalVotes = getTotalVotes();
-  const hasTriggeredConfetti = useRef(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const hasTriggeredCelebration = useRef(false);
   const { t } = useLanguage();
 
   // Find winner(s) - only when poll is finished
@@ -59,20 +194,32 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
       .map(opt => opt.id)
     : [];
 
-  // Trigger confetti when poll finishes with votes
+  // Get winner option text for celebration display
+  const winnerText = useMemo(() => {
+    if (winnerIds.length === 0) return '';
+    const winners = pollState.options.filter(opt => winnerIds.includes(opt.id));
+    return winners.map(w => w.text).join(' & ');
+  }, [winnerIds, pollState.options]);
+
+  // Trigger celebration when poll finishes with votes
   useEffect(() => {
-    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredConfetti.current) {
-      hasTriggeredConfetti.current = true;
-      triggerConfetti();
+    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredCelebration.current) {
+      hasTriggeredCelebration.current = true;
+      setShowCelebration(true);
     }
   }, [pollState.finished, totalVotes, winnerIds.length]);
 
-  // Reset confetti flag when countdown starts (new poll) or poll starts running
+  // Reset celebration flag when countdown starts (new poll) or poll starts running
   useEffect(() => {
     if (pollState.isRunning || pollState.countdown !== undefined) {
-      hasTriggeredConfetti.current = false;
+      hasTriggeredCelebration.current = false;
+      setShowCelebration(false);
     }
   }, [pollState.isRunning, pollState.countdown]);
+
+  const handleCelebrationComplete = useCallback(() => {
+    setShowCelebration(false);
+  }, []);
 
   // Get timer CSS classes based on remaining time
   const getTimerClasses = () => {
@@ -103,6 +250,9 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
 
   return (
     <div className="space-y-4 relative">
+      {/* Spotlight + Trophy Celebration */}
+      {showCelebration && <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />}
+
       {/* Countdown Overlay */}
       {isCountingDown && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -148,21 +298,21 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
       {/* Question */}
       {pollState.question && (
         <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
-            ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-              ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
-              : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
-                : 'bg-green-500/10 border-green-500'
-            : 'bg-purple-500/10 border-purple-500'
+          ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+            ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
+            : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+              ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
+              : 'bg-green-500/10 border-green-500'
+          : 'bg-purple-500/10 border-purple-500'
           }`}>
           {/* Animated Timer Bar */}
           {pollState.isRunning && pollState.timer > 0 && (
             <div
               className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                  ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
-                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                    : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
+                ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
+                : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                  : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
                 }`}
               style={{
                 width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
@@ -177,12 +327,12 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
           )}
           <div className="text-center py-5 px-6">
             <h3 className={`text-3xl font-bold transition-colors duration-500 ${pollState.isRunning
-                ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                  ? 'text-red-300'
-                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                    ? 'text-yellow-300'
-                    : 'text-white'
-                : 'text-white'
+              ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+                ? 'text-red-300'
+                : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                  ? 'text-yellow-300'
+                  : 'text-white'
+              : 'text-white'
               }`}>{pollState.question}</h3>
           </div>
         </div>
@@ -200,15 +350,15 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
             <div
               key={option.id}
               className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
-                  ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
-                  : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
+                ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
+                : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
                 }`}
             >
               {/* Background Progress Bar */}
               <div
                 className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
-                    ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
-                    : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
+                  ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
+                  : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
                   }`}
                 style={{ width: `${percentage}%` }}
               />
@@ -217,8 +367,8 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
               <div className={`relative flex items-center justify-between ${compact ? 'p-4' : 'p-6'}`}>
                 <div className="flex items-center gap-5">
                   <span className={`${compact ? 'w-12 h-12 text-xl' : 'w-14 h-14 text-2xl'} flex items-center justify-center rounded-full font-bold text-white flex-shrink-0 ${isWinner
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
-                      : 'bg-gradient-to-br from-purple-600 to-purple-400'
+                    ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
+                    : 'bg-gradient-to-br from-purple-600 to-purple-400'
                     }`}>
                     {option.id}
                   </span>
@@ -242,8 +392,8 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
               <div className="h-2 bg-slate-900/50">
                 <div
                   className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                      : 'bg-gradient-to-r from-purple-600 to-purple-400'
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                    : 'bg-gradient-to-r from-purple-600 to-purple-400'
                     }`}
                   style={{ width: `${percentage}%` }}
                 />
