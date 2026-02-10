@@ -91,6 +91,7 @@ export interface PollState {
   voters: Set<string>;
   timer: number;
   timeLeft: number;
+  countdown?: number; // 3, 2, 1, 0 (0 = GO!)
 }
 
 export interface VoteEntry {

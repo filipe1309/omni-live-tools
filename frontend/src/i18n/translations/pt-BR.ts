@@ -168,6 +168,9 @@ export const ptBR = {
     noVotesYet: 'Nenhum voto ainda...',
     votedFor: 'votou em',
     votesHidden: 'Votos ocultos',
+    // Countdown
+    startingIn: 'Iniciando em',
+    go: 'VAI!',
   },
 
   // Poll Results Page

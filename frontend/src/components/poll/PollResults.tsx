@@ -35,7 +35,7 @@ const triggerConfetti = () => {
       origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
       colors: CONFETTI.COLORS,
     });
-    
+
     // Confetti from right side
     confetti({
       ...defaults,
@@ -46,7 +46,7 @@ const triggerConfetti = () => {
   }, CONFETTI.INTERVAL);
 };
 
-export function PollResults({ pollState, getPercentage, getTotalVotes, showStatusBar = true, compact = false }: PollResultsProps) {
+export function PollResults ({ pollState, getPercentage, getTotalVotes, showStatusBar = true, compact = false }: PollResultsProps) {
   const totalVotes = getTotalVotes();
   const hasTriggeredConfetti = useRef(false);
   const { t } = useLanguage();
@@ -55,8 +55,8 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
   const maxVotes = Math.max(...Object.values(pollState.votes), 0);
   const winnerIds = pollState.finished && totalVotes > 0
     ? pollState.options
-        .filter(opt => pollState.votes[opt.id] === maxVotes && maxVotes > 0)
-        .map(opt => opt.id)
+      .filter(opt => pollState.votes[opt.id] === maxVotes && maxVotes > 0)
+      .map(opt => opt.id)
     : [];
 
   // Trigger confetti when poll finishes with votes
@@ -67,12 +67,12 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
     }
   }, [pollState.finished, totalVotes, winnerIds.length]);
 
-  // Reset confetti flag when poll starts running (new poll)
+  // Reset confetti flag when countdown starts (new poll) or poll starts running
   useEffect(() => {
-    if (pollState.isRunning) {
+    if (pollState.isRunning || pollState.countdown !== undefined) {
       hasTriggeredConfetti.current = false;
     }
-  }, [pollState.isRunning]);
+  }, [pollState.isRunning, pollState.countdown]);
 
   // Get timer CSS classes based on remaining time
   const getTimerClasses = () => {
@@ -84,6 +84,9 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
 
   // Get status display
   const getStatusDisplay = () => {
+    if (pollState.countdown !== undefined) {
+      return { text: pollState.countdown === 0 ? t.poll.go : `${pollState.countdown}...`, className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500 animate-pulse' };
+    }
     if (pollState.isRunning) {
       return { text: t.poll.status.inProgress, className: 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' };
     }
@@ -95,8 +98,31 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
 
   const status = getStatusDisplay();
 
+  // Check if countdown is active
+  const isCountingDown = pollState.countdown !== undefined;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
+      {/* Countdown Overlay */}
+      {isCountingDown && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="text-center animate-pulse">
+            {pollState.countdown === 0 ? (
+              <div className="text-9xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
+                {t.poll.go}
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl text-slate-300 mb-4">{t.poll.startingIn}</div>
+                <div className="text-[12rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
+                  {pollState.countdown}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Status Bar */}
       {showStatusBar && (
         <div className="flex items-center justify-around flex-wrap gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
@@ -121,46 +147,43 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
 
       {/* Question */}
       {pollState.question && (
-        <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${
-          pollState.isRunning
+        <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
             ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
               ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
               : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
                 ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
                 : 'bg-green-500/10 border-green-500'
             : 'bg-purple-500/10 border-purple-500'
-        }`}>
+          }`}>
           {/* Animated Timer Bar */}
           {pollState.isRunning && pollState.timer > 0 && (
-            <div 
-              className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${
-                pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL 
-                  ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse' 
-                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING 
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' 
+            <div
+              className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+                  ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
+                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
                     : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
-              }`}
-              style={{ 
+                }`}
+              style={{
                 width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
               }}
             />
           )}
           {/* Static bar when not running */}
           {!pollState.isRunning && (
-            <div 
+            <div
               className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-purple-600/50 to-purple-400/50"
             />
           )}
           <div className="text-center py-5 px-6">
-            <h3 className={`text-3xl font-bold transition-colors duration-500 ${
-              pollState.isRunning
+            <h3 className={`text-3xl font-bold transition-colors duration-500 ${pollState.isRunning
                 ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
                   ? 'text-red-300'
                   : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
                     ? 'text-yellow-300'
                     : 'text-white'
                 : 'text-white'
-            }`}>{pollState.question}</h3>
+              }`}>{pollState.question}</h3>
           </div>
         </div>
       )}
@@ -174,32 +197,29 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
           const percentageFixed = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
 
           return (
-            <div 
+            <div
               key={option.id}
-              className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${
-                isWinner 
-                  ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow' 
+              className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
+                  ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
                   : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
-              }`}
+                }`}
             >
               {/* Background Progress Bar */}
-              <div 
-                className={`absolute inset-0 transition-all duration-500 ease-out ${
-                  isWinner 
-                    ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10' 
+              <div
+                className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
+                    ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
                     : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
-                }`}
+                  }`}
                 style={{ width: `${percentage}%` }}
               />
-              
+
               {/* Content */}
               <div className={`relative flex items-center justify-between ${compact ? 'p-4' : 'p-6'}`}>
                 <div className="flex items-center gap-5">
-                  <span className={`${compact ? 'w-12 h-12 text-xl' : 'w-14 h-14 text-2xl'} flex items-center justify-center rounded-full font-bold text-white flex-shrink-0 ${
-                    isWinner 
-                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900' 
+                  <span className={`${compact ? 'w-12 h-12 text-xl' : 'w-14 h-14 text-2xl'} flex items-center justify-center rounded-full font-bold text-white flex-shrink-0 ${isWinner
+                      ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
                       : 'bg-gradient-to-br from-purple-600 to-purple-400'
-                  }`}>
+                    }`}>
                     {option.id}
                   </span>
                   <span className={`font-semibold text-white ${compact ? 'text-xl' : 'text-2xl'}`}>
@@ -207,7 +227,7 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
                     {isWinner && <span className="ml-2">👑</span>}
                   </span>
                 </div>
-                
+
                 <div className="text-right flex-shrink-0">
                   <span className={`font-bold ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'} ${compact ? 'text-xl' : 'text-2xl'}`}>
                     {votes} {t.poll.votes}
@@ -220,12 +240,11 @@ export function PollResults({ pollState, getPercentage, getTotalVotes, showStatu
 
               {/* Progress Bar Track */}
               <div className="h-2 bg-slate-900/50">
-                <div 
-                  className={`h-full transition-all duration-500 ease-out rounded-r ${
-                    isWinner 
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' 
+                <div
+                  className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
                       : 'bg-gradient-to-r from-purple-600 to-purple-400'
-                  }`}
+                    }`}
                   style={{ width: `${percentage}%` }}
                 />
               </div>

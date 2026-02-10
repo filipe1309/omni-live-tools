@@ -12,6 +12,7 @@ export interface SerializablePollState {
   votersArray: string[];
   timer: number;
   timeLeft: number;
+  countdown?: number; // 3, 2, 1, 0 (0 = GO!)
 }
 
 // Setup config for preview broadcast
@@ -48,6 +49,7 @@ const initialPollState: PollState = {
   voters: new Set(),
   timer: POLL_TIMER.DEFAULT,
   timeLeft: 0,
+  countdown: undefined,
 };
 
 // Initialize setupConfig OUTSIDE component to prevent recreation on every render
@@ -86,7 +88,7 @@ const loadInitialSetupConfig = (): SetupConfig => {
   return INITIAL_SETUP_CONFIG;
 };
 
-export function usePoll(): UsePollReturn {
+export function usePoll (): UsePollReturn {
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [voteLog, setVoteLog] = useState<VoteEntry[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -94,7 +96,7 @@ export function usePoll(): UsePollReturn {
   const popupWindowRef = useRef<Window | null>(null);
   // Initialize with saved config from localStorage or defaults
   const setupConfigRef = useRef<SetupConfig>(loadInitialSetupConfig());
-  
+
   const connectionStatusRef = useRef<boolean>(false);
   const pollStateRef = useRef<PollState>(initialPollState);
   // Initialize fullOptionsConfig from localStorage
@@ -128,31 +130,32 @@ export function usePoll(): UsePollReturn {
     if (channelRef.current) {
       return;
     }
-    
+
     try {
       channelRef.current = new BroadcastChannel('poll-results-channel');
-      
+
       // Listen for state requests and commands from popup
       channelRef.current.onmessage = (event) => {
         if (event.data.type === 'request-state') {
           // Use pollStateRef.current to get the latest state
           const currentState = pollStateRef.current;
-          
+
           // Respond to popup request-state
-          
-          // Only broadcast poll state if poll has been started (has options)
+
+          // Only broadcast poll state if poll has been started (has options) or is in countdown
           // Otherwise, only send setup config for preview
-          if (currentState.options.length > 0) {
+          if (currentState.options.length > 0 || currentState.countdown !== undefined) {
             const hasVotes = Object.values(currentState.votes).some(v => v > 0);
             const serializableState: SerializablePollState = {
               isRunning: currentState.isRunning,
-              finished: currentState.finished || (!currentState.isRunning && hasVotes),
+              finished: currentState.finished || (!currentState.isRunning && hasVotes && currentState.countdown === undefined),
               question: currentState.question,
               options: currentState.options,
               votes: currentState.votes,
               votersArray: Array.from(currentState.voters),
               timer: currentState.timer,
               timeLeft: currentState.timeLeft,
+              countdown: currentState.countdown,
             };
             channelRef.current?.postMessage({
               type: 'poll-update',
@@ -210,23 +213,24 @@ export function usePoll(): UsePollReturn {
   // Broadcast poll state changes
   const broadcastPollState = useCallback((state: PollState) => {
     if (!channelRef.current) return;
-    
-    // Don't broadcast if poll hasn't been configured yet (no options)
+
+    // Don't broadcast if poll hasn't been configured yet (no options) and not in countdown
     // The setup config will be used instead for preview
-    if (!state.isRunning && !state.finished && state.options.length === 0) {
+    if (!state.isRunning && !state.finished && state.options.length === 0 && state.countdown === undefined) {
       return;
     }
-    
+
     const hasVotes = Object.values(state.votes).some(v => v > 0);
     const serializableState: SerializablePollState = {
       isRunning: state.isRunning,
-      finished: state.finished || (!state.isRunning && state.options.length > 0 && hasVotes),
+      finished: state.finished || (!state.isRunning && state.options.length > 0 && hasVotes && state.countdown === undefined),
       question: state.question,
       options: state.options,
       votes: state.votes,
       votersArray: Array.from(state.voters),
       timer: state.timer,
       timeLeft: state.timeLeft,
+      countdown: state.countdown,
     };
 
     channelRef.current.postMessage({
@@ -254,34 +258,39 @@ export function usePoll(): UsePollReturn {
   // This ONLY updates the ref - actual broadcast happens on request-state
   const broadcastSetupConfig = useCallback((config: SetupConfig, fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }) => {
     console.log('[usePoll] broadcastSetupConfig called - OLD:', setupConfigRef.current.options, 'NEW:', config.options);
-    
+
     // Only update if the config actually changed (prevent unnecessary updates)
     const currentConfig = setupConfigRef.current;
     const optionsChanged = JSON.stringify(currentConfig.options) !== JSON.stringify(config.options);
     const questionChanged = currentConfig.question !== config.question;
     const timerChanged = currentConfig.timer !== config.timer;
-    
+
     if (optionsChanged || questionChanged || timerChanged) {
       console.log('[usePoll] Config changed, updating setupConfigRef');
       setupConfigRef.current = config;
     } else {
       console.log('[usePoll] Config unchanged, skipping update');
     }
-    
+
     // Update full options config if provided
     if (fullOptions) {
       fullOptionsConfigRef.current = fullOptions;
     }
-    
+
     // DON'T broadcast immediately - let request-state handle it
     // This prevents oscillation during initialization
   }, []);
+
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+      }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
       }
     };
   }, []);
@@ -292,6 +301,9 @@ export function usePoll(): UsePollReturn {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
 
     // Options already have their IDs preserved from PollSetup
     const pollOptions: PollOption[] = options;
@@ -300,8 +312,9 @@ export function usePoll(): UsePollReturn {
       initialVotes[opt.id] = 0;
     });
 
-    const newPollState = {
-      isRunning: true,
+    // Start with countdown state (3 seconds)
+    const countdownState: PollState = {
+      isRunning: false,
       finished: false,
       question,
       options: pollOptions,
@@ -309,16 +322,17 @@ export function usePoll(): UsePollReturn {
       voters: new Set<string>(),
       timer,
       timeLeft: timer,
+      countdown: 3,
     };
 
-    setPollState(newPollState);
+    setPollState(countdownState);
     setVoteLog([]);
 
-    // Manually broadcast since automatic broadcasting is disabled
-    setTimeout(() => {
+    // Broadcast countdown state
+    const broadcastCountdown = (countdownValue: number) => {
       if (channelRef.current) {
         const serializableState: SerializablePollState = {
-          isRunning: true,
+          isRunning: false,
           finished: false,
           question,
           options: pollOptions,
@@ -326,45 +340,107 @@ export function usePoll(): UsePollReturn {
           votersArray: [],
           timer,
           timeLeft: timer,
+          countdown: countdownValue,
         };
         channelRef.current.postMessage({
           type: 'poll-update',
           state: serializableState,
         });
       }
-    }, 100);
+    };
 
-    // Start countdown
-    timerRef.current = setInterval(() => {
-      setPollState(prev => {
-        if (prev.timeLeft <= 1) {
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-          }
-          const finishedState = { ...prev, isRunning: false, finished: true, timeLeft: 0 };
-          
-          // Broadcast finished state
+    // Initial broadcast
+    broadcastCountdown(3);
+
+    // Countdown interval
+    let countdownValue = 3;
+    countdownRef.current = setInterval(() => {
+      countdownValue--;
+
+      if (countdownValue <= 0) {
+        // Clear countdown interval
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
+
+        // Show "GO!" briefly (countdown = 0)
+        setPollState(prev => ({ ...prev, countdown: 0 }));
+        broadcastCountdown(0);
+
+        // After 500ms, start the actual poll
+        setTimeout(() => {
+          const newPollState: PollState = {
+            isRunning: true,
+            finished: false,
+            question,
+            options: pollOptions,
+            votes: initialVotes,
+            voters: new Set<string>(),
+            timer,
+            timeLeft: timer,
+            countdown: undefined,
+          };
+
+          setPollState(newPollState);
+
+          // Broadcast poll started
           if (channelRef.current) {
             const serializableState: SerializablePollState = {
-              isRunning: false,
-              finished: true,
-              question: prev.question,
-              options: prev.options,
-              votes: prev.votes,
-              votersArray: Array.from(prev.voters),
-              timer: prev.timer,
-              timeLeft: 0,
+              isRunning: true,
+              finished: false,
+              question,
+              options: pollOptions,
+              votes: initialVotes,
+              votersArray: [],
+              timer,
+              timeLeft: timer,
+              countdown: undefined,
             };
             channelRef.current.postMessage({
               type: 'poll-update',
               state: serializableState,
             });
           }
-          
-          return finishedState;
-        }
-        return { ...prev, timeLeft: prev.timeLeft - 1 };
-      });
+
+          // Start the poll timer countdown
+          timerRef.current = setInterval(() => {
+            setPollState(prev => {
+              if (prev.timeLeft <= 1) {
+                if (timerRef.current) {
+                  clearInterval(timerRef.current);
+                }
+                const finishedState = { ...prev, isRunning: false, finished: true, timeLeft: 0 };
+
+                // Broadcast finished state
+                if (channelRef.current) {
+                  const serializableState: SerializablePollState = {
+                    isRunning: false,
+                    finished: true,
+                    question: prev.question,
+                    options: prev.options,
+                    votes: prev.votes,
+                    votersArray: Array.from(prev.voters),
+                    timer: prev.timer,
+                    timeLeft: 0,
+                  };
+                  channelRef.current.postMessage({
+                    type: 'poll-update',
+                    state: serializableState,
+                  });
+                }
+
+                return finishedState;
+              }
+              return { ...prev, timeLeft: prev.timeLeft - 1 };
+            });
+          }, 1000);
+        }, 500); // 500ms delay after showing "GO!"
+      } else {
+        // Update countdown display (3, 2, 1)
+        setPollState(prev => ({ ...prev, countdown: countdownValue }));
+        broadcastCountdown(countdownValue);
+      }
     }, 1000);
   }, []);
 
@@ -372,9 +448,12 @@ export function usePoll(): UsePollReturn {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
     setPollState(prev => {
-      const stoppedState = { ...prev, isRunning: false, finished: true };
-      
+      const stoppedState = { ...prev, isRunning: false, finished: true, countdown: undefined };
+
       // Manually broadcast stopped state
       if (channelRef.current) {
         const serializableState: SerializablePollState = {
@@ -392,7 +471,7 @@ export function usePoll(): UsePollReturn {
           state: serializableState,
         });
       }
-      
+
       return stoppedState;
     });
   }, []);
@@ -401,9 +480,12 @@ export function usePoll(): UsePollReturn {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
     setPollState(initialPollState);
     setVoteLog([]);
-    
+
     // Manually broadcast reset state (back to no poll)
     if (channelRef.current) {
       channelRef.current.postMessage({

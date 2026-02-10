@@ -29,7 +29,7 @@ const triggerConfetti = () => {
       origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
       colors: CONFETTI.COLORS,
     });
-    
+
     // Confetti from right side
     confetti({
       ...defaults,
@@ -54,6 +54,7 @@ const initialPollState: PollState = {
   voters: new Set(),
   timer: POLL_TIMER.DEFAULT,
   timeLeft: 0,
+  countdown: undefined,
 };
 
 // Load full options config from localStorage (all options + selected state)
@@ -88,7 +89,7 @@ const LEADER_KEY = 'poll-results-leader';
 const LEADER_HEARTBEAT_INTERVAL = 2000;
 const LEADER_TIMEOUT = 5000;
 
-export function PollResultsPage() {
+export function PollResultsPage () {
   const { t } = useLanguage();
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
@@ -100,7 +101,7 @@ export function PollResultsPage() {
   });
   const [channelRef, setChannelRef] = useState<BroadcastChannel | null>(null);
   const [isLeader, setIsLeader] = useState(false);
-  
+
   // Full options for the PollSetup component - use state so it can be updated from broadcast
   const [fullOptionsConfig, setFullOptionsConfig] = useState<{ allOptions: string[]; selectedOptions: boolean[] } | null>(loadFullOptionsConfig);
 
@@ -109,14 +110,14 @@ export function PollResultsPage() {
     const tryBecomeLeader = () => {
       const leaderData = localStorage.getItem(LEADER_KEY);
       const now = Date.now();
-      
+
       if (!leaderData) {
         // No leader, become leader
         localStorage.setItem(LEADER_KEY, JSON.stringify({ id: TAB_ID, timestamp: now }));
         setIsLeader(true);
         return true;
       }
-      
+
       try {
         const leader = JSON.parse(leaderData);
         if (leader.id === TAB_ID) {
@@ -125,7 +126,7 @@ export function PollResultsPage() {
           setIsLeader(true);
           return true;
         }
-        
+
         // Check if leader is stale (timed out)
         if (now - leader.timestamp > LEADER_TIMEOUT) {
           // Leader timed out, take over
@@ -133,7 +134,7 @@ export function PollResultsPage() {
           setIsLeader(true);
           return true;
         }
-        
+
         // Another tab is the active leader
         setIsLeader(false);
         return false;
@@ -167,7 +168,7 @@ export function PollResultsPage() {
     return () => {
       clearInterval(heartbeatInterval);
       window.removeEventListener('storage', handleStorageChange);
-      
+
       // Release leadership if we were the leader
       const leaderData = localStorage.getItem(LEADER_KEY);
       if (leaderData) {
@@ -205,6 +206,7 @@ export function PollResultsPage() {
             voters: new Set(state.votersArray || []),
             timer: state.timer,
             timeLeft: state.timeLeft,
+            countdown: state.countdown,
           });
           setIsWaiting(false);
         } else if (data.type === 'setup-config') {
@@ -228,7 +230,7 @@ export function PollResultsPage() {
       // Only the leader tab polls for updates to avoid race conditions
       if (isLeader) {
         channel.postMessage({ type: 'request-state' });
-        
+
         // Poll for updates every second to keep timer and votes in sync
         pollInterval = setInterval(() => {
           if (channel) {
@@ -236,7 +238,7 @@ export function PollResultsPage() {
           }
         }, 1000);
       }
-      
+
       return () => {
         if (pollInterval) {
           clearInterval(pollInterval);
@@ -269,7 +271,7 @@ export function PollResultsPage() {
     setIsReconnecting(true);
     channelRef.postMessage({ type: 'reconnect' });
     console.log('[PollResultsPage] Reconnect message sent');
-    
+
     // Reset reconnecting state after timeout if still not connected
     setTimeout(() => {
       setIsReconnecting(false);
@@ -331,7 +333,7 @@ export function PollResultsPage() {
 
   // Confetti celebration when poll finishes
   const hasTriggeredConfetti = useRef(false);
-  
+
   useEffect(() => {
     if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredConfetti.current) {
       hasTriggeredConfetti.current = true;
@@ -339,12 +341,12 @@ export function PollResultsPage() {
     }
   }, [pollState.finished, totalVotes, winnerIds.length]);
 
-  // Reset confetti flag when poll starts running (new poll)
+  // Reset confetti flag when countdown starts (new poll) or poll starts running
   useEffect(() => {
-    if (pollState.isRunning) {
+    if (pollState.isRunning || pollState.countdown !== undefined) {
       hasTriggeredConfetti.current = false;
     }
-  }, [pollState.isRunning]);
+  }, [pollState.isRunning, pollState.countdown]);
 
   const displayQuestion = pollState.isRunning ? pollState.question : (setupConfig?.question || DEFAULT_QUESTION);
 
@@ -371,13 +373,12 @@ export function PollResultsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Blur Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-          
+
           {/* Modal Content */}
-          <div className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${
-            isReconnecting || isAutoReconnectEnabled
-              ? 'border-yellow-500/50 shadow-yellow-500/20' 
+          <div className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${isReconnecting || isAutoReconnectEnabled
+              ? 'border-yellow-500/50 shadow-yellow-500/20'
               : 'border-red-500/50 shadow-red-500/20 animate-pulse'
-          }`}>
+            }`}>
             {isReconnecting || isAutoReconnectEnabled ? (
               <>
                 <div className="text-6xl mb-6 animate-spin">🔄</div>
@@ -385,7 +386,7 @@ export function PollResultsPage() {
                   {isAutoReconnectEnabled ? t.pollResults.autoReconnectTitle : t.pollResults.reconnecting}
                 </h2>
                 <p className="text-slate-400 text-lg mb-8">
-                  {isAutoReconnectEnabled 
+                  {isAutoReconnectEnabled
                     ? t.pollResults.autoReconnectActive
                     : t.pollResults.attemptingReconnect}
                 </p>
@@ -424,11 +425,31 @@ export function PollResultsPage() {
         </div>
       )}
 
+      {/* Countdown Overlay */}
+      {pollState.countdown !== undefined && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="text-center animate-pulse">
+            {pollState.countdown === 0 ? (
+              <div className="text-9xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
+                {t.poll.go}
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl text-slate-300 mb-4">{t.poll.startingIn}</div>
+                <div className="text-[12rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
+                  {pollState.countdown}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col gap-4">
         {/* Setup Section - Above Results */}
         <div className="p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30">
           <PollSetup
-            onStart={() => {}} // Not used - we have separate control buttons
+            onStart={() => { }} // Not used - we have separate control buttons
             onChange={handleSetupChange}
             disabled={pollState.isRunning}
             showStartButton={false}
@@ -443,21 +464,21 @@ export function PollResultsPage() {
 
         {/* Control Buttons */}
         <div className="flex items-center justify-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/30">
-          <button 
+          <button
             onClick={() => sendCommand('start')}
-            disabled={!isConnected || pollState.isRunning}
+            disabled={!isConnected || pollState.isRunning || pollState.countdown !== undefined}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t.pollResults.start}
           </button>
-          <button 
+          <button
             onClick={() => sendCommand('stop')}
             disabled={!pollState.isRunning}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t.pollResults.stop}
           </button>
-          <button 
+          <button
             onClick={() => sendCommand('reset')}
             className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600"
           >
@@ -468,46 +489,43 @@ export function PollResultsPage() {
         {/* Results Section */}
         <div className="flex-1 space-y-3">
           {/* Question */}
-          <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${
-            pollState.isRunning
+          <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
               ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
                 ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
                 : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
                   ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
                   : 'bg-green-500/10 border-green-500'
               : 'bg-purple-500/10 border-purple-500'
-          }`}>
+            }`}>
             {/* Animated Timer Bar */}
             {pollState.isRunning && pollState.timer > 0 && (
-              <div 
-                className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${
-                  pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL 
-                    ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse' 
-                    : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING 
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' 
+              <div
+                className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
+                    ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
+                    : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
                       : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
-                }`}
-                style={{ 
+                  }`}
+                style={{
                   width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
                 }}
               />
             )}
             {/* Static bar when not running */}
             {!pollState.isRunning && (
-              <div 
+              <div
                 className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-purple-600/50 to-purple-400/50"
               />
             )}
             <div className="text-center py-5 px-6">
-              <h3 className={`text-5xl font-bold transition-colors duration-500 ${
-                pollState.isRunning
+              <h3 className={`text-5xl font-bold transition-colors duration-500 ${pollState.isRunning
                   ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
                     ? 'text-red-300'
                     : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
                       ? 'text-yellow-300'
                       : 'text-white'
                   : 'text-white'
-              }`}>{displayQuestion || t.pollResults.voteNow}</h3>
+                }`}>{displayQuestion || t.pollResults.voteNow}</h3>
             </div>
           </div>
 
@@ -520,32 +538,29 @@ export function PollResultsPage() {
               const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
 
               return (
-                <div 
+                <div
                   key={option.id}
-                  className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${
-                    isWinner 
-                      ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow' 
+                  className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
+                      ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
                       : 'border-slate-700/50 bg-slate-800/50'
-                  }`}
+                    }`}
                 >
                   {/* Background Progress Bar */}
-                  <div 
-                    className={`absolute inset-0 transition-all duration-500 ease-out ${
-                      isWinner 
-                        ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10' 
+                  <div
+                    className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
+                        ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
                         : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
-                    }`}
+                      }`}
                     style={{ width: `${percentage}%` }}
                   />
-                  
+
                   {/* Content */}
                   <div className="relative flex items-center justify-between p-5">
                     <div className="flex items-center gap-5">
-                      <span className={`w-16 h-16 flex items-center justify-center rounded-full font-bold text-white text-3xl flex-shrink-0 ${
-                        isWinner 
-                          ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900' 
+                      <span className={`w-16 h-16 flex items-center justify-center rounded-full font-bold text-white text-3xl flex-shrink-0 ${isWinner
+                          ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
                           : 'bg-gradient-to-br from-purple-600 to-purple-400'
-                      }`}>
+                        }`}>
                         {option.id}
                       </span>
                       <span className="font-semibold text-white text-3xl">
@@ -553,7 +568,7 @@ export function PollResultsPage() {
                         {isWinner && <span className="ml-2">👑</span>}
                       </span>
                     </div>
-                    
+
                     <div className="text-right flex-shrink-0">
                       <span className={`font-bold text-3xl ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'}`}>
                         {votes} {t.pollResults.votesUnit}
@@ -566,12 +581,11 @@ export function PollResultsPage() {
 
                   {/* Progress Bar Track */}
                   <div className="h-2 bg-slate-900/50">
-                    <div 
-                      className={`h-full transition-all duration-500 ease-out rounded-r ${
-                        isWinner 
-                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' 
+                    <div
+                      className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
+                          ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
                           : 'bg-gradient-to-r from-purple-600 to-purple-400'
-                      }`}
+                        }`}
                       style={{ width: `${percentage}%` }}
                     />
                   </div>

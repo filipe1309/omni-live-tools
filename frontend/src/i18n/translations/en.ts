@@ -170,6 +170,9 @@ export const en: TranslationKeys = {
     noVotesYet: 'No votes yet...',
     votedFor: 'voted for',
     votesHidden: 'Votes hidden',
+    // Countdown
+    startingIn: 'Starting in',
+    go: 'GO!',
   },
 
   // Poll Results Page
