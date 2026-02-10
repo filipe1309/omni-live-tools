@@ -19,6 +19,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 - [Building Desktop App](#-building-desktop-app-electron)
 - [Web Pages](#-web-pages)
 - [Poll Feature](#-poll-feature)
+- [Language Support](#-language-support)
 - [Troubleshooting](#-troubleshooting)
 - [License](#-license)
 - [Credits](#-credits)
@@ -30,7 +31,8 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
-- 🏗️ **Clean Architecture** - Well-structured TypeScript codebase
+- � **Multi-language Support** - Available in Portuguese (PT-BR) and English (EN)
+- �🏗️ **Clean Architecture** - Well-structured TypeScript codebase
 - ⚡ **Rate Limiting** - Built-in protection against excessive requests
 - 🔌 **Socket.IO Integration** - Real-time bidirectional communication
 
@@ -161,6 +163,30 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 - **Platform badges** - Visual indicators show which platform each vote came from
 - **Vote logging** - Optional detailed log of each vote with platform info
 - **Timer display** - Countdown shows remaining time
+
+## 🌍 Language Support
+
+The application supports multiple languages with easy switching:
+
+| Language | Code | Status |
+|----------|------|--------|
+| Portuguese (Brazil) | PT-BR | ✅ Default |
+| English | EN | ✅ Available |
+
+### How to Change Language
+
+1. Click the language selector in the header (shows 🇧🇷 or 🇺🇸 flag)
+2. Select your preferred language from the dropdown
+3. The interface will update immediately
+4. Your preference is saved in localStorage and persists across sessions
+
+### Translated Pages
+
+- Home page
+- Chat reader
+- Overlay generator
+- Live poll (including pop-out results page)
+- All connection and status messages
 
 ## 📝 License
 
