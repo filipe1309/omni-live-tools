@@ -43,6 +43,43 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 
+## 🌍 Language Support
+
+The application supports multiple languages with easy switching:
+
+| Language | Code | Status |
+|----------|------|--------|
+| Portuguese (Brazil) | PT-BR | ✅ Default |
+| English | EN | ✅ Available |
+
+## 🗳️ Poll Feature
+
+The poll feature allows viewers to vote by typing numbers in chat from **TikTok LIVE** and/or **Twitch**.
+
+![Poll Feature Demo](docs/tcrjb_poll.gif)
+
+### How It Works
+
+1. Select which platforms to use (TikTok, Twitch, or both)
+2. Connect to the live stream(s):
+   - **TikTok**: Enter the streamer's @username
+   - **Twitch**: Enter the channel name
+3. Configure your poll with 2-10 options
+4. Set the timer duration (10-300 seconds)
+5. Start the poll
+6. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
+7. Results update in real-time with platform badges showing vote sources
+
+### Features
+
+- **Multi-platform voting** - Collect votes from TikTok and Twitch simultaneously
+- **One vote per user per platform** - Each viewer can only vote once per poll per platform
+- **Real-time results** - Vote counts and percentages update instantly
+- **Platform badges** - Visual indicators show which platform each vote came from
+- **Vote logging** - Optional detailed log of each vote with platform info
+- **Timer display** - Countdown shows remaining time
+
+
 ## 🚀 Quick Start
 
 ```bash
@@ -137,56 +174,6 @@ make electron-dev     # Build & launch Electron in dev mode
 | OBS Overlay | `http://localhost:8081/obs.html` |
 | Live Poll | `http://localhost:8081/poll.html` |
 
-## 🗳️ Poll Feature
-
-The poll feature allows viewers to vote by typing numbers in chat from **TikTok LIVE** and/or **Twitch**.
-
-![Poll Feature Demo](docs/tcrjb_poll.gif)
-
-### How It Works
-
-1. Select which platforms to use (TikTok, Twitch, or both)
-2. Connect to the live stream(s):
-   - **TikTok**: Enter the streamer's @username
-   - **Twitch**: Enter the channel name
-3. Configure your poll with 2-10 options
-4. Set the timer duration (10-300 seconds)
-5. Start the poll
-6. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
-7. Results update in real-time with platform badges showing vote sources
-
-### Features
-
-- **Multi-platform voting** - Collect votes from TikTok and Twitch simultaneously
-- **One vote per user per platform** - Each viewer can only vote once per poll per platform
-- **Real-time results** - Vote counts and percentages update instantly
-- **Platform badges** - Visual indicators show which platform each vote came from
-- **Vote logging** - Optional detailed log of each vote with platform info
-- **Timer display** - Countdown shows remaining time
-
-## 🌍 Language Support
-
-The application supports multiple languages with easy switching:
-
-| Language | Code | Status |
-|----------|------|--------|
-| Portuguese (Brazil) | PT-BR | ✅ Default |
-| English | EN | ✅ Available |
-
-### How to Change Language
-
-1. Click the language selector in the header (shows 🇧🇷 or 🇺🇸 flag)
-2. Select your preferred language from the dropdown
-3. The interface will update immediately
-4. Your preference is saved in localStorage and persists across sessions
-
-### Translated Pages
-
-- Home page
-- Chat reader
-- Overlay generator
-- Live poll (including pop-out results page)
-- All connection and status messages
 
 ## 📝 License
 
@@ -201,4 +188,4 @@ MIT License
 
 ---
 
-Made with ❤️ by [Filipe](https://github.com/filipe1309)
+<p align="center">Made with ❤️ by <a href="https://github.com/filipe1309">Filipe</a></p>
