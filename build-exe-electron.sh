@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔨 Building Omni LIVE Chat Reader (Electron)..."
+echo "🔨 Building Omni LIVE Tools (Electron)..."
 
 # Fix for macOS: electron-builder looks for 'python' but modern macOS only has 'python3'
 # Create a temporary bin directory with python symlink
@@ -20,7 +20,7 @@ fi
 # Clean up any stale disk mounts from previous failed builds (macOS)
 if [[ "$(uname -s)" == "Darwin" ]]; then
     echo "🧹 Cleaning stale DMG mounts..."
-    # Detach any mounted Omni LIVE Chat Reader volumes
+    # Detach any mounted Omni LIVE Tools volumes
     for vol in /Volumes/Omni*; do
         [ -d "$vol" ] && hdiutil detach "$vol" -force 2>/dev/null || true
     done

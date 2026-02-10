@@ -1,4 +1,4 @@
-# Omni LIVE Chat Reader
+# Omni LIVE Tools
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -7,7 +7,7 @@
 
 A multi-platform chat reader and poll application for **TikTok LIVE** and **Twitch** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
-![Omni LIVE Chat Reader (Demo)](docs/chatreaderjb.gif)
+![Omni LIVE Tools (Demo)](docs/omni-live-tools.gif)
 
 ## 📑 Table of Contents
 

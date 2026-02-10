@@ -1,7 +1,7 @@
 {
-  "name": "omni-live-chat-reader-backend",
-  "version": "2.0.0",
-  "description": "Omni LIVE Chat Reader Backend - Node.js + TypeScript with Clean Architecture",
+  "name": "omni-live-tools-backend",
+  "version": "1.0.0",
+  "description": "Omni LIVE Tools Backend - Node.js + TypeScript with Clean Architecture",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
