@@ -18,9 +18,15 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' }) {
 }
 
 export function ChatMessage({ item }: ChatMessageProps) {
+  const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0);
+  
   return (
     <div className="flex items-start gap-3 py-2 px-3 hover:bg-slate-700/30 rounded-lg animate-fade-in">
-      <ProfilePicture src={item.user.profilePictureUrl} size="sm" />
+      <ProfilePicture 
+        src={item.user.profilePictureUrl} 
+        size="sm" 
+        fallbackInitial={initial}
+      />
       <div className="flex-1 min-w-0">
         <span className="font-medium inline-flex items-center gap-1">
           {item.platform && <PlatformBadge platform={item.platform} />}

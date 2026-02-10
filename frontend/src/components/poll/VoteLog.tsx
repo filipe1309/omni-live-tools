@@ -85,7 +85,11 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
                   {/* Platform Badge */}
                   <PlatformBadge platform={entry.platform} />
                   
-                  <ProfilePicture src={entry.user.profilePictureUrl} size="sm" />
+                  <ProfilePicture 
+                    src={entry.user.profilePictureUrl} 
+                    size="sm" 
+                    fallbackInitial={(entry.user.nickname || entry.user.uniqueId || '?').charAt(0)}
+                  />
                   
                   <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
                     <span className={`font-bold truncate ${
