@@ -12,6 +12,14 @@ module.exports = {
     '^@config/(.*)$': '<rootDir>/config/$1',
     '^@shared/(.*)$': '<rootDir>/shared/$1',
   },
+  // Transform @twurple ESM modules for Jest compatibility
+  transformIgnorePatterns: [
+    'node_modules/(?!(@twurple)/)',
+  ],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { useESM: false }],
+    '^.+\\.jsx?$': 'babel-jest',
+  },
   collectCoverageFrom: [
     '**/*.ts',
     '!**/*.d.ts',

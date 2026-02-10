@@ -1,7 +1,7 @@
 {
   "name": "tiktok-chat-reader",
   "version": "2.0.0",
-  "description": "TikTok LIVE Chat Reader - Electron Desktop App",
+  "description": "Omni LIVE Chat Reader - Electron Desktop App",
   "main": "electron/dist-electron/main.js",
   "scripts": {
     "backend:install": "cd backend && npm install",

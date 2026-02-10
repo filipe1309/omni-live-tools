@@ -1,17 +1,18 @@
-# TikTok LIVE Chat Reader
+# Omni LIVE Chat Reader
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-black.svg)](https://socket.io/)
 
-A chat reader and poll application for TikTok LIVE streams utilizing TikTok-Live-Connector and Socket.IO. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
+A multi-platform chat reader and poll application for **TikTok LIVE** and **Twitch** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
-![TikTok LIVE Chat Reader (Demo)](docs/chatreaderjb.gif)
+![Omni LIVE Chat Reader (Demo)](docs/chatreaderjb.gif)
 
 ## 📑 Table of Contents
 
 - [Features](#-features)
+- [Supported Platforms](#-supported-platforms)
 - [Quick Start](#-quick-start)
 - [Development](#-development)
 - [Configuration](#-configuration)
@@ -24,13 +25,21 @@ A chat reader and poll application for TikTok LIVE streams utilizing TikTok-Live
 
 ## ✨ Features
 
-- 💬 **Real-time Chat Reading** - Display TikTok LIVE chat messages instantly
-- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat
+- 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE and Twitch instantly
+- 🌐 **Multi-Platform Support** - Connect to TikTok and Twitch simultaneously
+- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
 - 🏗️ **Clean Architecture** - Well-structured TypeScript codebase
 - ⚡ **Rate Limiting** - Built-in protection against excessive requests
 - 🔌 **Socket.IO Integration** - Real-time bidirectional communication
+
+## 🌐 Supported Platforms
+
+| Platform | Chat Reading | Polls | Library |
+|----------|-------------|-------|---------|
+| TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
+| Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 
 ## 🚀 Quick Start
 
@@ -128,24 +137,29 @@ make electron-dev     # Build & launch Electron in dev mode
 
 ## 🗳️ Poll Feature
 
-The poll feature allows viewers to vote by typing numbers in chat.
+The poll feature allows viewers to vote by typing numbers in chat from **TikTok LIVE** and/or **Twitch**.
 
 ![Poll Feature Demo](docs/tcrjb_poll.gif)
 
 ### How It Works
 
-1. Connect to a TikTok live stream using the streamer's @username
-2. Configure your poll with 2-10 options
-3. Set the timer duration (10-300 seconds)
-4. Start the poll
-5. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
-6. Results update in real-time
+1. Select which platforms to use (TikTok, Twitch, or both)
+2. Connect to the live stream(s):
+   - **TikTok**: Enter the streamer's @username
+   - **Twitch**: Enter the channel name
+3. Configure your poll with 2-10 options
+4. Set the timer duration (10-300 seconds)
+5. Start the poll
+6. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
+7. Results update in real-time with platform badges showing vote sources
 
 ### Features
 
-- **One vote per user** - Each viewer can only vote once per poll
+- **Multi-platform voting** - Collect votes from TikTok and Twitch simultaneously
+- **One vote per user per platform** - Each viewer can only vote once per poll per platform
 - **Real-time results** - Vote counts and percentages update instantly
-- **Vote logging** - Optional detailed log of each vote
+- **Platform badges** - Visual indicators show which platform each vote came from
+- **Vote logging** - Optional detailed log of each vote with platform info
 - **Timer display** - Countdown shows remaining time
 
 ## 📝 License
@@ -155,4 +169,5 @@ MIT License
 ## 🙏 Credits
 
 - [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector)
+- [Twurple](https://twurple.js.org/) - Modern Twitch API library
 - Original project by [zerodytrash](https://github.com/zerodytrash/TikTok-Chat-Reader)

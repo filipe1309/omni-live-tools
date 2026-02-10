@@ -99,6 +99,7 @@ export interface VoteEntry {
   optionId: number;
   optionText: string;
   timestamp: Date;
+  platform?: 'tiktok' | 'twitch';
 }
 
 // Chat item for display
@@ -112,4 +113,5 @@ export interface ChatItem {
   isTemporary?: boolean;
   giftData?: GiftMessage;
   isPendingStreak?: boolean;
+  platform?: 'tiktok' | 'twitch';
 }

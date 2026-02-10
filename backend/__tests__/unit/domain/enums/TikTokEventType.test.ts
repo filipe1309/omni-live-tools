@@ -1,6 +1,18 @@
-import { TikTokEventType, ConnectionStatus, SocketEventType } from '../../../../domain/enums';
+import { TikTokEventType, TwitchEventType, PlatformType, ConnectionStatus, SocketEventType } from '../../../../domain/enums';
 
 describe('Domain Enums', () => {
+  describe('PlatformType', () => {
+    it('should have all expected platform types', () => {
+      expect(PlatformType.TIKTOK).toBe('tiktok');
+      expect(PlatformType.TWITCH).toBe('twitch');
+    });
+
+    it('should have the correct number of platform types', () => {
+      const platforms = Object.values(PlatformType);
+      expect(platforms).toHaveLength(2);
+    });
+  });
+
   describe('TikTokEventType', () => {
     it('should have all expected event types', () => {
       expect(TikTokEventType.ROOM_USER).toBe('roomUser');
@@ -25,6 +37,26 @@ describe('Domain Enums', () => {
     });
   });
 
+  describe('TwitchEventType', () => {
+    it('should have all expected Twitch event types', () => {
+      expect(TwitchEventType.CHAT).toBe('chat');
+      expect(TwitchEventType.SUB).toBe('sub');
+      expect(TwitchEventType.RESUB).toBe('resub');
+      expect(TwitchEventType.SUBGIFT).toBe('subgift');
+      expect(TwitchEventType.CHEER).toBe('cheer');
+      expect(TwitchEventType.RAID).toBe('raid');
+      expect(TwitchEventType.BAN).toBe('ban');
+      expect(TwitchEventType.TIMEOUT).toBe('timeout');
+      expect(TwitchEventType.CONNECTED).toBe('connected');
+      expect(TwitchEventType.DISCONNECTED).toBe('disconnected');
+    });
+
+    it('should have the correct number of Twitch event types', () => {
+      const eventTypes = Object.values(TwitchEventType);
+      expect(eventTypes).toHaveLength(10);
+    });
+  });
+
   describe('ConnectionStatus', () => {
     it('should have all expected connection statuses', () => {
       expect(ConnectionStatus.DISCONNECTED).toBe('disconnected');
@@ -41,16 +73,23 @@ describe('Domain Enums', () => {
 
   describe('SocketEventType', () => {
     it('should have all expected socket event types', () => {
+      // TikTok events
       expect(SocketEventType.TIKTOK_CONNECTED).toBe('tiktokConnected');
       expect(SocketEventType.TIKTOK_DISCONNECTED).toBe('tiktokDisconnected');
-      expect(SocketEventType.STREAM_END).toBe('streamEnd');
       expect(SocketEventType.SET_UNIQUE_ID).toBe('setUniqueId');
+      // Twitch events
+      expect(SocketEventType.TWITCH_CONNECTED).toBe('twitchConnected');
+      expect(SocketEventType.TWITCH_DISCONNECTED).toBe('twitchDisconnected');
+      expect(SocketEventType.SET_TWITCH_CHANNEL).toBe('setTwitchChannel');
+      // Shared events
+      expect(SocketEventType.STREAM_END).toBe('streamEnd');
       expect(SocketEventType.STATISTIC).toBe('statistic');
+      expect(SocketEventType.CHAT).toBe('chat');
     });
 
     it('should have the correct number of socket event types', () => {
       const eventTypes = Object.values(SocketEventType);
-      expect(eventTypes).toHaveLength(5);
+      expect(eventTypes).toHaveLength(9);
     });
   });
 });

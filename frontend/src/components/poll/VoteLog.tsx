@@ -1,11 +1,30 @@
 import { useRef, useEffect, useState } from 'react';
-import { ProfilePicture } from '../common/ProfilePicture';
+import { ProfilePicture, TikTokIcon, TwitchIcon } from '../common';
 import type { VoteEntry } from '@/types';
 
 interface VoteLogProps {
   entries: VoteEntry[];
   maxHeight?: string;
   onClear?: () => void;
+}
+
+/**
+ * Platform badge component for vote entries
+ */
+function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' }) {
+  if (platform === 'twitch') {
+    return (
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-purple-500/20 text-purple-400" title="Twitch">
+        <TwitchIcon className="w-3 h-3" />
+      </span>
+    );
+  }
+  // Default to TikTok
+  return (
+    <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-tiktok-cyan/20 text-tiktok-cyan" title="TikTok">
+      <TikTokIcon className="w-3 h-3" />
+    </span>
+  );
 }
 
 export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps) {
@@ -63,11 +82,16 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
                   key={entry.id}
                   className="flex items-center gap-3 py-2 px-3 bg-slate-800/50 rounded-lg animate-slide-in border border-slate-700/30"
                 >
+                  {/* Platform Badge */}
+                  <PlatformBadge platform={entry.platform} />
+                  
                   <ProfilePicture src={entry.user.profilePictureUrl} size="sm" />
                   
                   <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-                    <span className="text-tiktok-cyan font-bold truncate">
-                      @{entry.user.uniqueId}
+                    <span className={`font-bold truncate ${
+                      entry.platform === 'twitch' ? 'text-purple-400' : 'text-tiktok-cyan'
+                    }`}>
+                      {entry.platform === 'twitch' ? '' : '@'}{entry.user.uniqueId}
                     </span>
                     <span className="text-slate-400">votou em</span>
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded text-purple-300 font-semibold">

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { PollState, PollOption, VoteEntry, ChatMessage } from '@/types';
+import type { PollState, PollOption, VoteEntry, ChatMessage, PlatformType } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
 
 // Serializable version of PollState for BroadcastChannel
@@ -27,7 +27,7 @@ interface UsePollReturn {
   startPoll: (question: string, options: PollOption[], timer?: number) => void;
   stopPoll: () => void;
   resetPoll: () => void;
-  processVote: (message: ChatMessage) => void;
+  processVote: (message: ChatMessage, platform?: PlatformType) => void;
   clearVoteLog: () => void;
   getTotalVotes: () => number;
   getWinner: () => PollOption | null;
@@ -454,7 +454,7 @@ export function usePoll(): UsePollReturn {
     }, 500);
   }, [broadcastPollState]);
 
-  const processVote = useCallback((message: ChatMessage) => {
+  const processVote = useCallback((message: ChatMessage, platform?: PlatformType) => {
     setPollState(prev => {
       if (!prev.isRunning) return prev;
 
@@ -472,25 +472,29 @@ export function usePoll(): UsePollReturn {
         return prev; // Vote number doesn't match any option
       }
 
+      // Create a unique voter ID that includes platform to allow same user on different platforms
+      const uniqueVoterId = platform ? `${platform}:${message.uniqueId}` : message.uniqueId;
+
       // Check if user already voted
-      if (prev.voters.has(message.uniqueId)) {
+      if (prev.voters.has(uniqueVoterId)) {
         return prev;
       }
 
       // Register vote
       const newVoters = new Set(prev.voters);
-      newVoters.add(message.uniqueId);
+      newVoters.add(uniqueVoterId);
 
       const newVotes = { ...prev.votes };
       newVotes[voteNumber] = (newVotes[voteNumber] || 0) + 1;
 
-      // Add to vote log
+      // Add to vote log with platform info
       const entry: VoteEntry = {
-        id: `${message.uniqueId}-${Date.now()}`,
+        id: `${uniqueVoterId}-${Date.now()}`,
         user: message,
         optionId: voteNumber,
         optionText: option.text,
         timestamp: new Date(),
+        platform: platform, // Add platform to vote entry
       };
       setVoteLog(log => [...log.slice(-99), entry]); // Keep last 100 entries
 

@@ -33,7 +33,7 @@ export function HomePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-tiktok-red to-tiktok-cyan bg-clip-text text-transparent mb-4">
-          Ferramentas TikTok LIVE
+          Ferramentas Omni LIVE
         </h1>
         <p className="text-slate-400 max-w-2xl mx-auto">
           Uma coleção de ferramentas para{' '}
@@ -47,7 +47,12 @@ export function HomePage() {
           e{' '}
           <a href="https://socket.io/" className="text-tiktok-cyan hover:underline">
             Socket.IO
-          </a>.
+          </a>{' '}
+          e{' '}
+          <a href="https://twurple.js.org/" className="text-tiktok-cyan hover:underline">
+            Twurple
+          </a>{' '}
+          para Twitch.
         </p>
       </div>
 
@@ -71,10 +76,10 @@ export function HomePage() {
         <p>
           Source:{' '}
           <a
-            href="https://github.com/filipe1309/tiktok-chat-reader-jb"
+            href="https://github.com/filipe1309/omni-chat-reader-jb"
             className="text-tiktok-cyan hover:underline"
           >
-            https://github.com/filipe1309/tiktok-chat-reader-jb
+            https://github.com/filipe1309/omni-chat-reader-jb
           </a>
         </p>
       </footer>

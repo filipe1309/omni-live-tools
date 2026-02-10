@@ -10,7 +10,7 @@ export function Header() {
               <span className="text-white font-bold text-lg">T</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Ferramentas TikTok LIVE</h1>
+              <h1 className="text-xl font-bold text-white">Ferramentas Omni LIVE</h1>
               <p className="text-xs text-slate-400">Chat e eventos em tempo real</p>
             </div>
           </Link>

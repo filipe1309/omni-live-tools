@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
-import { TikTokEventType, SocketEventType } from '../../domain/enums';
-import { ConnectionOptions, sanitizeConnectionOptions } from '../../domain/entities';
+import { TikTokEventType, SocketEventType, PlatformType } from '../../domain/enums';
+import { ConnectionOptions, sanitizeConnectionOptions, UnifiedChatMessage } from '../../domain/entities';
 import { RateLimiterService, StatisticsService } from '../../application/services';
 import { 
   TikTokConnectionWrapper, 
@@ -8,6 +8,10 @@ import {
   TikFinityConnectionWrapper,
   createTikFinityConnectionWrapper 
 } from '../../infrastructure/tiktok';
+import {
+  TwitchConnectionWrapper,
+  createTwitchConnectionWrapper
+} from '../../infrastructure/twitch';
 
 /**
  * Error patterns that indicate eulerstream/rate limit issues
@@ -28,6 +32,7 @@ const RATE_LIMIT_ERROR_PATTERNS = [
 export class SocketHandler {
   private connectionWrapper: TikTokConnectionWrapper | null = null;
   private tikfinityWrapper: TikFinityConnectionWrapper | null = null;
+  private twitchWrapper: TwitchConnectionWrapper | null = null;
   private clientIp: string;
   private useFallback = false;
 
@@ -47,8 +52,39 @@ export class SocketHandler {
   private setupEventHandlers(): void {
     this.logConnection();
 
+    // TikTok connection handler
     this.socket.on(SocketEventType.SET_UNIQUE_ID, this.handleSetUniqueId.bind(this));
+    this.socket.on('disconnectTikTok', this.handleDisconnectTikTok.bind(this));
+    // Twitch connection handler
+    this.socket.on(SocketEventType.SET_TWITCH_CHANNEL, this.handleSetTwitchChannel.bind(this));
+    this.socket.on('disconnectTwitch', this.handleDisconnectTwitch.bind(this));
     this.socket.on('disconnect', this.handleDisconnect.bind(this));
+  }
+
+  /**
+   * Handle disconnectTikTok event
+   */
+  private handleDisconnectTikTok(): void {
+    if (this.connectionWrapper) {
+      console.info('Disconnecting TikTok by client request');
+      this.connectionWrapper.disconnect();
+      this.connectionWrapper = null;
+    }
+    if (this.tikfinityWrapper) {
+      this.tikfinityWrapper.disconnect();
+      this.tikfinityWrapper = null;
+    }
+  }
+
+  /**
+   * Handle disconnectTwitch event
+   */
+  private handleDisconnectTwitch(): void {
+    if (this.twitchWrapper) {
+      console.info('Disconnecting Twitch by client request');
+      this.twitchWrapper.disconnect();
+      this.twitchWrapper = null;
+    }
   }
 
   /**
@@ -271,6 +307,96 @@ export class SocketHandler {
   }
 
   /**
+   * Handle setTwitchChannel event
+   */
+  private handleSetTwitchChannel(channel: string): void {
+    // Check rate limiting
+    this.rateLimiterService.recordRequest(this.clientIp);
+    
+    if (this.rateLimiterService.shouldBlockClient(this.clientIp)) {
+      this.socket.emit(
+        SocketEventType.TWITCH_DISCONNECTED,
+        this.rateLimiterService.getRateLimitMessage()
+      );
+      return;
+    }
+
+    // Create Twitch connection
+    this.connectToTwitch(channel);
+  }
+
+  /**
+   * Connect to Twitch chat
+   */
+  private connectToTwitch(channel: string): void {
+    try {
+      // Disconnect existing Twitch connection if any
+      if (this.twitchWrapper) {
+        this.twitchWrapper.disconnect();
+        this.twitchWrapper = null;
+      }
+
+      const twitchFactory = createTwitchConnectionWrapper(
+        (delta) => {
+          if (delta > 0) {
+            this.statisticsService.incrementConnectionCount();
+          } else {
+            this.statisticsService.decrementConnectionCount();
+          }
+        }
+      );
+
+      this.twitchWrapper = twitchFactory(channel);
+      
+      // Set up event forwarding
+      this.setupTwitchEventForwarding();
+
+      // Handle connection events
+      this.twitchWrapper.once('connected', (state) => {
+        this.socket.emit(SocketEventType.TWITCH_CONNECTED, state);
+      });
+
+      this.twitchWrapper.once('disconnected', (reason: string) => {
+        this.socket.emit(SocketEventType.TWITCH_DISCONNECTED, reason);
+      });
+
+      // Connect
+      this.twitchWrapper.connect().catch((err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.socket.emit(SocketEventType.TWITCH_DISCONNECTED, errorMessage);
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.socket.emit(SocketEventType.TWITCH_DISCONNECTED, errorMessage);
+    }
+  }
+
+  /**
+   * Set up Twitch event forwarding to the socket
+   */
+  private setupTwitchEventForwarding(): void {
+    if (!this.twitchWrapper) return;
+
+    // Forward chat messages as twitch-specific event (not unified 'chat' to avoid collision with TikTok)
+    this.twitchWrapper.on('chat', (msg: UnifiedChatMessage) => {
+      this.socket.emit('twitchChat', msg);
+    });
+
+    // Forward subscription events (optional)
+    this.twitchWrapper.on('sub', (data: unknown) => {
+      this.socket.emit('twitchSub', data);
+    });
+
+    this.twitchWrapper.on('resub', (data: unknown) => {
+      this.socket.emit('twitchResub', data);
+    });
+
+    this.twitchWrapper.on('raid', (data: unknown) => {
+      this.socket.emit('twitchRaid', data);
+    });
+  }
+
+  /**
    * Handle socket disconnect
    */
   private handleDisconnect(): void {
@@ -282,6 +408,11 @@ export class SocketHandler {
     if (this.tikfinityWrapper) {
       this.tikfinityWrapper.disconnect();
       this.tikfinityWrapper = null;
+    }
+
+    if (this.twitchWrapper) {
+      this.twitchWrapper.disconnect();
+      this.twitchWrapper = null;
     }
   }
 
