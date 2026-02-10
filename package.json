@@ -1,6 +1,6 @@
 {
-  "name": "tiktok-chat-reader",
-  "version": "2.0.0",
+  "name": "omni-live-chat-reader",
+  "version": "1.0.0",
   "description": "Omni LIVE Chat Reader - Electron Desktop App",
   "main": "electron/dist-electron/main.js",
   "scripts": {

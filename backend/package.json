@@ -1,7 +1,7 @@
 {
-  "name": "tiktok-chat-reader-backend",
+  "name": "omni-live-chat-reader-backend",
   "version": "2.0.0",
-  "description": "TikTok LIVE Chat Reader Backend - Node.js + TypeScript with Clean Architecture",
+  "description": "Omni LIVE Chat Reader Backend - Node.js + TypeScript with Clean Architecture",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",

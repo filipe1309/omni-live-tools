@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔨 Building TikTok Chat Reader (Electron)..."
+echo "🔨 Building Omni LIVE Chat Reader (Electron)..."
 
 # Fix for macOS: electron-builder looks for 'python' but modern macOS only has 'python3'
 # Create a temporary bin directory with python symlink
@@ -20,8 +20,8 @@ fi
 # Clean up any stale disk mounts from previous failed builds (macOS)
 if [[ "$(uname -s)" == "Darwin" ]]; then
     echo "🧹 Cleaning stale DMG mounts..."
-    # Detach any mounted TikTok volumes
-    for vol in /Volumes/TikTok*; do
+    # Detach any mounted Omni LIVE Chat Reader volumes
+    for vol in /Volumes/Omni*; do
         [ -d "$vol" ] && hdiutil detach "$vol" -force 2>/dev/null || true
     done
     # Also try detaching by disk numbers
@@ -59,7 +59,7 @@ echo "🏗️  Building Electron distributables..."
 
 # Cleanup function for macOS DMG builds
 cleanup_dmg_mounts() {
-    for vol in /Volumes/TikTok*; do
+    for vol in /Volumes/Omni*; do
         [ -d "$vol" ] && hdiutil detach "$vol" -force 2>/dev/null || true
     done
 }
