@@ -18,7 +18,7 @@ let mainWindow: BrowserWindow | null = null;
  * Boot the backend server by requiring the compiled main.js bundle.
  * The bundle starts Express + Socket.IO and begins listening.
  */
-function startBackendServer(): void {
+function startBackendServer (): void {
   // Point static files to the bundled public-react inside the app
   // __dirname is electron/dist-electron, so we go up 2 levels to reach root
   const staticPath = path.join(__dirname, '../../public-react');
@@ -31,13 +31,13 @@ function startBackendServer(): void {
 /**
  * Create the main application window.
  */
-function createWindow(): void {
+function createWindow (): void {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    title: 'TikTok LIVE Chat Reader',
+    title: 'Omni LIVE Tools',
     icon: path.join(__dirname, '../../public-react/favicon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -66,7 +66,7 @@ function createWindow(): void {
           height: parseFeature('height') || 600,
           x: parseFeature('left'),
           y: parseFeature('top'),
-          title: 'TikTok LIVE Chat Reader',
+          title: 'Omni LIVE Tools',
           icon: path.join(__dirname, '../../public-react/favicon.ico'),
           webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
@@ -92,7 +92,7 @@ function createWindow(): void {
 /**
  * Wait for the backend server to be ready before opening the window.
  */
-async function waitForServer(url: string, retries = 30, delay = 500): Promise<void> {
+async function waitForServer (url: string, retries = 30, delay = 500): Promise<void> {
   for (let i = 0; i < retries; i++) {
     try {
       const http = await import('http');

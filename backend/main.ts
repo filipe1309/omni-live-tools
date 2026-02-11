@@ -1,5 +1,5 @@
 /**
- * TikTok LIVE Chat Reader
+ * Omni LIVE Tools
  * Main Entry Point - Application Bootstrap
  */
 
@@ -22,9 +22,9 @@ class Application {
   /**
    * Bootstrap and start the application
    */
-  async start(): Promise<void> {
+  async start (): Promise<void> {
     try {
-      console.info('Starting TikTok LIVE Chat Reader...');
+      console.info('Starting Omni LIVE Tools...');
 
       // Load and validate configuration
       const envConfig = loadConfig();
@@ -78,7 +78,7 @@ class Application {
   /**
    * Stop the application
    */
-  async stop(): Promise<void> {
+  async stop (): Promise<void> {
     if (this.isShuttingDown) {
       return;
     }
@@ -101,7 +101,7 @@ class Application {
   /**
    * Set up graceful shutdown handlers
    */
-  private setupGracefulShutdown(): void {
+  private setupGracefulShutdown (): void {
     const shutdown = async (signal: string) => {
       if (this.isShuttingDown) {
         return;
