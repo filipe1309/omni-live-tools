@@ -15,6 +15,11 @@ files:
   - node_modules/**/*
   - package.json
 
+# Unpack ESM-only modules from asar so dynamic imports work at runtime
+asarUnpack:
+  - "**/node_modules/@twurple/**"
+  - "**/node_modules/@d-fischer/**"
+
 # Electron main entry point (compiled from electron/main.ts)
 # electron-builder reads "main" from package.json, but we override here
 extraMetadata:
