@@ -1,26 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { PollState, PollOption, VoteEntry, ChatMessage, PlatformType } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
+import { usePollTimer } from './usePollTimer';
+import { usePollSync } from './usePollSync';
+import type { SetupConfig } from './usePollSync';
 
-// Serializable version of PollState for BroadcastChannel
-export interface SerializablePollState {
-  isRunning: boolean;
-  finished: boolean;
-  question: string;
-  options: PollOption[];
-  votes: Record<number, number>;
-  votersArray: string[];
-  timer: number;
-  timeLeft: number;
-  countdown?: number; // 3, 2, 1, 0 (0 = GO!)
-}
-
-// Setup config for preview broadcast
-export interface SetupConfig {
-  question: string;
-  options: PollOption[];
-  timer: number;
-}
+// Re-export types for backward compatibility
+export type { SerializablePollState, SetupConfig } from './usePollSync';
 
 interface UsePollReturn {
   pollState: PollState;
@@ -34,7 +20,10 @@ interface UsePollReturn {
   getWinner: () => PollOption | null;
   getPercentage: (optionId: number) => number;
   openResultsPopup: () => void;
-  broadcastSetupConfig: (config: SetupConfig, fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }) => void;
+  broadcastSetupConfig: (
+    config: SetupConfig,
+    fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }
+  ) => void;
   setConnectionStatus: (isConnected: boolean) => void;
   onConfigUpdate: (callback: (config: SetupConfig) => void) => void;
   onReconnect: (callback: () => void) => void;
@@ -75,7 +64,7 @@ const loadInitialFullOptionsConfig = (): { allOptions: string[]; selectedOptions
   return null;
 };
 
-// Load setupConfig from localStorage  
+// Load setupConfig from localStorage
 const loadInitialSetupConfig = (): SetupConfig => {
   try {
     const saved = localStorage.getItem('tiktok-poll-setupConfig');
@@ -91,441 +80,210 @@ const loadInitialSetupConfig = (): SetupConfig => {
 export function usePoll (): UsePollReturn {
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [voteLog, setVoteLog] = useState<VoteEntry[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const channelRef = useRef<BroadcastChannel | null>(null);
-  const popupWindowRef = useRef<Window | null>(null);
-  // Initialize with saved config from localStorage or defaults
-  const setupConfigRef = useRef<SetupConfig>(loadInitialSetupConfig());
 
+  // Refs for configuration and state
+  const popupWindowRef = useRef<Window | null>(null);
+  const setupConfigRef = useRef<SetupConfig>(loadInitialSetupConfig());
   const connectionStatusRef = useRef<boolean>(false);
   const pollStateRef = useRef<PollState>(initialPollState);
-  // Initialize fullOptionsConfig from localStorage
-  const fullOptionsConfigRef = useRef<{ allOptions: string[]; selectedOptions: boolean[] } | null>(loadInitialFullOptionsConfig());
-  const commandHandlersRef = useRef<{
-    start: () => void;
-    stop: () => void;
-    reset: () => void;
-  } | null>(null);
-  const configUpdateCallbackRef = useRef<((config: SetupConfig) => void) | null>(null);
-  const reconnectCallbackRef = useRef<(() => void) | null>(null);
-
-  // Register callback for config updates from popup
-  const onConfigUpdate = useCallback((callback: (config: SetupConfig) => void) => {
-    configUpdateCallbackRef.current = callback;
-  }, []);
-
-  // Register callback for reconnect from popup
-  const onReconnect = useCallback((callback: () => void) => {
-    reconnectCallbackRef.current = callback;
-  }, []);
+  const fullOptionsConfigRef = useRef<{ allOptions: string[]; selectedOptions: boolean[] } | null>(
+    loadInitialFullOptionsConfig()
+  );
 
   // Keep pollStateRef in sync with pollState
   useEffect(() => {
     pollStateRef.current = pollState;
   }, [pollState]);
 
-  // Initialize BroadcastChannel for syncing with popup window
+  // Setup sync options - memoized to avoid recreating on every render
+  const syncOptions = useMemo(
+    () => ({
+      getCurrentState: () => pollStateRef.current,
+      getSetupConfig: () => setupConfigRef.current,
+      getFullOptionsConfig: () => fullOptionsConfigRef.current,
+      getConnectionStatus: () => connectionStatusRef.current,
+    }),
+    []
+  );
+
+  // Initialize sync hook
+  const {
+    broadcastPollState,
+    broadcastSetupConfig: broadcastSetupConfigToPopup,
+    broadcastConnectionStatus,
+    setCommandHandlers,
+    onConfigUpdate: registerSyncConfigUpdate,
+    onReconnect: registerSyncReconnect,
+  } = usePollSync(syncOptions);
+
+  // Consumer callback refs for config update and reconnect
+  const configUpdateCallbackRef = useRef<((config: SetupConfig) => void) | null>(null);
+  const reconnectCallbackRef = useRef<(() => void) | null>(null);
+
+  // Register internal handlers with usePollSync that update our refs AND call consumer callbacks
   useEffect(() => {
-    // Prevent duplicate listeners in React Strict Mode
-    if (channelRef.current) {
-      return;
-    }
-
-    try {
-      channelRef.current = new BroadcastChannel('poll-results-channel');
-
-      // Listen for state requests and commands from popup
-      channelRef.current.onmessage = (event) => {
-        if (event.data.type === 'request-state') {
-          // Use pollStateRef.current to get the latest state
-          const currentState = pollStateRef.current;
-
-          // Respond to popup request-state
-
-          // Only broadcast poll state if poll has been started (has options) or is in countdown
-          // Otherwise, only send setup config for preview
-          if (currentState.options.length > 0 || currentState.countdown !== undefined) {
-            const hasVotes = Object.values(currentState.votes).some(v => v > 0);
-            const serializableState: SerializablePollState = {
-              isRunning: currentState.isRunning,
-              finished: currentState.finished || (!currentState.isRunning && hasVotes && currentState.countdown === undefined),
-              question: currentState.question,
-              options: currentState.options,
-              votes: currentState.votes,
-              votersArray: Array.from(currentState.voters),
-              timer: currentState.timer,
-              timeLeft: currentState.timeLeft,
-              countdown: currentState.countdown,
-            };
-            channelRef.current?.postMessage({
-              type: 'poll-update',
-              state: serializableState,
-            });
-            // Don't send setup-config when poll is active to avoid conflicting options
-          } else {
-            // Send setup config for preview - use stored config (always initialized now)
-            channelRef.current?.postMessage({
-              type: 'setup-config',
-              config: setupConfigRef.current,
-              fullOptions: fullOptionsConfigRef.current,
-            });
-          }
-          // Broadcast connection status
-          channelRef.current?.postMessage({
-            type: 'connection-status',
-            isConnected: connectionStatusRef.current,
-          });
-        } else if (event.data.type === 'poll-command') {
-          const command = event.data.command as 'start' | 'stop' | 'reset';
-          if (commandHandlersRef.current) {
-            commandHandlersRef.current[command]();
-          }
-        } else if (event.data.type === 'config-update') {
-          // Handle config updates from popup
-          const config = event.data.config as SetupConfig;
-          console.log('[usePoll] Received config-update from popup:', config);
-          setupConfigRef.current = config;
-          // Notify the callback (PollPage) about the config change
-          if (configUpdateCallbackRef.current) {
-            configUpdateCallbackRef.current(config);
-          }
-        } else if (event.data.type === 'reconnect') {
-          // Handle reconnect request from popup
-          console.log('[usePoll] Received reconnect request from popup');
-          console.log('[usePoll] reconnectCallbackRef.current:', !!reconnectCallbackRef.current);
-          if (reconnectCallbackRef.current) {
-            console.log('[usePoll] Calling reconnect callback');
-            reconnectCallbackRef.current();
-          } else {
-            console.log('[usePoll] No reconnect callback registered yet');
-          }
-        }
-      };
-    } catch (e) {
-      console.warn('BroadcastChannel not supported:', e);
-    }
-
-    return () => {
-      channelRef.current?.close();
-    };
-  }, []);
-
-  // Broadcast poll state changes
-  const broadcastPollState = useCallback((state: PollState) => {
-    if (!channelRef.current) return;
-
-    // Don't broadcast if poll hasn't been configured yet (no options) and not in countdown
-    // The setup config will be used instead for preview
-    if (!state.isRunning && !state.finished && state.options.length === 0 && state.countdown === undefined) {
-      return;
-    }
-
-    const hasVotes = Object.values(state.votes).some(v => v > 0);
-    const serializableState: SerializablePollState = {
-      isRunning: state.isRunning,
-      finished: state.finished || (!state.isRunning && state.options.length > 0 && hasVotes && state.countdown === undefined),
-      question: state.question,
-      options: state.options,
-      votes: state.votes,
-      votersArray: Array.from(state.voters),
-      timer: state.timer,
-      timeLeft: state.timeLeft,
-      countdown: state.countdown,
-    };
-
-    channelRef.current.postMessage({
-      type: 'poll-update',
-      state: serializableState,
-    });
-  }, []);
-
-  // Broadcast state on changes - but ONLY when poll is actually running or finished
-  // NOT just when it has options, as setupConfig should never populate pollState
-  // DISABLED: Automatic broadcasting is causing oscillation issues
-  // Instead, only respond to explicit request-state messages
-  /*
-  useEffect(() => {
-    // Only broadcast when poll has been explicitly started (isRunning=true) or finished
-    // This prevents broadcasting setup config as if it were poll state
-    if (pollState.isRunning || pollState.finished) {
-      console.log('[usePoll] Broadcasting poll state (isRunning or finished):', pollState.options);
-      broadcastPollState(pollState);
-    }
-  }, [pollState, broadcastPollState]);
-  */
-
-  // Broadcast setup config changes (for preview in popup)
-  // This ONLY updates the ref - actual broadcast happens on request-state
-  const broadcastSetupConfig = useCallback((config: SetupConfig, fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }) => {
-    console.log('[usePoll] broadcastSetupConfig called - OLD:', setupConfigRef.current.options, 'NEW:', config.options);
-
-    // Only update if the config actually changed (prevent unnecessary updates)
-    const currentConfig = setupConfigRef.current;
-    const optionsChanged = JSON.stringify(currentConfig.options) !== JSON.stringify(config.options);
-    const questionChanged = currentConfig.question !== config.question;
-    const timerChanged = currentConfig.timer !== config.timer;
-
-    if (optionsChanged || questionChanged || timerChanged) {
-      console.log('[usePoll] Config changed, updating setupConfigRef');
+    registerSyncConfigUpdate((config: SetupConfig) => {
+      // Update our internal setupConfigRef - this was missing in the refactor!
+      console.log('[usePoll] Config update received, updating setupConfigRef:', config);
       setupConfigRef.current = config;
-    } else {
-      console.log('[usePoll] Config unchanged, skipping update');
-    }
-
-    // Update full options config if provided
-    if (fullOptions) {
-      fullOptionsConfigRef.current = fullOptions;
-    }
-
-    // DON'T broadcast immediately - let request-state handle it
-    // This prevents oscillation during initialization
-  }, []);
-
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      // Then notify the consumer (e.g., PollPage)
+      if (configUpdateCallbackRef.current) {
+        configUpdateCallbackRef.current(config);
       }
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-      }
-    };
-  }, []);
-
-  const startPoll = useCallback((question: string, options: PollOption[], timer = POLL_TIMER.DEFAULT) => {
-    console.log('[usePoll] startPoll called with options:', options);
-    // Clear any existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
-
-    // Options already have their IDs preserved from PollSetup
-    const pollOptions: PollOption[] = options;
-    const initialVotes: Record<number, number> = {};
-    pollOptions.forEach(opt => {
-      initialVotes[opt.id] = 0;
     });
 
-    // Start with countdown state (3 seconds)
-    const countdownState: PollState = {
-      isRunning: false,
-      finished: false,
-      question,
-      options: pollOptions,
-      votes: initialVotes,
-      voters: new Set<string>(),
-      timer,
-      timeLeft: timer,
-      countdown: 3,
-    };
-
-    setPollState(countdownState);
-    setVoteLog([]);
-
-    // Broadcast countdown state
-    const broadcastCountdown = (countdownValue: number) => {
-      if (channelRef.current) {
-        const serializableState: SerializablePollState = {
-          isRunning: false,
-          finished: false,
-          question,
-          options: pollOptions,
-          votes: initialVotes,
-          votersArray: [],
-          timer,
-          timeLeft: timer,
-          countdown: countdownValue,
-        };
-        channelRef.current.postMessage({
-          type: 'poll-update',
-          state: serializableState,
-        });
+    registerSyncReconnect(() => {
+      if (reconnectCallbackRef.current) {
+        reconnectCallbackRef.current();
       }
-    };
+    });
+  }, [registerSyncConfigUpdate, registerSyncReconnect]);
 
-    // Initial broadcast
-    broadcastCountdown(3);
-
-    // Countdown interval
-    let countdownValue = 3;
-    countdownRef.current = setInterval(() => {
-      countdownValue--;
-
-      if (countdownValue <= 0) {
-        // Clear countdown interval
-        if (countdownRef.current) {
-          clearInterval(countdownRef.current);
-          countdownRef.current = null;
-        }
-
-        // Show "GO!" briefly (countdown = 0)
-        setPollState(prev => ({ ...prev, countdown: 0 }));
-        broadcastCountdown(0);
-
-        // After 500ms, start the actual poll
-        setTimeout(() => {
-          const newPollState: PollState = {
-            isRunning: true,
-            finished: false,
-            question,
-            options: pollOptions,
-            votes: initialVotes,
-            voters: new Set<string>(),
-            timer,
-            timeLeft: timer,
-            countdown: undefined,
-          };
-
-          setPollState(newPollState);
-
-          // Broadcast poll started
-          if (channelRef.current) {
-            const serializableState: SerializablePollState = {
-              isRunning: true,
-              finished: false,
-              question,
-              options: pollOptions,
-              votes: initialVotes,
-              votersArray: [],
-              timer,
-              timeLeft: timer,
-              countdown: undefined,
-            };
-            channelRef.current.postMessage({
-              type: 'poll-update',
-              state: serializableState,
-            });
-          }
-
-          // Start the poll timer countdown
-          timerRef.current = setInterval(() => {
-            setPollState(prev => {
-              if (prev.timeLeft <= 1) {
-                if (timerRef.current) {
-                  clearInterval(timerRef.current);
-                }
-                const finishedState = { ...prev, isRunning: false, finished: true, timeLeft: 0 };
-
-                // Broadcast finished state
-                if (channelRef.current) {
-                  const serializableState: SerializablePollState = {
-                    isRunning: false,
-                    finished: true,
-                    question: prev.question,
-                    options: prev.options,
-                    votes: prev.votes,
-                    votersArray: Array.from(prev.voters),
-                    timer: prev.timer,
-                    timeLeft: 0,
-                  };
-                  channelRef.current.postMessage({
-                    type: 'poll-update',
-                    state: serializableState,
-                  });
-                }
-
-                return finishedState;
-              }
-
-              // Broadcast intermediate timeLeft updates for smooth animation in popup
-              const newTimeLeft = prev.timeLeft - 1;
-              if (channelRef.current) {
-                const serializableState: SerializablePollState = {
-                  isRunning: true,
-                  finished: false,
-                  question: prev.question,
-                  options: prev.options,
-                  votes: prev.votes,
-                  votersArray: Array.from(prev.voters),
-                  timer: prev.timer,
-                  timeLeft: newTimeLeft,
-                };
-                channelRef.current.postMessage({
-                  type: 'poll-update',
-                  state: serializableState,
-                });
-              }
-
-              return { ...prev, timeLeft: newTimeLeft };
-            });
-          }, 1000);
-        }, 500); // 500ms delay after showing "GO!"
-      } else {
-        // Update countdown display (3, 2, 1)
-        setPollState(prev => ({ ...prev, countdown: countdownValue }));
-        broadcastCountdown(countdownValue);
-      }
-    }, 1000);
+  // Public callback registration for consumers
+  const onConfigUpdate = useCallback((callback: (config: SetupConfig) => void) => {
+    configUpdateCallbackRef.current = callback;
   }, []);
 
+  const onReconnect = useCallback((callback: () => void) => {
+    reconnectCallbackRef.current = callback;
+  }, []);
+
+  // Timer callbacks
+  const timerCallbacks = useMemo(
+    () => ({
+      onCountdownChange: (countdown: number) => {
+        setPollState(prev => ({ ...prev, countdown }));
+
+        // Broadcast countdown state - use setupConfig for question/options if not yet set
+        const state = pollStateRef.current;
+        const stateWithCountdown: PollState = {
+          ...state,
+          question: state.question || setupConfigRef.current.question,
+          options: state.options.length > 0 ? state.options : setupConfigRef.current.options,
+          timer: state.timer || setupConfigRef.current.timer,
+          timeLeft: state.timeLeft || setupConfigRef.current.timer,
+          countdown,
+        };
+        broadcastPollState(stateWithCountdown);
+      },
+
+      onPollStart: (newState: PollState) => {
+        setPollState(newState);
+        broadcastPollState(newState);
+      },
+
+      onTimeLeftChange: (timeLeft: number) => {
+        setPollState(prev => {
+          const newState = { ...prev, timeLeft };
+          broadcastPollState(newState);
+          return newState;
+        });
+      },
+
+      onPollFinish: () => {
+        setPollState(prev => {
+          const finishedState = { ...prev, isRunning: false, finished: true, timeLeft: 0 };
+          broadcastPollState(finishedState);
+          return finishedState;
+        });
+      },
+    }),
+    [broadcastPollState]
+  );
+
+  // Initialize timer hook
+  const { startTimer, stopTimer } = usePollTimer(timerCallbacks);
+
+  // Start poll with countdown
+  const startPoll = useCallback(
+    (question: string, options: PollOption[], timer = POLL_TIMER.DEFAULT) => {
+      console.log('[usePoll] startPoll called with options:', options);
+
+      // Initialize votes map
+      const initialVotes: Record<number, number> = {};
+      options.forEach(opt => {
+        initialVotes[opt.id] = 0;
+      });
+
+      // Create countdown state
+      const countdownState: PollState = {
+        isRunning: false,
+        finished: false,
+        question,
+        options,
+        votes: initialVotes,
+        voters: new Set<string>(),
+        timer,
+        timeLeft: timer,
+        countdown: 3,
+      };
+
+      setPollState(countdownState);
+      setVoteLog([]);
+
+      // Start timer (handles countdown and poll timer)
+      startTimer(question, options, timer);
+    },
+    [startTimer]
+  );
+
+  // Stop poll
   const stopPoll = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
+    stopTimer();
     setPollState(prev => {
       const stoppedState = { ...prev, isRunning: false, finished: true, countdown: undefined };
-
-      // Manually broadcast stopped state
-      if (channelRef.current) {
-        const serializableState: SerializablePollState = {
-          isRunning: false,
-          finished: true,
-          question: prev.question,
-          options: prev.options,
-          votes: prev.votes,
-          votersArray: Array.from(prev.voters),
-          timer: prev.timer,
-          timeLeft: prev.timeLeft,
-        };
-        channelRef.current.postMessage({
-          type: 'poll-update',
-          state: serializableState,
-        });
-      }
-
+      broadcastPollState(stoppedState);
       return stoppedState;
     });
-  }, []);
+  }, [stopTimer, broadcastPollState]);
 
+  // Reset poll
   const resetPoll = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
+    stopTimer();
     setPollState(initialPollState);
     setVoteLog([]);
+    broadcastSetupConfigToPopup();
+  }, [stopTimer, broadcastSetupConfigToPopup]);
 
-    // Manually broadcast reset state (back to no poll)
-    if (channelRef.current) {
-      channelRef.current.postMessage({
-        type: 'setup-config',
-        config: setupConfigRef.current,
-      });
-    }
-  }, []);
+  // Set connection status and broadcast
+  const setConnectionStatus = useCallback(
+    (isConnected: boolean) => {
+      connectionStatusRef.current = isConnected;
+      broadcastConnectionStatus(isConnected);
+    },
+    [broadcastConnectionStatus]
+  );
 
-  // Set connection status and broadcast to popup
-  const setConnectionStatus = useCallback((isConnected: boolean) => {
-    connectionStatusRef.current = isConnected;
-    if (channelRef.current) {
-      channelRef.current.postMessage({
-        type: 'connection-status',
-        isConnected,
-      });
-    }
-  }, []);
+  // Broadcast setup config changes (for preview in popup)
+  const broadcastSetupConfig = useCallback(
+    (config: SetupConfig, fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }) => {
+      console.log(
+        '[usePoll] broadcastSetupConfig called - OLD:',
+        setupConfigRef.current.options,
+        'NEW:',
+        config.options
+      );
 
+      // Only update if the config actually changed
+      const currentConfig = setupConfigRef.current;
+      const optionsChanged = JSON.stringify(currentConfig.options) !== JSON.stringify(config.options);
+      const questionChanged = currentConfig.question !== config.question;
+      const timerChanged = currentConfig.timer !== config.timer;
+
+      if (optionsChanged || questionChanged || timerChanged) {
+        console.log('[usePoll] Config changed, updating setupConfigRef');
+        setupConfigRef.current = config;
+      }
+
+      // Update full options config if provided
+      if (fullOptions) {
+        fullOptionsConfigRef.current = fullOptions;
+      }
+    },
+    []
+  );
+
+  // Open results popup window
   const openResultsPopup = useCallback(() => {
     // Check if popup is already open
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
@@ -533,15 +291,11 @@ export function usePoll (): UsePollReturn {
       return;
     }
 
-    // Calculate popup size and position
-    // Width: 700px to fit content comfortably
-    // Height: 900px to show up to 8 options + controls + status bar
     const width = 700;
     const height = 900;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
 
-    // Open popup with minimal chrome
     popupWindowRef.current = window.open(
       '/poll-results',
       'pollResultsPopup',
@@ -549,13 +303,13 @@ export function usePoll (): UsePollReturn {
       'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes'
     );
 
-    // Send initial state after a short delay to let popup load
-    // Use pollStateRef to get the latest state
+    // Send initial state after popup loads
     setTimeout(() => {
       broadcastPollState(pollStateRef.current);
     }, 500);
   }, [broadcastPollState]);
 
+  // Process vote from chat
   const processVote = useCallback((message: ChatMessage, platform?: PlatformType) => {
     setPollState(prev => {
       if (!prev.isRunning) return prev;
@@ -563,42 +317,30 @@ export function usePoll (): UsePollReturn {
       const comment = message.comment.trim();
       const voteNumber = parseInt(comment);
 
-      // Check if valid vote number - must match an existing option ID
-      if (isNaN(voteNumber)) {
-        return prev;
-      }
+      if (isNaN(voteNumber)) return prev;
 
-      // Find the option with this ID (options preserve their original IDs)
       const option = prev.options.find(o => o.id === voteNumber);
-      if (!option) {
-        return prev; // Vote number doesn't match any option
-      }
+      if (!option) return prev;
 
-      // Create a unique voter ID that includes platform to allow same user on different platforms
       const uniqueVoterId = platform ? `${platform}:${message.uniqueId}` : message.uniqueId;
 
-      // Check if user already voted
-      if (prev.voters.has(uniqueVoterId)) {
-        return prev;
-      }
+      if (prev.voters.has(uniqueVoterId)) return prev;
 
-      // Register vote
       const newVoters = new Set(prev.voters);
       newVoters.add(uniqueVoterId);
 
       const newVotes = { ...prev.votes };
       newVotes[voteNumber] = (newVotes[voteNumber] || 0) + 1;
 
-      // Add to vote log with platform info
       const entry: VoteEntry = {
         id: `${uniqueVoterId}-${Date.now()}`,
         user: message,
         optionId: voteNumber,
         optionText: option.text,
         timestamp: new Date(),
-        platform: platform, // Add platform to vote entry
+        platform,
       };
-      setVoteLog(log => [...log.slice(-99), entry]); // Keep last 100 entries
+      setVoteLog(log => [...log.slice(-99), entry]);
 
       return {
         ...prev,
@@ -633,15 +375,18 @@ export function usePoll (): UsePollReturn {
     return pollState.options.find(o => o.id === winnerId) || null;
   }, [pollState.votes, pollState.options, getTotalVotes]);
 
-  const getPercentage = useCallback((optionId: number) => {
-    const totalVotes = getTotalVotes();
-    if (totalVotes === 0) return 0;
-    return Math.round((pollState.votes[optionId] / totalVotes) * 100);
-  }, [pollState.votes, getTotalVotes]);
+  const getPercentage = useCallback(
+    (optionId: number) => {
+      const totalVotes = getTotalVotes();
+      if (totalVotes === 0) return 0;
+      return Math.round((pollState.votes[optionId] / totalVotes) * 100);
+    },
+    [pollState.votes, getTotalVotes]
+  );
 
   // Register command handlers for popup communication
   useEffect(() => {
-    commandHandlersRef.current = {
+    setCommandHandlers({
       start: () => {
         if (setupConfigRef.current) {
           startPoll(
@@ -653,8 +398,8 @@ export function usePoll (): UsePollReturn {
       },
       stop: stopPoll,
       reset: resetPoll,
-    };
-  }, [startPoll, stopPoll, resetPoll]);
+    });
+  }, [startPoll, stopPoll, resetPoll, setCommandHandlers]);
 
   return {
     pollState,
