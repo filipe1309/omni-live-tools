@@ -365,12 +365,13 @@ export function PollResultsPage () {
       if (isLeader) {
         channel.postMessage({ type: 'request-state' });
 
-        // Poll for updates every second to keep timer and votes in sync
+        // Poll for updates every 500ms as a backup for pushed updates
+        // Primary updates come via broadcast, this catches missed messages
         pollInterval = setInterval(() => {
           if (channel) {
             channel.postMessage({ type: 'request-state' });
           }
-        }, 1000);
+        }, 500);
       }
 
       return () => {

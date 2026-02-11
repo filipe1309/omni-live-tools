@@ -432,7 +432,27 @@ export function usePoll (): UsePollReturn {
 
                 return finishedState;
               }
-              return { ...prev, timeLeft: prev.timeLeft - 1 };
+
+              // Broadcast intermediate timeLeft updates for smooth animation in popup
+              const newTimeLeft = prev.timeLeft - 1;
+              if (channelRef.current) {
+                const serializableState: SerializablePollState = {
+                  isRunning: true,
+                  finished: false,
+                  question: prev.question,
+                  options: prev.options,
+                  votes: prev.votes,
+                  votersArray: Array.from(prev.voters),
+                  timer: prev.timer,
+                  timeLeft: newTimeLeft,
+                };
+                channelRef.current.postMessage({
+                  type: 'poll-update',
+                  state: serializableState,
+                });
+              }
+
+              return { ...prev, timeLeft: newTimeLeft };
             });
           }, 1000);
         }, 500); // 500ms delay after showing "GO!"
