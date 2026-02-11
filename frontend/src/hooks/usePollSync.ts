@@ -1,38 +1,15 @@
 import { useRef, useEffect, useCallback } from 'react';
-import type { PollState, PollOption } from '@/types';
+import type { PollState } from '@/types';
+import type {
+  SerializablePollState,
+  SetupConfig,
+  FullOptionsConfig,
+  PollCommand,
+  SyncCommandHandlers,
+} from '@/types';
 
-// Serializable version of PollState for BroadcastChannel
-export interface SerializablePollState {
-  isRunning: boolean;
-  finished: boolean;
-  question: string;
-  options: PollOption[];
-  votes: Record<number, number>;
-  votersArray: string[];
-  timer: number;
-  timeLeft: number;
-  countdown?: number;
-}
-
-// Setup config for preview broadcast
-export interface SetupConfig {
-  question: string;
-  options: PollOption[];
-  timer: number;
-}
-
-export interface FullOptionsConfig {
-  allOptions: string[];
-  selectedOptions: boolean[];
-}
-
-export type PollCommand = 'start' | 'stop' | 'reset';
-
-export interface SyncCommandHandlers {
-  start: () => void;
-  stop: () => void;
-  reset: () => void;
-}
+// Re-export types for backward compatibility
+export type { SerializablePollState, SetupConfig, FullOptionsConfig, PollCommand, SyncCommandHandlers };
 
 interface UsePollSyncOptions {
   /** Get current poll state - called during request-state */

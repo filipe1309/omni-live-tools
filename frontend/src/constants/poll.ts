@@ -3,6 +3,8 @@
  * Centralized constants for poll-related features
  */
 
+import type { PollOption } from '@/types';
+
 // Timer settings
 export const POLL_TIMER = {
   DEFAULT: 30 as number,
@@ -44,6 +46,12 @@ export const DEFAULT_SELECTED_OPTIONS = [
   true, true, false, false, false, false,
   false, false, false, false, false, false,
 ] as const;
+
+// Default poll options as typed PollOption array (for components)
+export const DEFAULT_POLL_OPTIONS: PollOption[] = [
+  { id: 1, text: 'Sim' },
+  { id: 2, text: 'Não' },
+];
 
 // Default poll question
 export const DEFAULT_QUESTION = 'Votar agora!';

@@ -1,12 +1,18 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import type { PollState, PollOption, VoteEntry, ChatMessage, PlatformType } from '@/types';
+import type {
+  PollState,
+  PollOption,
+  VoteEntry,
+  ChatMessage,
+  PlatformType,
+  SetupConfig,
+} from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
 import { usePollTimer } from './usePollTimer';
 import { usePollSync } from './usePollSync';
-import type { SetupConfig } from './usePollSync';
 
 // Re-export types for backward compatibility
-export type { SerializablePollState, SetupConfig } from './usePollSync';
+export type { SerializablePollState, SetupConfig } from '@/types';
 
 interface UsePollReturn {
   pollState: PollState;

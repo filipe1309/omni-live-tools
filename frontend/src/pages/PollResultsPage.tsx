@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { PollState, PollOption } from '@/types';
-import type { SerializablePollState, SetupConfig } from '@/hooks/usePoll';
+import type { PollState, PollOption, SerializablePollState, SetupConfig } from '@/types';
 import { PollSetup } from '@/components/poll/PollSetup';
 import { SpotlightTrophyCelebration } from '@/components/poll/SpotlightTrophyCelebration';
 import { CountdownOverlay } from '@/components/poll/CountdownOverlay';
@@ -11,13 +10,8 @@ import { DisconnectedModal } from '@/components/poll/DisconnectedModal';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
-import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, DEFAULT_POLL_OPTIONS } from '@/constants';
 import { useLanguage } from '@/i18n';
-
-const DEFAULT_OPTIONS: PollOption[] = [
-  { id: 1, text: 'Sim' },
-  { id: 2, text: 'Não' },
-];
 
 const initialPollState: PollState = {
   isRunning: false,
@@ -95,7 +89,7 @@ export function PollResultsPage () {
     if (setupConfig?.options && setupConfig.options.length > 0) {
       return setupConfig.options;
     }
-    return DEFAULT_OPTIONS;
+    return DEFAULT_POLL_OPTIONS;
     // Use serialized keys for stable dependency comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pollState.isRunning, pollOptionsKey, setupOptionsKey]);
