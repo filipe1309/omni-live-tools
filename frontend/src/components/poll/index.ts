@@ -1,3 +1,8 @@
 export { PollSetup } from './PollSetup';
 export { PollResults } from './PollResults';
 export { VoteLog } from './VoteLog';
+export { SpotlightTrophyCelebration } from './SpotlightTrophyCelebration';
+export { CountdownOverlay } from './CountdownOverlay';
+export { PollQuestion } from './PollQuestion';
+export { PollOptionCard } from './PollOptionCard';
+export { PollControlButtons } from './PollControlButtons';

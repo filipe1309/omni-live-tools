@@ -85,7 +85,7 @@ export const POLL_SHORTCUTS: {
   RESET: KeyboardShortcut[];
 } = {
   START: [
-    { key: 'b', ctrl: true },       // CTRL+B to start
+    { key: 'm', ctrl: true },       // CTRL+m to start
   ],
   STOP: [
     { key: 'Escape' },      // Escape to stop

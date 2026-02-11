@@ -1,178 +1,15 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { PollState, PollOption } from '@/types';
 import type { SerializablePollState, SetupConfig } from '@/hooks/usePoll';
 import { PollSetup } from '@/components/poll/PollSetup';
-import { CONFETTI, POLL_TIMER, DEFAULT_QUESTION, TIMER_THRESHOLDS, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
+import { SpotlightTrophyCelebration } from '@/components/poll/SpotlightTrophyCelebration';
+import { CountdownOverlay } from '@/components/poll/CountdownOverlay';
+import { PollQuestion } from '@/components/poll/PollQuestion';
+import { PollOptionCard } from '@/components/poll/PollOptionCard';
+import { PollControlButtons } from '@/components/poll/PollControlButtons';
+import { usePollDisplay } from '@/hooks/usePollDisplay';
+import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
 import { useLanguage } from '@/i18n';
-
-// Spotlight + Trophy celebration component
-const SpotlightTrophyCelebration = ({ onComplete, winnerText }: { onComplete: () => void; winnerText: string }) => {
-  useEffect(() => {
-    const timer = setTimeout(onComplete, CONFETTI.DURATION);
-    return () => clearTimeout(timer);
-  }, [onComplete]);
-
-  return (
-    <div className="absolute inset-0 z-[9999] pointer-events-none overflow-hidden rounded-xl">
-      {/* Dark overlay with spotlight gradient */}
-      <div
-        className="absolute inset-0 animate-fade-in"
-        style={{
-          background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0.92) 50%, rgba(0,0,0,0.98) 100%)',
-        }}
-      />
-
-      {/* Spotlight beam effect */}
-      <div
-        className="absolute inset-0 animate-pulse"
-        style={{
-          background: 'radial-gradient(ellipse 30% 40% at center 40%, rgba(255,215,0,0.15) 0%, transparent 70%)',
-        }}
-      />
-
-      {/* Sparkles around trophy */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-3xl animate-sparkle"
-            style={{
-              transform: `rotate(${i * 45}deg) translateY(-100px)`,
-              animationDelay: `${i * 100}ms`,
-            }}
-          >
-            ✨
-          </div>
-        ))}
-      </div>
-
-      {/* Trophy zoom animation */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="animate-trophy-zoom text-center">
-          <div
-            className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow"
-          >
-            🏆
-          </div>
-          <div className="text-3xl font-black text-yellow-400 mt-2 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
-            WINNER!
-          </div>
-          <div className="text-4xl font-black text-white mt-3 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-winner-text">
-            {winnerText}
-          </div>
-        </div>
-      </div>
-
-      {/* Light rays */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-[150%] bg-gradient-to-t from-transparent via-yellow-400/20 to-transparent animate-ray"
-            style={{
-              transform: `rotate(${i * 30}deg)`,
-              animationDelay: `${i * 50}ms`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* CSS for animations */}
-      <style>{`
-        @keyframes trophy-zoom {
-          0% {
-            transform: scale(0) rotate(-180deg);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.2) rotate(10deg);
-          }
-          70% {
-            transform: scale(0.9) rotate(-5deg);
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes trophy-glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
-          }
-          50% {
-            filter: drop-shadow(0 0 100px rgba(255,215,0,1)) drop-shadow(0 0 150px rgba(255,215,0,0.5));
-          }
-        }
-        
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 0;
-            transform: rotate(var(--rotation)) translateY(-100px) scale(0.5);
-          }
-          50% {
-            opacity: 1;
-            transform: rotate(var(--rotation)) translateY(-120px) scale(1.2);
-          }
-        }
-        
-        @keyframes ray {
-          0%, 100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-        
-        @keyframes fade-in {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        
-        .animate-trophy-zoom {
-          animation: trophy-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        
-        .animate-trophy-glow {
-          animation: trophy-glow 1.5s ease-in-out infinite;
-        }
-        
-        .animate-sparkle {
-          animation: sparkle 1.2s ease-in-out infinite;
-        }
-        
-        .animate-ray {
-          animation: ray 2s ease-in-out infinite;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
-        }
-        
-        @keyframes winner-text {
-          0% {
-            opacity: 0;
-            transform: translateY(20px) scale(0.8);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        .animate-winner-text {
-          animation: winner-text 0.5s ease-out 0.6s forwards;
-          opacity: 0;
-        }
-      `}</style>
-    </div>
-  );
-};
 
 const DEFAULT_OPTIONS: PollOption[] = [
   { id: 1, text: 'Sim' },
@@ -237,7 +74,41 @@ export function PollResultsPage () {
   const [isLeader, setIsLeader] = useState(false);
 
   // Full options for the PollSetup component - use state so it can be updated from broadcast
-  const [fullOptionsConfig, setFullOptionsConfig] = useState<{ allOptions: string[]; selectedOptions: boolean[] } | null>(loadFullOptionsConfig);
+  const [fullOptionsConfig, setFullOptionsConfig] = useState<{
+    allOptions: string[];
+    selectedOptions: boolean[];
+  } | null>(loadFullOptionsConfig);
+
+  // Serialize options to string for stable comparison in useMemo
+  const pollOptionsKey = JSON.stringify(pollState.options);
+  const setupOptionsKey = JSON.stringify(setupConfig?.options || []);
+
+  // Use pollState.options ONLY when poll is actively running, otherwise use setupConfig for live preview
+  const displayOptions = useMemo<PollOption[]>(() => {
+    if (pollState.isRunning && pollState.options.length > 0) {
+      return pollState.options;
+    }
+    if (setupConfig?.options && setupConfig.options.length > 0) {
+      return setupConfig.options;
+    }
+    return DEFAULT_OPTIONS;
+    // Use serialized keys for stable dependency comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollState.isRunning, pollOptionsKey, setupOptionsKey]);
+
+  // Use shared hook for display logic
+  const {
+    totalVotes,
+    getPercentage,
+    winnerIds,
+    winnerText,
+    showCelebration,
+    handleCelebrationComplete,
+    isCountingDown,
+  } = usePollDisplay({ pollState, displayOptions });
+
+  const displayQuestion =
+    pollState.isRunning ? pollState.question : setupConfig?.question || DEFAULT_QUESTION;
 
   // Leader election - only the leader tab polls for updates
   useEffect(() => {
@@ -392,10 +263,13 @@ export function PollResultsPage () {
     };
   }, [isLeader]);
 
-  const sendCommand = useCallback((command: 'start' | 'stop' | 'reset') => {
-    if (!channelRef) return;
-    channelRef.postMessage({ type: 'poll-command', command });
-  }, [channelRef]);
+  const sendCommand = useCallback(
+    (command: 'start' | 'stop' | 'reset') => {
+      if (!channelRef) return;
+      channelRef.postMessage({ type: 'poll-command', command });
+    },
+    [channelRef]
+  );
 
   // Keyboard shortcuts for poll control
   useEffect(() => {
@@ -453,89 +327,32 @@ export function PollResultsPage () {
   };
 
   // Broadcast config changes back to PollPage (used by PollSetup onChange)
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[]) => {
-    if (!channelRef) return;
-    channelRef.postMessage({
-      type: 'config-update',
-      config: { question, options, timer },
-    });
-    // Also update local setupConfig
-    setSetupConfig({ question, options, timer });
-    // Save to localStorage for persistence
-    localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify({ question, options, timer }));
-    if (allOptions && selectedOptions) {
-      localStorage.setItem('tiktok-poll-fullOptions', JSON.stringify({ allOptions, selectedOptions }));
-    }
-  }, [channelRef]);
-
-  const getTotalVotes = useCallback(() => {
-    return Object.values(pollState.votes).reduce((sum, count) => sum + count, 0);
-  }, [pollState.votes]);
-
-  const getPercentage = useCallback((optionId: number) => {
-    const totalVotes = getTotalVotes();
-    if (totalVotes === 0) return 0;
-    return ((pollState.votes[optionId] || 0) / totalVotes) * 100;
-  }, [pollState.votes, getTotalVotes]);
-
-  const totalVotes = getTotalVotes();
-  const maxVotes = Math.max(...Object.values(pollState.votes), 0);
-
-  // Serialize options to string for stable comparison in useMemo
-  const pollOptionsKey = JSON.stringify(pollState.options);
-  const setupOptionsKey = JSON.stringify(setupConfig?.options || []);
-
-  // Use pollState.options ONLY when poll is actively running, otherwise use setupConfig for live preview
-  const displayOptions = useMemo<PollOption[]>(() => {
-    if (pollState.isRunning && pollState.options.length > 0) {
-      return pollState.options;
-    }
-    if (setupConfig?.options && setupConfig.options.length > 0) {
-      return setupConfig.options;
-    }
-    return DEFAULT_OPTIONS;
-    // Use serialized keys for stable dependency comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pollState.isRunning, pollOptionsKey, setupOptionsKey]);
-
-  const winnerIds = useMemo(() => {
-    if (!pollState.finished || totalVotes === 0) return [];
-    return displayOptions
-      .filter(opt => pollState.votes[opt.id] === maxVotes && maxVotes > 0)
-      .map(opt => opt.id);
-  }, [pollState.finished, pollState.votes, displayOptions, totalVotes, maxVotes]);
-
-  // Get winner option text for celebration display
-  const winnerText = useMemo(() => {
-    if (winnerIds.length === 0) return '';
-    const winners = displayOptions.filter(opt => winnerIds.includes(opt.id));
-    return winners.map(w => w.text).join(' & ');
-  }, [winnerIds, displayOptions]);
-
-  // Spotlight + Trophy celebration when poll finishes
-  const [showCelebration, setShowCelebration] = useState(false);
-  const hasTriggeredCelebration = useRef(false);
-
-  useEffect(() => {
-    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredCelebration.current) {
-      hasTriggeredCelebration.current = true;
-      setShowCelebration(true);
-    }
-  }, [pollState.finished, totalVotes, winnerIds.length]);
-
-  // Reset celebration flag when countdown starts (new poll) or poll starts running
-  useEffect(() => {
-    if (pollState.isRunning || pollState.countdown !== undefined) {
-      hasTriggeredCelebration.current = false;
-      setShowCelebration(false);
-    }
-  }, [pollState.isRunning, pollState.countdown]);
-
-  const handleCelebrationComplete = useCallback(() => {
-    setShowCelebration(false);
-  }, []);
-
-  const displayQuestion = pollState.isRunning ? pollState.question : (setupConfig?.question || DEFAULT_QUESTION);
+  const handleSetupChange = useCallback(
+    (
+      question: string,
+      options: PollOption[],
+      timer: number,
+      allOptions?: string[],
+      selectedOptions?: boolean[]
+    ) => {
+      if (!channelRef) return;
+      channelRef.postMessage({
+        type: 'config-update',
+        config: { question, options, timer },
+      });
+      // Also update local setupConfig
+      setSetupConfig({ question, options, timer });
+      // Save to localStorage for persistence
+      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify({ question, options, timer }));
+      if (allOptions && selectedOptions) {
+        localStorage.setItem(
+          'tiktok-poll-fullOptions',
+          JSON.stringify({ allOptions, selectedOptions })
+        );
+      }
+    },
+    [channelRef]
+  );
 
   if (isWaiting && !setupConfig && pollState.options.length === 0) {
     return (
@@ -557,59 +374,11 @@ export function PollResultsPage () {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5 relative">
       {/* Disconnected Modal with Blur Background */}
       {!isConnected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Blur Backdrop */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-
-          {/* Modal Content */}
-          <div className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${isReconnecting || isAutoReconnectEnabled
-            ? 'border-yellow-500/50 shadow-yellow-500/20'
-            : 'border-red-500/50 shadow-red-500/20 animate-pulse'
-            }`}>
-            {isReconnecting || isAutoReconnectEnabled ? (
-              <>
-                <div className="text-6xl mb-6 animate-spin">🔄</div>
-                <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-                  {isAutoReconnectEnabled ? t.pollResults.autoReconnectTitle : t.pollResults.reconnecting}
-                </h2>
-                <p className="text-slate-400 text-lg mb-8">
-                  {isAutoReconnectEnabled
-                    ? t.pollResults.autoReconnectActive
-                    : t.pollResults.attemptingReconnect}
-                </p>
-                <div className="flex justify-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-                {isAutoReconnectEnabled && (
-                  <p className="text-slate-500 text-sm mt-6">
-                    {t.pollResults.autoReconnectEnabledMainPage}
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="text-6xl mb-6">⚠️</div>
-                <h2 className="text-3xl font-bold text-red-400 mb-4">
-                  {t.pollResults.disconnected}
-                </h2>
-                <p className="text-slate-400 text-lg mb-8">
-                  {t.pollResults.connectionLost}
-                </p>
-                <button
-                  onClick={sendReconnect}
-                  className="px-10 py-4 text-xl font-bold rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
-                >
-                  {t.pollResults.reconnectButton}
-                </button>
-                <p className="text-slate-500 text-sm mt-6">
-                  {t.pollResults.autoReconnectTip}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
+        <DisconnectedModal
+          isReconnecting={isReconnecting}
+          isAutoReconnectEnabled={isAutoReconnectEnabled}
+          onReconnect={sendReconnect}
+        />
       )}
 
       <div className="flex-1 flex flex-col gap-4">
@@ -630,164 +399,135 @@ export function PollResultsPage () {
         </div>
 
         {/* Control Buttons */}
-        <div className="flex items-center justify-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/30">
-          <button
-            onClick={() => sendCommand('start')}
-            disabled={!isConnected || pollState.isRunning || pollState.countdown !== undefined}
-            className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
-          >
-            {t.pollResults.start} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
-          </button>
-          <button
-            onClick={() => sendCommand('stop')}
-            disabled={!pollState.isRunning}
-            className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            title={POLL_SHORTCUT_LABELS.STOP}
-          >
-            {t.pollResults.stop} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
-          </button>
-          <button
-            onClick={() => sendCommand('reset')}
-            disabled={pollState.isRunning}
-            className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            title={POLL_SHORTCUT_LABELS.RESET}
-          >
-            {t.pollResults.restart} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
-          </button>
-        </div>
+        <PollControlButtons
+          onStart={() => sendCommand('start')}
+          onStop={() => sendCommand('stop')}
+          onReset={() => sendCommand('reset')}
+          isConnected={isConnected}
+          isRunning={pollState.isRunning}
+          isCountingDown={isCountingDown}
+          variant="results-page"
+        />
 
         {/* Results Section */}
         <div className="flex-1 space-y-3 relative">
-          {/* Spotlight + Trophy Celebration - positioned within Results Section */}
-          {showCelebration && <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />}
-
-          {/* Countdown Overlay - positioned within Results Section */}
-          {pollState.countdown !== undefined && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden rounded-xl">
-              <div className="text-center animate-pulse">
-                {pollState.countdown === 0 ? (
-                  <div className="text-7xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
-                    {t.poll.go}
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-xl text-slate-300 mb-3">{t.poll.startingIn}</div>
-                    <div className="text-[8rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
-                      {pollState.countdown}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
+          {/* Spotlight + Trophy Celebration */}
+          {showCelebration && (
+            <SpotlightTrophyCelebration
+              onComplete={handleCelebrationComplete}
+              winnerText={winnerText}
+            />
           )}
 
+          {/* Countdown Overlay */}
+          {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
+
           {/* Question */}
-          <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
-            ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-              ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
-              : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
-                : 'bg-green-500/10 border-green-500'
-            : 'bg-purple-500/10 border-purple-500'
-            }`}>
-            {/* Animated Timer Bar */}
-            {pollState.isRunning && pollState.timer > 0 && (
-              <div
-                className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                  ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
-                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                    : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
-                  }`}
-                style={{
-                  width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
-                }}
-              />
-            )}
-            {/* Static bar when not running */}
-            {!pollState.isRunning && (
-              <div
-                className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-purple-600/50 to-purple-400/50"
-              />
-            )}
-            <div className="text-center py-5 px-6">
-              <h3 className={`text-5xl font-bold transition-colors duration-500 ${pollState.isRunning
-                ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                  ? 'text-red-300'
-                  : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                    ? 'text-yellow-300'
-                    : 'text-white'
-                : 'text-white'
-                }`}>{displayQuestion || t.pollResults.voteNow}</h3>
-            </div>
-          </div>
+          <PollQuestion
+            question={displayQuestion || t.pollResults.voteNow}
+            isRunning={pollState.isRunning}
+            timeLeft={pollState.timeLeft}
+            timer={pollState.timer}
+            className="[&_h3]:text-5xl"
+          />
 
           {/* Results */}
           <div className="space-y-3 flex-1 min-h-[440px]">
             {displayOptions.map((option) => {
               const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
-              const votes = pollState.votes[option.id] || 0;
-              const isWinner = winnerIds.includes(option.id);
-              const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
 
               return (
-                <div
+                <PollOptionCard
                   key={option.id}
-                  className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
-                    ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
-                    : 'border-slate-700/50 bg-slate-800/50'
-                    }`}
-                >
-                  {/* Background Progress Bar */}
-                  <div
-                    className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
-                      ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
-                      : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
-                      }`}
-                    style={{ width: `${percentage}%` }}
-                  />
-
-                  {/* Content */}
-                  <div className="relative flex items-center justify-between p-5">
-                    <div className="flex items-center gap-5">
-                      <span className={`w-16 h-16 flex items-center justify-center rounded-full font-bold text-white text-3xl flex-shrink-0 ${isWinner
-                        ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
-                        : 'bg-gradient-to-br from-purple-600 to-purple-400'
-                        }`}>
-                        {option.id}
-                      </span>
-                      <span className="font-semibold text-white text-3xl">
-                        {option.text}
-                        {isWinner && <span className="ml-2">👑</span>}
-                      </span>
-                    </div>
-
-                    <div className="text-right flex-shrink-0">
-                      <span className={`font-bold text-3xl ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'}`}>
-                        {votes} {t.pollResults.votesUnit}
-                      </span>
-                      <span className="text-slate-400 text-2xl ml-2">
-                        ({percentageFixed}%)
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar Track */}
-                  <div className="h-2 bg-slate-900/50">
-                    <div
-                      className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
-                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                        : 'bg-gradient-to-r from-purple-600 to-purple-400'
-                        }`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
+                  option={option}
+                  votes={pollState.votes[option.id] || 0}
+                  percentage={percentage}
+                  totalVotes={totalVotes}
+                  isWinner={winnerIds.includes(option.id)}
+                  size="large"
+                />
               );
             })}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Disconnected Modal Component
+interface DisconnectedModalProps {
+  isReconnecting: boolean;
+  isAutoReconnectEnabled: boolean;
+  onReconnect: () => void;
+}
+
+function DisconnectedModal ({
+  isReconnecting,
+  isAutoReconnectEnabled,
+  onReconnect,
+}: DisconnectedModalProps) {
+  const { t } = useLanguage();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Blur Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+
+      {/* Modal Content */}
+      <div
+        className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${isReconnecting || isAutoReconnectEnabled
+            ? 'border-yellow-500/50 shadow-yellow-500/20'
+            : 'border-red-500/50 shadow-red-500/20 animate-pulse'
+          }`}
+      >
+        {isReconnecting || isAutoReconnectEnabled ? (
+          <>
+            <div className="text-6xl mb-6 animate-spin">🔄</div>
+            <h2 className="text-3xl font-bold text-yellow-400 mb-4">
+              {isAutoReconnectEnabled
+                ? t.pollResults.autoReconnectTitle
+                : t.pollResults.reconnecting}
+            </h2>
+            <p className="text-slate-400 text-lg mb-8">
+              {isAutoReconnectEnabled
+                ? t.pollResults.autoReconnectActive
+                : t.pollResults.attemptingReconnect}
+            </p>
+            <div className="flex justify-center gap-2">
+              <div
+                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
+                style={{ animationDelay: '0ms' }}
+              ></div>
+              <div
+                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
+                style={{ animationDelay: '150ms' }}
+              ></div>
+              <div
+                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
+                style={{ animationDelay: '300ms' }}
+              ></div>
+            </div>
+            {isAutoReconnectEnabled && (
+              <p className="text-slate-500 text-sm mt-6">
+                {t.pollResults.autoReconnectEnabledMainPage}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="text-6xl mb-6">⚠️</div>
+            <h2 className="text-3xl font-bold text-red-400 mb-4">{t.pollResults.disconnected}</h2>
+            <p className="text-slate-400 text-lg mb-8">{t.pollResults.connectionLost}</p>
+            <button
+              onClick={onReconnect}
+              className="px-10 py-4 text-xl font-bold rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
+            >
+              {t.pollResults.reconnectButton}
+            </button>
+            <p className="text-slate-500 text-sm mt-6">{t.pollResults.autoReconnectTip}</p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,13 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
-import { CONFETTI, TIMER_THRESHOLDS, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
+import { POLL_SHORTCUTS, matchesShortcut } from '@/constants';
+import { usePollDisplay } from '@/hooks/usePollDisplay';
+import { SpotlightTrophyCelebration } from './SpotlightTrophyCelebration';
+import { CountdownOverlay } from './CountdownOverlay';
+import { PollQuestion } from './PollQuestion';
+import { PollOptionCard } from './PollOptionCard';
+import { PollControlButtons } from './PollControlButtons';
 
 interface PollResultsProps {
   pollState: PollState;
@@ -17,176 +23,7 @@ interface PollResultsProps {
   showControlButtons?: boolean;
 }
 
-// Spotlight + Trophy celebration component
-const SpotlightTrophyCelebration = ({ onComplete, winnerText }: { onComplete: () => void; winnerText: string }) => {
-  useEffect(() => {
-    const timer = setTimeout(onComplete, CONFETTI.DURATION);
-    return () => clearTimeout(timer);
-  }, [onComplete]);
-
-  return (
-    <div className="absolute inset-0 z-[9999] pointer-events-none overflow-hidden rounded-xl">
-      {/* Dark overlay with spotlight gradient */}
-      <div
-        className="absolute inset-0 animate-fade-in"
-        style={{
-          background: 'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.8) 15%, rgba(0,0,0,0.92) 50%, rgba(0,0,0,0.98) 100%)',
-        }}
-      />
-
-      {/* Spotlight beam effect */}
-      <div
-        className="absolute inset-0 animate-pulse"
-        style={{
-          background: 'radial-gradient(ellipse 30% 40% at center 40%, rgba(255,215,0,0.15) 0%, transparent 70%)',
-        }}
-      />
-
-      {/* Sparkles around trophy */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-3xl animate-sparkle"
-            style={{
-              transform: `rotate(${i * 45}deg) translateY(-100px)`,
-              animationDelay: `${i * 100}ms`,
-            }}
-          >
-            ✨
-          </div>
-        ))}
-      </div>
-
-      {/* Trophy zoom animation */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="animate-trophy-zoom text-center">
-          <div
-            className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow"
-          >
-            🏆
-          </div>
-          <div className="text-3xl font-black text-yellow-400 mt-2 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
-            WINNER!
-          </div>
-          <div className="text-4xl font-black text-white mt-3 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] animate-winner-text">
-            {winnerText}
-          </div>
-        </div>
-      </div>
-
-      {/* Light rays */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-[150%] bg-gradient-to-t from-transparent via-yellow-400/20 to-transparent animate-ray"
-            style={{
-              transform: `rotate(${i * 30}deg)`,
-              animationDelay: `${i * 50}ms`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* CSS for animations */}
-      <style>{`
-        @keyframes trophy-zoom {
-          0% {
-            transform: scale(0) rotate(-180deg);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.2) rotate(10deg);
-          }
-          70% {
-            transform: scale(0.9) rotate(-5deg);
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes trophy-glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
-          }
-          50% {
-            filter: drop-shadow(0 0 100px rgba(255,215,0,1)) drop-shadow(0 0 150px rgba(255,215,0,0.5));
-          }
-        }
-        
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 0;
-            transform: rotate(var(--rotation)) translateY(-100px) scale(0.5);
-          }
-          50% {
-            opacity: 1;
-            transform: rotate(var(--rotation)) translateY(-120px) scale(1.2);
-          }
-        }
-        
-        @keyframes ray {
-          0%, 100% {
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-        
-        @keyframes fade-in {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-        
-        @keyframes winner-text {
-          0% {
-            opacity: 0;
-            transform: translateY(20px) scale(0.8);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        .animate-trophy-zoom {
-          animation: trophy-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        
-        .animate-trophy-glow {
-          animation: trophy-glow 1.5s ease-in-out infinite;
-        }
-        
-        .animate-sparkle {
-          animation: sparkle 1.2s ease-in-out infinite;
-        }
-        
-        .animate-ray {
-          animation: ray 2s ease-in-out infinite;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
-        }
-        
-        .animate-winner-text {
-          animation: winner-text 0.5s ease-out 0.6s forwards;
-          opacity: 0;
-        }
-      `}</style>
-    </div>
-  );
-};
-
-export function PollResults ({
+export function PollResults({
   pollState,
   getPercentage,
   getTotalVotes,
@@ -196,12 +33,20 @@ export function PollResults ({
   onStop,
   onReset,
   isConnected = true,
-  showControlButtons = false
+  showControlButtons = false,
 }: PollResultsProps) {
   const totalVotes = getTotalVotes();
-  const [showCelebration, setShowCelebration] = useState(false);
-  const hasTriggeredCelebration = useRef(false);
   const { t } = useLanguage();
+
+  const {
+    winnerIds,
+    winnerText,
+    showCelebration,
+    handleCelebrationComplete,
+    getTimerClasses,
+    getStatusDisplay,
+    isCountingDown,
+  } = usePollDisplay({ pollState });
 
   // Keyboard shortcuts for poll control
   useEffect(() => {
@@ -244,136 +89,43 @@ export function PollResults ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isConnected, pollState.isRunning, pollState.countdown, onStart, onStop, onReset]);
 
-  // Find winner(s) - only when poll is finished
-  const maxVotes = Math.max(...Object.values(pollState.votes), 0);
-  const winnerIds = pollState.finished && totalVotes > 0
-    ? pollState.options
-      .filter(opt => pollState.votes[opt.id] === maxVotes && maxVotes > 0)
-      .map(opt => opt.id)
-    : [];
-
-  // Get winner option text for celebration display
-  const winnerText = useMemo(() => {
-    if (winnerIds.length === 0) return '';
-    const winners = pollState.options.filter(opt => winnerIds.includes(opt.id));
-    return winners.map(w => w.text).join(' & ');
-  }, [winnerIds, pollState.options]);
-
-  // Trigger celebration when poll finishes with votes
-  useEffect(() => {
-    if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredCelebration.current) {
-      hasTriggeredCelebration.current = true;
-      setShowCelebration(true);
-    }
-  }, [pollState.finished, totalVotes, winnerIds.length]);
-
-  // Reset celebration flag when countdown starts (new poll) or poll starts running
-  useEffect(() => {
-    if (pollState.isRunning || pollState.countdown !== undefined) {
-      hasTriggeredCelebration.current = false;
-      setShowCelebration(false);
-    }
-  }, [pollState.isRunning, pollState.countdown]);
-
-  const handleCelebrationComplete = useCallback(() => {
-    setShowCelebration(false);
-  }, []);
-
-  // Get timer CSS classes based on remaining time
-  const getTimerClasses = () => {
-    if (!pollState.isRunning) return 'text-slate-400';
-    if (pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL) return 'timer-critical';
-    if (pollState.timeLeft <= TIMER_THRESHOLDS.WARNING) return 'timer-warning';
-    return 'text-tiktok-cyan';
-  };
-
-  // Get status display
-  const getStatusDisplay = () => {
-    if (pollState.countdown !== undefined) {
-      return { text: pollState.countdown === 0 ? t.poll.go : `${pollState.countdown}...`, className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500 animate-pulse' };
-    }
-    if (pollState.isRunning) {
-      return { text: t.poll.status.inProgress, className: 'bg-green-500/20 text-green-400 border-green-500 animate-pulse' };
-    }
-    if (pollState.finished) {
-      return { text: t.poll.status.finished, className: 'bg-blue-500/20 text-blue-400 border-blue-500' };
-    }
-    return { text: t.poll.status.waiting, className: 'bg-slate-500/20 text-slate-400 border-slate-500' };
-  };
-
   const status = getStatusDisplay();
-
-  // Check if countdown is active
-  const isCountingDown = pollState.countdown !== undefined;
 
   return (
     <div className="space-y-4 relative">
       {/* Spotlight + Trophy Celebration */}
-      {showCelebration && <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />}
+      {showCelebration && (
+        <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />
+      )}
 
       {/* Countdown Overlay - positioned within Results Section */}
-      {isCountingDown && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden rounded-xl">
-          <div className="text-center animate-pulse">
-            {pollState.countdown === 0 ? (
-              <div className="text-7xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
-                {t.poll.go}
-              </div>
-            ) : (
-              <>
-                <div className="text-xl text-slate-300 mb-3">{t.poll.startingIn}</div>
-                <div className="text-[8rem] font-black text-yellow-400 leading-none drop-shadow-[0_0_30px_rgba(250,204,21,0.8)] animate-bounce">
-                  {pollState.countdown}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
 
       {/* Control Buttons */}
       {showControlButtons && (onStart || onStop || onReset) && (
-        <div className="flex items-center justify-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/30">
-          {onStart && (
-            <button
-              onClick={onStart}
-              disabled={!isConnected || pollState.isRunning || pollState.countdown !== undefined}
-              className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
-            >
-              {t.poll.startPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
-            </button>
-          )}
-          {onStop && (
-            <button
-              onClick={onStop}
-              disabled={!pollState.isRunning}
-              className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title={POLL_SHORTCUT_LABELS.STOP}
-            >
-              {t.poll.stopPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
-            </button>
-          )}
-          {onReset && (
-            <button
-              onClick={onReset}
-              disabled={pollState.isRunning}
-              className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={POLL_SHORTCUT_LABELS.RESET}
-            >
-              {t.poll.resetPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
-            </button>
-          )}
-        </div>
+        <PollControlButtons
+          onStart={onStart}
+          onStop={onStop}
+          onReset={onReset}
+          isConnected={isConnected}
+          isRunning={pollState.isRunning}
+          isCountingDown={isCountingDown}
+        />
       )}
 
       {/* Status Bar */}
       {showStatusBar && (
         <div className="flex items-center justify-around flex-wrap gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
           <div className="text-center">
-            <span className="block text-xs text-slate-400 mb-1">{pollState.isRunning ? t.poll.timeRemaining : t.poll.configuredTime}</span>
+            <span className="block text-xs text-slate-400 mb-1">
+              {pollState.isRunning ? t.poll.timeRemaining : t.poll.configuredTime}
+            </span>
             <span className={`font-mono text-3xl font-bold ${getTimerClasses()}`}>
-              {pollState.isRunning ? `${pollState.timeLeft}s` : (pollState.timer > 0 ? `${pollState.timer}s` : '--')}
+              {pollState.isRunning
+                ? `${pollState.timeLeft}s`
+                : pollState.timer > 0
+                  ? `${pollState.timer}s`
+                  : '--'}
             </span>
           </div>
           <div className="text-center">
@@ -382,7 +134,9 @@ export function PollResults ({
           </div>
           <div className="text-center">
             <span className="block text-xs text-slate-400 mb-1">Status</span>
-            <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold border ${status.className}`}>
+            <span
+              className={`inline-block px-3 py-1 rounded-full text-sm font-bold border ${status.className}`}
+            >
               {status.text}
             </span>
           </div>
@@ -391,110 +145,28 @@ export function PollResults ({
 
       {/* Question */}
       {pollState.question && (
-        <div className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${pollState.isRunning
-          ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-            ? 'bg-red-500/20 border-red-500 animate-pulse shadow-lg shadow-red-500/20'
-            : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-              ? 'bg-yellow-500/15 border-yellow-500 shadow-lg shadow-yellow-500/10'
-              : 'bg-green-500/10 border-green-500'
-          : 'bg-purple-500/10 border-purple-500'
-          }`}>
-          {/* Animated Timer Bar */}
-          {pollState.isRunning && pollState.timer > 0 && (
-            <div
-              className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                ? 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse'
-                : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                  : 'bg-gradient-to-r from-green-500 to-tiktok-cyan'
-                }`}
-              style={{
-                width: `${(pollState.timeLeft / pollState.timer) * 100}%`,
-              }}
-            />
-          )}
-          {/* Static bar when not running */}
-          {!pollState.isRunning && (
-            <div
-              className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-purple-600/50 to-purple-400/50"
-            />
-          )}
-          <div className="text-center py-5 px-6">
-            <h3 className={`text-3xl font-bold transition-colors duration-500 ${pollState.isRunning
-              ? pollState.timeLeft <= TIMER_THRESHOLDS.CRITICAL
-                ? 'text-red-300'
-                : pollState.timeLeft <= TIMER_THRESHOLDS.WARNING
-                  ? 'text-yellow-300'
-                  : 'text-white'
-              : 'text-white'
-              }`}>{pollState.question}</h3>
-          </div>
-        </div>
+        <PollQuestion
+          question={pollState.question}
+          isRunning={pollState.isRunning}
+          timeLeft={pollState.timeLeft}
+          timer={pollState.timer}
+          className="[&_h3]:text-3xl"
+        />
       )}
 
       {/* Results */}
       <div className="space-y-4">
-        {pollState.options.map((option) => {
-          const percentage = getPercentage(option.id);
-          const votes = pollState.votes[option.id] || 0;
-          const isWinner = winnerIds.includes(option.id);
-          const percentageFixed = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : '0.0';
-
-          return (
-            <div
-              key={option.id}
-              className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
-                ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
-                : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
-                }`}
-            >
-              {/* Background Progress Bar */}
-              <div
-                className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
-                  ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
-                  : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
-                  }`}
-                style={{ width: `${percentage}%` }}
-              />
-
-              {/* Content */}
-              <div className={`relative flex items-center justify-between ${compact ? 'p-4' : 'p-6'}`}>
-                <div className="flex items-center gap-5">
-                  <span className={`${compact ? 'w-12 h-12 text-xl' : 'w-14 h-14 text-2xl'} flex items-center justify-center rounded-full font-bold text-white flex-shrink-0 ${isWinner
-                    ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
-                    : 'bg-gradient-to-br from-purple-600 to-purple-400'
-                    }`}>
-                    {option.id}
-                  </span>
-                  <span className={`font-semibold text-white ${compact ? 'text-xl' : 'text-2xl'}`}>
-                    {option.text}
-                    {isWinner && <span className="ml-2">👑</span>}
-                  </span>
-                </div>
-
-                <div className="text-right flex-shrink-0">
-                  <span className={`font-bold ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'} ${compact ? 'text-xl' : 'text-2xl'}`}>
-                    {votes} {t.poll.votes}
-                  </span>
-                  <span className="text-slate-400 text-xl ml-2">
-                    ({percentageFixed}%)
-                  </span>
-                </div>
-              </div>
-
-              {/* Progress Bar Track */}
-              <div className="h-2 bg-slate-900/50">
-                <div
-                  className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                    : 'bg-gradient-to-r from-purple-600 to-purple-400'
-                    }`}
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
+        {pollState.options.map((option) => (
+          <PollOptionCard
+            key={option.id}
+            option={option}
+            votes={pollState.votes[option.id] || 0}
+            percentage={getPercentage(option.id)}
+            totalVotes={totalVotes}
+            isWinner={winnerIds.includes(option.id)}
+            size={compact ? 'compact' : 'normal'}
+          />
+        ))}
       </div>
 
       {/* Footer stats */}
