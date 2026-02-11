@@ -41,7 +41,7 @@ export const DEFAULT_OPTIONS = [
 
 // Default selected options (indices 0 and 1 - "Sim" and "Não")
 export const DEFAULT_SELECTED_OPTIONS = [
-  true, true, false, false, false, false, 
+  true, true, false, false, false, false,
   false, false, false, false, false, false,
 ] as const;
 
@@ -61,3 +61,75 @@ export const TIMER_THRESHOLDS = {
   CRITICAL: 5,  // Red/pulsing
   WARNING: 10,  // Yellow
 } as const;
+
+// Keyboard shortcut type with modifier support
+export interface KeyboardShortcut {
+  key: string;       // The key (e.g., 'm', 'Enter', ' ', 'Escape')
+  ctrl?: boolean;    // Require CTRL key
+  alt?: boolean;     // Require ALT key
+  shift?: boolean;   // Require SHIFT key
+  meta?: boolean;    // Require META (Cmd on Mac, Win on Windows)
+}
+
+// Keyboard shortcuts for poll control
+// Easily configurable - change these values to customize shortcuts
+// Examples:
+//   { key: 'm', ctrl: true }              -> CTRL+M
+//   { key: 'Enter' }                      -> Enter alone
+//   { key: 's', ctrl: true, shift: true } -> CTRL+SHIFT+S
+//   { key: ' ' }                          -> Spacebar alone
+//   { key: 'R' }                          -> R alone
+export const POLL_SHORTCUTS: {
+  START: KeyboardShortcut[];
+  STOP: KeyboardShortcut[];
+  RESET: KeyboardShortcut[];
+} = {
+  START: [
+    { key: 'b', ctrl: true },       // CTRL+B to start
+  ],
+  STOP: [
+    { key: 'Escape' },      // Escape to stop
+  ],
+  RESET: [
+    { key: '.', ctrl: true },           // CTRL+. to reset
+  ],
+};
+
+// Helper function to check if a keyboard event matches a shortcut
+export function matchesShortcut (e: KeyboardEvent, shortcuts: KeyboardShortcut[]): boolean {
+  return shortcuts.some(shortcut => {
+    const keyMatch = e.key === shortcut.key;
+    const ctrlMatch = !!shortcut.ctrl === e.ctrlKey;
+    const altMatch = !!shortcut.alt === e.altKey;
+    const shiftMatch = !!shortcut.shift === e.shiftKey;
+    const metaMatch = !!shortcut.meta === e.metaKey;
+    return keyMatch && ctrlMatch && altMatch && shiftMatch && metaMatch;
+  });
+}
+
+// Helper function to generate a readable label from a shortcut
+function shortcutToLabel (shortcut: KeyboardShortcut): string {
+  const parts: string[] = [];
+
+  if (shortcut.ctrl) parts.push('Ctrl');
+  if (shortcut.alt) parts.push('Alt');
+  if (shortcut.shift) parts.push('Shift');
+  if (shortcut.meta) parts.push('⌘');
+
+  // Format special keys for display
+  let keyLabel = shortcut.key;
+  if (shortcut.key === ' ') keyLabel = 'Space';
+  else if (shortcut.key === 'Escape') keyLabel = 'Esc';
+  else if (shortcut.key === 'Enter') keyLabel = 'Enter';
+  else keyLabel = shortcut.key.toUpperCase();
+
+  parts.push(keyLabel);
+  return parts.join('+');
+}
+
+// Generate labels from the first shortcut in each array (auto-updated)
+export const POLL_SHORTCUT_LABELS = {
+  START: shortcutToLabel(POLL_SHORTCUTS.START[0]),
+  STOP: shortcutToLabel(POLL_SHORTCUTS.STOP[0]),
+  RESET: shortcutToLabel(POLL_SHORTCUTS.RESET[0]),
+};

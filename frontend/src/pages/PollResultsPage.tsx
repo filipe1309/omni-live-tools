@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { PollState, PollOption } from '@/types';
 import type { SerializablePollState, SetupConfig } from '@/hooks/usePoll';
 import { PollSetup } from '@/components/poll/PollSetup';
-import { CONFETTI, POLL_TIMER, DEFAULT_QUESTION, TIMER_THRESHOLDS } from '@/constants';
+import { CONFETTI, POLL_TIMER, DEFAULT_QUESTION, TIMER_THRESHOLDS, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
 import { useLanguage } from '@/i18n';
 
 // Spotlight + Trophy celebration component
@@ -392,10 +392,49 @@ export function PollResultsPage () {
     };
   }, [isLeader]);
 
-  const sendCommand = (command: 'start' | 'stop' | 'reset') => {
+  const sendCommand = useCallback((command: 'start' | 'stop' | 'reset') => {
     if (!channelRef) return;
     channelRef.postMessage({ type: 'poll-command', command });
-  };
+  }, [channelRef]);
+
+  // Keyboard shortcuts for poll control
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      // Start: Space or Enter (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.START)) {
+        e.preventDefault();
+        if (isConnected && !pollState.isRunning && pollState.countdown === undefined) {
+          sendCommand('start');
+        }
+        return;
+      }
+
+      // Stop: Escape (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.STOP)) {
+        if (pollState.isRunning) {
+          sendCommand('stop');
+        }
+        return;
+      }
+
+      // Reset: R (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.RESET)) {
+        if (!pollState.isRunning) {
+          sendCommand('reset');
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isConnected, pollState.isRunning, pollState.countdown, sendCommand]);
 
   const sendReconnect = () => {
     console.log('[PollResultsPage] Sending reconnect message, channelRef:', !!channelRef);
@@ -596,21 +635,25 @@ export function PollResultsPage () {
             onClick={() => sendCommand('start')}
             disabled={!isConnected || pollState.isRunning || pollState.countdown !== undefined}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
           >
-            {t.pollResults.start}
+            {t.pollResults.start} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
           </button>
           <button
             onClick={() => sendCommand('stop')}
             disabled={!pollState.isRunning}
             className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            title={POLL_SHORTCUT_LABELS.STOP}
           >
-            {t.pollResults.stop}
+            {t.pollResults.stop} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
           </button>
           <button
             onClick={() => sendCommand('reset')}
-            className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600"
+            disabled={pollState.isRunning}
+            className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={POLL_SHORTCUT_LABELS.RESET}
           >
-            {t.pollResults.restart}
+            {t.pollResults.restart} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
           </button>
         </div>
 

@@ -4,7 +4,7 @@ import { useLanguage, interpolate } from '@/i18n';
 import { MultiPlatformConnectionForm, PollSetup, PollResults, VoteLog } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
-import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
 import { safeSetItem } from '@/utils';
 
 export function PollPage () {
@@ -399,9 +399,9 @@ export function PollPage () {
     });
   }, [onReconnect]);
 
-  const handleStartPoll = (question: string, options: PollOption[], timer: number) => {
+  const handleStartPoll = useCallback((question: string, options: PollOption[], timer: number) => {
     startPoll(question, options, timer);
-  };
+  }, [startPoll]);
 
   // Ensure setupConfig is available before rendering
   const currentSetupConfig = setupConfig || {
@@ -412,6 +412,45 @@ export function PollPage () {
     ],
     timer: POLL_TIMER.DEFAULT,
   };
+
+  // Keyboard shortcuts for poll control
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      // Start: configured shortcut (e.g., Space, Enter, Ctrl+M)
+      if (matchesShortcut(e, POLL_SHORTCUTS.START)) {
+        e.preventDefault();
+        if (connection.isAnyConnected && !pollState.isRunning && pollState.countdown === undefined) {
+          handleStartPoll(currentSetupConfig.question, currentSetupConfig.options, currentSetupConfig.timer);
+        }
+        return;
+      }
+
+      // Stop: configured shortcut (e.g., Escape)
+      if (matchesShortcut(e, POLL_SHORTCUTS.STOP)) {
+        if (pollState.isRunning || pollState.countdown !== undefined) {
+          stopPoll();
+        }
+        return;
+      }
+
+      // Reset: configured shortcut (e.g., R, Ctrl+.)
+      if (matchesShortcut(e, POLL_SHORTCUTS.RESET)) {
+        if (!pollState.isRunning) {
+          resetPoll();
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [connection.isAnyConnected, pollState.isRunning, pollState.countdown, currentSetupConfig, stopPoll, resetPoll, handleStartPoll]);
 
   // Check if poll is active (has been configured)
   const isPollActive = pollState.question || pollState.options.length > 0;
@@ -431,20 +470,20 @@ export function PollPage () {
 
         {/* Connection Section */}
         <div className={`card mb-6 border transition-all duration-300 ${connection.isAnyConnected
-            ? 'border-green-500/50 bg-green-500/5'
-            : 'border-slate-700/50'
+          ? 'border-green-500/50 bg-green-500/5'
+          : 'border-slate-700/50'
           }`}>
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-bold text-white">🔗 {t.poll.connection}</h2>
               {/* Connection Status Indicator */}
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${connection.isAnyConnected
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                  : 'bg-slate-700/50 text-slate-400 border border-slate-600/30'
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-slate-700/50 text-slate-400 border border-slate-600/30'
                 }`}>
                 <span className={`w-2 h-2 rounded-full ${connection.isAnyConnected
-                    ? 'bg-green-400 animate-pulse'
-                    : 'bg-slate-500'
+                  ? 'bg-green-400 animate-pulse'
+                  : 'bg-slate-500'
                   }`} />
                 {connection.isAnyConnected
                   ? `${connection.connectedPlatforms.length} ${t.common.platforms}`
@@ -505,21 +544,25 @@ export function PollPage () {
               )}
               disabled={!connection.isAnyConnected || pollState.isRunning || pollState.countdown !== undefined}
               className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
             >
-              ▶️ {t.poll.startPoll}
+              ▶️ {t.poll.startPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
             </button>
             <button
               onClick={stopPoll}
               disabled={!pollState.isRunning && pollState.countdown === undefined}
               className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              title={POLL_SHORTCUT_LABELS.STOP}
             >
-              ⏹️ {t.poll.stopPoll}
+              ⏹️ {t.poll.stopPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
             </button>
             <button
               onClick={resetPoll}
-              className="btn-secondary px-8 py-3 text-lg"
+              disabled={pollState.isRunning}
+              className="btn-secondary px-8 py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              title={POLL_SHORTCUT_LABELS.RESET}
             >
-              🔄 {t.poll.resetPoll}
+              🔄 {t.poll.resetPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
             </button>
           </div>
         </div>

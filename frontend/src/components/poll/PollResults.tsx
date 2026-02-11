@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
-import { CONFETTI, TIMER_THRESHOLDS } from '@/constants';
+import { CONFETTI, TIMER_THRESHOLDS, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
 
 interface PollResultsProps {
   pollState: PollState;
@@ -9,6 +9,12 @@ interface PollResultsProps {
   getTotalVotes: () => number;
   showStatusBar?: boolean;
   compact?: boolean;
+  // Optional control callbacks for keyboard shortcuts
+  onStart?: () => void;
+  onStop?: () => void;
+  onReset?: () => void;
+  isConnected?: boolean;
+  showControlButtons?: boolean;
 }
 
 // Spotlight + Trophy celebration component
@@ -180,11 +186,63 @@ const SpotlightTrophyCelebration = ({ onComplete, winnerText }: { onComplete: ()
   );
 };
 
-export function PollResults ({ pollState, getPercentage, getTotalVotes, showStatusBar = true, compact = false }: PollResultsProps) {
+export function PollResults ({
+  pollState,
+  getPercentage,
+  getTotalVotes,
+  showStatusBar = true,
+  compact = false,
+  onStart,
+  onStop,
+  onReset,
+  isConnected = true,
+  showControlButtons = false
+}: PollResultsProps) {
   const totalVotes = getTotalVotes();
   const [showCelebration, setShowCelebration] = useState(false);
   const hasTriggeredCelebration = useRef(false);
   const { t } = useLanguage();
+
+  // Keyboard shortcuts for poll control
+  useEffect(() => {
+    if (!onStart && !onStop && !onReset) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      // Start: Space or Enter (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.START)) {
+        e.preventDefault();
+        if (onStart && isConnected && !pollState.isRunning && pollState.countdown === undefined) {
+          onStart();
+        }
+        return;
+      }
+
+      // Stop: Escape (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.STOP)) {
+        if (onStop && pollState.isRunning) {
+          onStop();
+        }
+        return;
+      }
+
+      // Reset: R (or custom shortcut)
+      if (matchesShortcut(e, POLL_SHORTCUTS.RESET)) {
+        if (onReset && !pollState.isRunning) {
+          onReset();
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isConnected, pollState.isRunning, pollState.countdown, onStart, onStop, onReset]);
 
   // Find winner(s) - only when poll is finished
   const maxVotes = Math.max(...Object.values(pollState.votes), 0);
@@ -270,6 +328,42 @@ export function PollResults ({ pollState, getPercentage, getTotalVotes, showStat
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Control Buttons */}
+      {showControlButtons && (onStart || onStop || onReset) && (
+        <div className="flex items-center justify-center gap-2 p-2 bg-purple-500/10 rounded-lg border border-purple-500/30">
+          {onStart && (
+            <button
+              onClick={onStart}
+              disabled={!isConnected || pollState.isRunning || pollState.countdown !== undefined}
+              className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
+            >
+              {t.poll.startPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
+            </button>
+          )}
+          {onStop && (
+            <button
+              onClick={onStop}
+              disabled={!pollState.isRunning}
+              className="px-4 py-1 text-sm font-bold rounded-md bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              title={POLL_SHORTCUT_LABELS.STOP}
+            >
+              {t.poll.stopPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
+            </button>
+          )}
+          {onReset && (
+            <button
+              onClick={onReset}
+              disabled={pollState.isRunning}
+              className="px-4 py-1 text-sm font-bold rounded-md bg-slate-700 text-white hover:bg-slate-600 transition-all border border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={POLL_SHORTCUT_LABELS.RESET}
+            >
+              {t.poll.resetPoll} <kbd className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
+            </button>
+          )}
         </div>
       )}
 
