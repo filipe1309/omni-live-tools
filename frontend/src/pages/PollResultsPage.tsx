@@ -7,8 +7,11 @@ import { CountdownOverlay } from '@/components/poll/CountdownOverlay';
 import { PollQuestion } from '@/components/poll/PollQuestion';
 import { PollOptionCard } from '@/components/poll/PollOptionCard';
 import { PollControlButtons } from '@/components/poll/PollControlButtons';
+import { DisconnectedModal } from '@/components/poll/DisconnectedModal';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
-import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
+import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
+import { useLeaderElection } from '@/hooks/useLeaderElection';
+import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
 import { useLanguage } from '@/i18n';
 
 const DEFAULT_OPTIONS: PollOption[] = [
@@ -54,11 +57,7 @@ const loadSavedSetupConfig = (): SetupConfig | null => {
   return null;
 };
 
-// Generate unique tab ID
-const TAB_ID = `poll-results-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 const LEADER_KEY = 'poll-results-leader';
-const LEADER_HEARTBEAT_INTERVAL = 2000;
-const LEADER_TIMEOUT = 5000;
 
 export function PollResultsPage () {
   const { t } = useLanguage();
@@ -71,7 +70,12 @@ export function PollResultsPage () {
     return localStorage.getItem('tiktok-poll-autoReconnect') === 'true';
   });
   const [channelRef, setChannelRef] = useState<BroadcastChannel | null>(null);
-  const [isLeader, setIsLeader] = useState(false);
+
+  // Leader election - only the leader tab polls for updates
+  const { isLeader } = useLeaderElection({
+    leaderKey: LEADER_KEY,
+    onAutoReconnectChange: setIsAutoReconnectEnabled,
+  });
 
   // Full options for the PollSetup component - use state so it can be updated from broadcast
   const [fullOptionsConfig, setFullOptionsConfig] = useState<{
@@ -109,85 +113,6 @@ export function PollResultsPage () {
 
   const displayQuestion =
     pollState.isRunning ? pollState.question : setupConfig?.question || DEFAULT_QUESTION;
-
-  // Leader election - only the leader tab polls for updates
-  useEffect(() => {
-    const tryBecomeLeader = () => {
-      const leaderData = localStorage.getItem(LEADER_KEY);
-      const now = Date.now();
-
-      if (!leaderData) {
-        // No leader, become leader
-        localStorage.setItem(LEADER_KEY, JSON.stringify({ id: TAB_ID, timestamp: now }));
-        setIsLeader(true);
-        return true;
-      }
-
-      try {
-        const leader = JSON.parse(leaderData);
-        if (leader.id === TAB_ID) {
-          // We are already the leader, update heartbeat
-          localStorage.setItem(LEADER_KEY, JSON.stringify({ id: TAB_ID, timestamp: now }));
-          setIsLeader(true);
-          return true;
-        }
-
-        // Check if leader is stale (timed out)
-        if (now - leader.timestamp > LEADER_TIMEOUT) {
-          // Leader timed out, take over
-          localStorage.setItem(LEADER_KEY, JSON.stringify({ id: TAB_ID, timestamp: now }));
-          setIsLeader(true);
-          return true;
-        }
-
-        // Another tab is the active leader
-        setIsLeader(false);
-        return false;
-      } catch {
-        // Invalid data, become leader
-        localStorage.setItem(LEADER_KEY, JSON.stringify({ id: TAB_ID, timestamp: now }));
-        setIsLeader(true);
-        return true;
-      }
-    };
-
-    // Try to become leader immediately
-    tryBecomeLeader();
-
-    // Heartbeat interval - leader refreshes, followers check if leader is alive
-    const heartbeatInterval = setInterval(tryBecomeLeader, LEADER_HEARTBEAT_INTERVAL);
-
-    // Listen for storage changes (when another tab becomes leader or updates state)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === LEADER_KEY) {
-        tryBecomeLeader();
-      }
-      // Listen for auto-reconnect setting changes
-      if (e.key === 'tiktok-poll-autoReconnect') {
-        setIsAutoReconnectEnabled(e.newValue === 'true');
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    // Cleanup: if we're the leader, release leadership
-    return () => {
-      clearInterval(heartbeatInterval);
-      window.removeEventListener('storage', handleStorageChange);
-
-      // Release leadership if we were the leader
-      const leaderData = localStorage.getItem(LEADER_KEY);
-      if (leaderData) {
-        try {
-          const leader = JSON.parse(leaderData);
-          if (leader.id === TAB_ID) {
-            localStorage.removeItem(LEADER_KEY);
-          }
-        } catch {
-          // Ignore
-        }
-      }
-    };
-  }, []);
 
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
@@ -272,43 +197,14 @@ export function PollResultsPage () {
   );
 
   // Keyboard shortcuts for poll control
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input field
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        return;
-      }
-
-      // Start: Space or Enter (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.START)) {
-        e.preventDefault();
-        if (isConnected && !pollState.isRunning && pollState.countdown === undefined) {
-          sendCommand('start');
-        }
-        return;
-      }
-
-      // Stop: Escape (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.STOP)) {
-        if (pollState.isRunning) {
-          sendCommand('stop');
-        }
-        return;
-      }
-
-      // Reset: R (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.RESET)) {
-        if (!pollState.isRunning) {
-          sendCommand('reset');
-        }
-        return;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isConnected, pollState.isRunning, pollState.countdown, sendCommand]);
+  usePollKeyboardShortcuts({
+    onStart: () => sendCommand('start'),
+    onStop: () => sendCommand('stop'),
+    onReset: () => sendCommand('reset'),
+    isConnected,
+    isRunning: pollState.isRunning,
+    isCountingDown,
+  });
 
   const sendReconnect = () => {
     console.log('[PollResultsPage] Sending reconnect message, channelRef:', !!channelRef);
@@ -450,84 +346,6 @@ export function PollResultsPage () {
             })}
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// Disconnected Modal Component
-interface DisconnectedModalProps {
-  isReconnecting: boolean;
-  isAutoReconnectEnabled: boolean;
-  onReconnect: () => void;
-}
-
-function DisconnectedModal ({
-  isReconnecting,
-  isAutoReconnectEnabled,
-  onReconnect,
-}: DisconnectedModalProps) {
-  const { t } = useLanguage();
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Blur Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-
-      {/* Modal Content */}
-      <div
-        className={`relative z-10 bg-slate-800/95 border-2 rounded-2xl p-10 shadow-2xl max-w-md mx-4 text-center ${isReconnecting || isAutoReconnectEnabled
-            ? 'border-yellow-500/50 shadow-yellow-500/20'
-            : 'border-red-500/50 shadow-red-500/20 animate-pulse'
-          }`}
-      >
-        {isReconnecting || isAutoReconnectEnabled ? (
-          <>
-            <div className="text-6xl mb-6 animate-spin">🔄</div>
-            <h2 className="text-3xl font-bold text-yellow-400 mb-4">
-              {isAutoReconnectEnabled
-                ? t.pollResults.autoReconnectTitle
-                : t.pollResults.reconnecting}
-            </h2>
-            <p className="text-slate-400 text-lg mb-8">
-              {isAutoReconnectEnabled
-                ? t.pollResults.autoReconnectActive
-                : t.pollResults.attemptingReconnect}
-            </p>
-            <div className="flex justify-center gap-2">
-              <div
-                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
-                style={{ animationDelay: '0ms' }}
-              ></div>
-              <div
-                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
-                style={{ animationDelay: '150ms' }}
-              ></div>
-              <div
-                className="w-3 h-3 bg-yellow-400 rounded-full animate-bounce"
-                style={{ animationDelay: '300ms' }}
-              ></div>
-            </div>
-            {isAutoReconnectEnabled && (
-              <p className="text-slate-500 text-sm mt-6">
-                {t.pollResults.autoReconnectEnabledMainPage}
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            <div className="text-6xl mb-6">⚠️</div>
-            <h2 className="text-3xl font-bold text-red-400 mb-4">{t.pollResults.disconnected}</h2>
-            <p className="text-slate-400 text-lg mb-8">{t.pollResults.connectionLost}</p>
-            <button
-              onClick={onReconnect}
-              className="px-10 py-4 text-xl font-bold rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
-            >
-              {t.pollResults.reconnectButton}
-            </button>
-            <p className="text-slate-500 text-sm mt-6">{t.pollResults.autoReconnectTip}</p>
-          </>
-        )}
       </div>
     </div>
   );

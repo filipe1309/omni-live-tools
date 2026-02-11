@@ -5,5 +5,7 @@ export type { TwitchConnectionStatus } from './useTwitchConnection';
 export { useMultiPlatformConnection } from './useMultiPlatformConnection';
 export { usePoll } from './usePoll';
 export { usePollDisplay } from './usePollDisplay';
+export { usePollKeyboardShortcuts } from './usePollKeyboardShortcuts';
+export { useLeaderElection } from './useLeaderElection';
 export { useToast, ToastProvider } from './useToast';
 export type { Toast, ToastType } from './useToast';

@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
-import { POLL_SHORTCUTS, matchesShortcut } from '@/constants';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
+import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { SpotlightTrophyCelebration } from './SpotlightTrophyCelebration';
 import { CountdownOverlay } from './CountdownOverlay';
 import { PollQuestion } from './PollQuestion';
@@ -23,7 +22,7 @@ interface PollResultsProps {
   showControlButtons?: boolean;
 }
 
-export function PollResults({
+export function PollResults ({
   pollState,
   getPercentage,
   getTotalVotes,
@@ -49,45 +48,14 @@ export function PollResults({
   } = usePollDisplay({ pollState });
 
   // Keyboard shortcuts for poll control
-  useEffect(() => {
-    if (!onStart && !onStop && !onReset) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input field
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        return;
-      }
-
-      // Start: Space or Enter (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.START)) {
-        e.preventDefault();
-        if (onStart && isConnected && !pollState.isRunning && pollState.countdown === undefined) {
-          onStart();
-        }
-        return;
-      }
-
-      // Stop: Escape (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.STOP)) {
-        if (onStop && pollState.isRunning) {
-          onStop();
-        }
-        return;
-      }
-
-      // Reset: R (or custom shortcut)
-      if (matchesShortcut(e, POLL_SHORTCUTS.RESET)) {
-        if (onReset && !pollState.isRunning) {
-          onReset();
-        }
-        return;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isConnected, pollState.isRunning, pollState.countdown, onStart, onStop, onReset]);
+  usePollKeyboardShortcuts({
+    onStart,
+    onStop,
+    onReset,
+    isConnected,
+    isRunning: pollState.isRunning,
+    isCountingDown,
+  });
 
   const status = getStatusDisplay();
 
