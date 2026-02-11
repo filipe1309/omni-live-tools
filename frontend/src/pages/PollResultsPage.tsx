@@ -621,7 +621,7 @@ export function PollResultsPage () {
 
           {/* Countdown Overlay - positioned within Results Section */}
           {pollState.countdown !== undefined && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden rounded-xl">
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden rounded-xl">
               <div className="text-center animate-pulse">
                 {pollState.countdown === 0 ? (
                   <div className="text-7xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
