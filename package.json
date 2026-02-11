@@ -21,6 +21,8 @@
     "electron:dist": "bash build-exe-electron.sh"
   },
   "dependencies": {
+    "@twurple/auth": "^8.0.3",
+    "@twurple/chat": "^8.0.3",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "socket.io": "^4.4.1",
