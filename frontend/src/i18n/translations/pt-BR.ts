@@ -171,6 +171,7 @@ export const ptBR = {
     // Countdown
     startingIn: 'Iniciando em',
     go: 'VAI!',
+    winner: 'VENCEDOR!',
   },
 
   // Poll Results Page

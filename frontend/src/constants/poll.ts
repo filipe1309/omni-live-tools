@@ -130,7 +130,6 @@ function shortcutToLabel (shortcut: KeyboardShortcut): string {
   if (shortcut.key === ' ') keyLabel = 'Space';
   else if (shortcut.key === 'Escape') keyLabel = 'Esc';
   else if (shortcut.key === 'Enter') keyLabel = 'Enter';
-  else keyLabel = shortcut.key.toUpperCase();
 
   parts.push(keyLabel);
   return parts.join('+');

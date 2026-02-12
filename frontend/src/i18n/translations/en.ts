@@ -173,6 +173,7 @@ export const en: TranslationKeys = {
     // Countdown
     startingIn: 'Starting in',
     go: 'GO!',
+    winner: 'WINNER!',
   },
 
   // Poll Results Page
