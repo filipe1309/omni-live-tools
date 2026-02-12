@@ -68,7 +68,7 @@ describe('usePollKeyboardShortcuts', () => {
     expect(mockOnStart).not.toHaveBeenCalled();
   });
 
-  it('should call onStop when Escape is pressed during running poll', () => {
+  it('should call onStop when CTRL+, is pressed during running poll', () => {
     renderHook(() =>
       usePollKeyboardShortcuts({
         onStart: mockOnStart,
@@ -80,7 +80,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('Escape');
+    triggerKeyDown(',', { ctrlKey: true });
     expect(mockOnStop).toHaveBeenCalledTimes(1);
   });
 
@@ -96,7 +96,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('Escape');
+    triggerKeyDown(',', { ctrlKey: true });
     expect(mockOnStop).not.toHaveBeenCalled();
   });
 
