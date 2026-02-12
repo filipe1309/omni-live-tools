@@ -6,4 +6,5 @@ export { CountdownOverlay } from './CountdownOverlay';
 export { PollQuestion } from './PollQuestion';
 export { PollOptionCard } from './PollOptionCard';
 export { PollControlButtons } from './PollControlButtons';
+export { PollStatusBar } from './PollStatusBar';
 export { DisconnectedModal } from './DisconnectedModal';
