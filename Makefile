@@ -4,6 +4,7 @@
         backend-build-exe backend-verify backend-upgrade backend-outdated \
         backend-test backend-test-watch backend-test-coverage backend-test-ci \
         frontend-install frontend-dev frontend-build frontend-lint frontend-clean \
+        frontend-test frontend-test-watch frontend-test-coverage \
         electron-dev electron-build-ts electron-dist electron-clean \
         install dev build start lint clean clean-all info test test-watch test-coverage
 
@@ -79,6 +80,9 @@ help:
 	@printf "  $(GREEN)frontend-build$(NC)   Build for production\n"
 	@printf "  $(GREEN)frontend-lint$(NC)    Run ESLint\n"
 	@printf "  $(GREEN)frontend-clean$(NC)   Remove build artifacts\n"
+	@printf "  $(GREEN)frontend-test$(NC)    Run frontend tests\n"
+	@printf "  $(GREEN)frontend-test-watch$(NC) Run tests in watch mode\n"
+	@printf "  $(GREEN)frontend-test-coverage$(NC) Run tests with coverage\n"
 	@printf "\n"
 	@printf "$(CYAN)▸ Electron Commands (Desktop App)$(NC)\n"
 	@printf "  $(GREEN)electron-dev$(NC)     Build & launch Electron dev app\n"
@@ -148,14 +152,14 @@ lint: backend-lint frontend-lint
 	@printf "$(GREEN)✓ All linting complete$(NC)\n"
 
 ## test: Run all tests
-test: backend-test
+test: backend-test frontend-test
 	@printf "$(GREEN)✓ All tests complete$(NC)\n"
 
 ## test-watch: Run tests in watch mode
-test-watch: backend-test-watch
+test-watch: backend-test-watch frontend-test-watch
 
 ## test-coverage: Run tests with coverage report
-test-coverage: backend-test-coverage
+test-coverage: backend-test-coverage frontend-test-coverage
 
 ## clean: Clean all build artifacts
 clean: backend-clean frontend-clean electron-clean
@@ -321,6 +325,23 @@ frontend-clean:
 	@rm -rf $(FRONTEND_DIR)/dist
 	@rm -rf public-react
 	@printf "$(GREEN)✓ Frontend clean complete$(NC)\n"
+
+## frontend-test: Run frontend tests
+frontend-test: check-frontend-deps
+	@printf "$(BLUE)🧪 Running frontend tests...$(NC)\n"
+	@cd $(FRONTEND_DIR) && $(NPM) run test:run
+	@printf "$(GREEN)✓ Frontend tests complete$(NC)\n"
+
+## frontend-test-watch: Run frontend tests in watch mode
+frontend-test-watch: check-frontend-deps
+	@printf "$(BLUE)🧪 Running frontend tests in watch mode...$(NC)\n"
+	@cd $(FRONTEND_DIR) && $(NPM) run test
+
+## frontend-test-coverage: Run frontend tests with coverage report
+frontend-test-coverage: check-frontend-deps
+	@printf "$(BLUE)🧪 Running frontend tests with coverage...$(NC)\n"
+	@cd $(FRONTEND_DIR) && $(NPM) run test:coverage
+	@printf "$(GREEN)✓ Frontend coverage report generated$(NC)\n"
 
 # =============================================================================
 # Electron Commands (Desktop App)
