@@ -33,6 +33,56 @@ export function usePollTimer (callbacks: TimerCallbacks): UsePollTimerReturn {
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const callbacksRef = useRef(callbacks);
 
+  // Track poll timing with timestamps to handle window minimization
+  const pollStartTimeRef = useRef<number | null>(null);
+  const pollDurationRef = useRef<number>(0);
+  const lastReportedTimeLeftRef = useRef<number>(-1);
+
+  // Calculate time left based on actual elapsed time (handles window minimization)
+  const calculateTimeLeft = useCallback(() => {
+    if (pollStartTimeRef.current === null) return -1;
+    const elapsed = Math.floor((Date.now() - pollStartTimeRef.current) / 1000);
+    return Math.max(0, pollDurationRef.current - elapsed);
+  }, []);
+
+  // Update timer based on actual time elapsed
+  const updateTimerFromTimestamp = useCallback(() => {
+    const timeLeft = calculateTimeLeft();
+    if (timeLeft < 0) return;
+
+    // Only notify if timeLeft changed
+    if (timeLeft !== lastReportedTimeLeftRef.current) {
+      lastReportedTimeLeftRef.current = timeLeft;
+
+      if (timeLeft <= 0) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        pollStartTimeRef.current = null;
+        callbacksRef.current.onTimeLeftChange(0);
+        callbacksRef.current.onPollFinish();
+      } else {
+        callbacksRef.current.onTimeLeftChange(timeLeft);
+      }
+    }
+  }, [calculateTimeLeft]);
+
+  // Handle visibility change to catch up timer when window becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && pollStartTimeRef.current !== null) {
+        // Window became visible - update timer based on actual elapsed time
+        updateTimerFromTimestamp();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [updateTimerFromTimestamp]);
+
   // Keep callbacks ref updated
   useEffect(() => {
     callbacksRef.current = callbacks;
@@ -59,6 +109,9 @@ export function usePollTimer (callbacks: TimerCallbacks): UsePollTimerReturn {
       clearInterval(countdownRef.current);
       countdownRef.current = null;
     }
+    // Clear timing refs
+    pollStartTimeRef.current = null;
+    lastReportedTimeLeftRef.current = -1;
   }, []);
 
   const isCountdownActive = useCallback(() => countdownRef.current !== null, []);
@@ -122,22 +175,33 @@ export function usePollTimer (callbacks: TimerCallbacks): UsePollTimerReturn {
 
             callbacksRef.current.onPollStart(pollStartState);
 
-            // Track current timeLeft to avoid stale closure
-            let currentTimeLeft = timer;
+            // Store poll start time and duration for timestamp-based calculation
+            // This ensures accurate timing even when window is minimized
+            pollStartTimeRef.current = Date.now();
+            pollDurationRef.current = timer;
+            lastReportedTimeLeftRef.current = timer;
 
-            // Start poll timer countdown
+            // Start poll timer - uses timestamp-based calculation
             timerRef.current = setInterval(() => {
-              currentTimeLeft--;
+              // Calculate time left based on actual elapsed time
+              const elapsed = Math.floor((Date.now() - pollStartTimeRef.current!) / 1000);
+              const timeLeft = Math.max(0, timer - elapsed);
 
-              if (currentTimeLeft <= 0) {
-                if (timerRef.current) {
-                  clearInterval(timerRef.current);
-                  timerRef.current = null;
+              // Only notify if timeLeft changed
+              if (timeLeft !== lastReportedTimeLeftRef.current) {
+                lastReportedTimeLeftRef.current = timeLeft;
+
+                if (timeLeft <= 0) {
+                  if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = null;
+                  }
+                  pollStartTimeRef.current = null;
+                  callbacksRef.current.onTimeLeftChange(0);
+                  callbacksRef.current.onPollFinish();
+                } else {
+                  callbacksRef.current.onTimeLeftChange(timeLeft);
                 }
-                callbacksRef.current.onTimeLeftChange(0);
-                callbacksRef.current.onPollFinish();
-              } else {
-                callbacksRef.current.onTimeLeftChange(currentTimeLeft);
               }
             }, 1000);
           }, 500); // 500ms delay after showing "GO!"
