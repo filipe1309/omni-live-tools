@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage, interpolate } from '@/i18n';
-import { 
-  POLL_TIMER, 
-  POLL_OPTIONS, 
-  QUESTION_HISTORY, 
-  DEFAULT_OPTIONS, 
-  DEFAULT_SELECTED_OPTIONS, 
-  DEFAULT_QUESTION 
+import {
+  POLL_TIMER,
+  POLL_OPTIONS,
+  QUESTION_HISTORY,
+  DEFAULT_OPTIONS,
+  DEFAULT_SELECTED_OPTIONS,
+  DEFAULT_QUESTION
 } from '@/constants';
 
 // Load question history from localStorage
@@ -43,25 +43,27 @@ interface OptionWithId {
 
 interface PollSetupProps {
   onStart: (question: string, options: OptionWithId[], timer: number) => void;
-  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[]) => void;
+  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean) => void;
   disabled?: boolean;
   initialQuestion?: string;
   initialOptions?: string[];
   initialSelectedOptions?: boolean[];
   initialTimer?: number;
+  initialShowStatusBar?: boolean;
   showStartButton?: boolean;
-  externalConfig?: { question: string; options: OptionWithId[]; timer: number } | null;
+  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
 
-export function PollSetup({ 
-  onStart, 
+export function PollSetup ({
+  onStart,
   onChange,
   disabled = false,
   initialQuestion = DEFAULT_QUESTION,
   initialOptions = [...DEFAULT_OPTIONS],
   initialSelectedOptions = [...DEFAULT_SELECTED_OPTIONS],
   initialTimer = POLL_TIMER.DEFAULT,
+  initialShowStatusBar = true,
   showStartButton = true,
   externalConfig = null,
   externalFullOptions = null
@@ -70,9 +72,10 @@ export function PollSetup({
   const [options, setOptions] = useState<string[]>(initialOptions);
   const [selectedOptions, setSelectedOptions] = useState<boolean[]>(initialSelectedOptions);
   const [timer, setTimer] = useState(initialTimer);
+  const [showStatusBar, setShowStatusBar] = useState(initialShowStatusBar);
   const hasSentInitialChange = useRef(false);
   const { t } = useLanguage();
-  
+
   // Question history state
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
@@ -81,17 +84,17 @@ export function PollSetup({
 
   // Update state when externalFullOptions changes (preferred - has complete state)
   const lastExternalFullOptionsRef = useRef<string | null>(null);
-  
+
   useEffect(() => {
     if (externalFullOptions) {
       const configKey = JSON.stringify(externalFullOptions);
-      
+
       // Skip if this is the same config we just sent
       if (lastExternalFullOptionsRef.current === configKey) {
         return;
       }
       lastExternalFullOptionsRef.current = configKey;
-      
+
       console.log('[PollSetup] Received external full options update:', externalFullOptions);
       setOptions([...externalFullOptions.allOptions]);
       setSelectedOptions([...externalFullOptions.selectedOptions]);
@@ -101,21 +104,24 @@ export function PollSetup({
   // Update state when externalConfig changes (from popup edit)
   // Only update if this is the initial load (not from our own changes)
   const lastExternalConfigRef = useRef<string | null>(null);
-  
+
   useEffect(() => {
     if (externalConfig) {
       const configKey = JSON.stringify(externalConfig);
-      
+
       // Skip if this is the same config we just sent (prevents overwriting our own changes)
       if (lastExternalConfigRef.current === configKey) {
         return;
       }
       lastExternalConfigRef.current = configKey;
-      
+
       console.log('[PollSetup] Received external config update:', externalConfig);
       setQuestion(externalConfig.question);
       setTimer(externalConfig.timer);
-      
+      if (externalConfig.showStatusBar !== undefined) {
+        setShowStatusBar(externalConfig.showStatusBar);
+      }
+
       // Only rebuild options from externalConfig if we don't have externalFullOptions
       // (externalFullOptions is more complete and should take precedence for options)
       if (!externalFullOptions) {
@@ -125,14 +131,14 @@ export function PollSetup({
           const newOptions = [...prevOptions];
           // Reset selected status first
           const newSelected = new Array(POLL_OPTIONS.TOTAL).fill(false);
-          
+
           externalConfig.options.forEach(opt => {
             if (opt.id >= 1 && opt.id <= POLL_OPTIONS.TOTAL) {
               newOptions[opt.id - 1] = opt.text;
               newSelected[opt.id - 1] = true;
             }
           });
-          
+
           setSelectedOptions(newSelected);
           return newOptions;
         });
@@ -145,13 +151,13 @@ export function PollSetup({
     const opts = currentOptions ?? options;
     const selected = currentSelected ?? selectedOptions;
     const result = opts
-      .map((opt, idx) => ({ 
+      .map((opt, idx) => ({
         text: opt.trim(), // Don't use index as fallback - keep empty if not filled
         id: idx + 1, // 1-based id to preserve original position
-        selected: selected[idx] 
+        selected: selected[idx]
       }))
       .filter(opt => opt.selected && opt.text); // Only include selected AND non-empty options
-    
+
     return result;
   };
 
@@ -167,7 +173,7 @@ export function PollSetup({
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
       console.log('[PollSetup] Sending initial onChange with options:', selectedPollOptionsWithIds);
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
       hasSentInitialChange.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -180,12 +186,12 @@ export function PollSetup({
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
-    
+
     // Notify parent of change with new state
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions);
+      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar);
     }
   };
 
@@ -193,23 +199,35 @@ export function PollSetup({
     const newSelected = [...selectedOptions];
     newSelected[index] = !newSelected[index];
     setSelectedOptions(newSelected);
-    
+
     // Notify parent of change with new state
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(options, newSelected);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar);
+    }
+  };
+
+  // Handle showStatusBar toggle
+  const handleShowStatusBarChange = (value: boolean) => {
+    setShowStatusBar(value);
+
+    // Notify parent of change
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value);
     }
   };
 
   // Handle question change and notify parent
   const handleQuestionChange = (value: string) => {
     setQuestion(value);
-    
+
     // Load fresh history and filter suggestions based on input
     const history = loadQuestionHistory();
     if (value.trim()) {
-      const filtered = history.filter(q => 
+      const filtered = history.filter(q =>
         q.toLowerCase().includes(value.toLowerCase()) && q !== value
       );
       setFilteredSuggestions(filtered);
@@ -219,40 +237,40 @@ export function PollSetup({
       setFilteredSuggestions(history);
       setShowSuggestions(history.length > 0);
     }
-    
+
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = value.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
     }
   };
-  
+
   // Handle selecting a suggestion
   const handleSelectSuggestion = (suggestion: string) => {
     setQuestion(suggestion);
     setShowSuggestions(false);
-    
+
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
-      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions);
+      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
     }
   };
-  
+
   // Save question to history when input loses focus
   const handleQuestionBlur = () => {
     // Delay hiding to allow click on suggestion
     setTimeout(() => {
       setShowSuggestions(false);
     }, 200);
-    
+
     // Save to history if it's a meaningful question
     if (question.trim() && question.trim() !== DEFAULT_QUESTION) {
       saveQuestionToHistory(question.trim());
     }
   };
-  
+
   // Show suggestions on focus
   const handleQuestionFocus = () => {
     // Load fresh history
@@ -266,12 +284,12 @@ export function PollSetup({
   const handleTimerChange = (value: number) => {
     const clampedValue = Math.min(POLL_TIMER.MAX, Math.max(POLL_TIMER.MIN, value));
     setTimer(clampedValue);
-    
+
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions);
+      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar);
     }
   };
 
@@ -323,7 +341,7 @@ export function PollSetup({
           </div>
           {/* Suggestions Dropdown */}
           {showSuggestions && filteredSuggestions.length > 0 && (
-            <div 
+            <div
               ref={suggestionsRef}
               className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-48 overflow-y-auto"
             >
@@ -374,6 +392,29 @@ export function PollSetup({
             </button>
           </div>
         </div>
+
+        {/* Show Status Bar Toggle */}
+        <div className="flex items-end">
+          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showStatusBar
+              ? 'bg-purple-900/30 border-purple-500/50'
+              : 'bg-slate-900/50 border-slate-700/50'
+            }`}>
+            <button
+              type="button"
+              onClick={() => handleShowStatusBarChange(!showStatusBar)}
+              disabled={disabled}
+              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showStatusBar
+                  ? 'bg-purple-600 border-purple-500 text-white'
+                  : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {showStatusBar && '✓'}
+            </button>
+            <span className="text-sm text-slate-300 whitespace-nowrap">
+              📊 {t.poll.showStatusBar}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Options Grid with Checkboxes */}
@@ -383,31 +424,28 @@ export function PollSetup({
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {options.map((option, index) => (
-            <div 
-              key={index} 
-              className={`flex items-center gap-2 p-2 rounded-lg border transition-all overflow-hidden ${
-                selectedOptions[index] 
-                  ? 'bg-purple-900/30 border-purple-500/50' 
+            <div
+              key={index}
+              className={`flex items-center gap-2 p-2 rounded-lg border transition-all overflow-hidden ${selectedOptions[index]
+                  ? 'bg-purple-900/30 border-purple-500/50'
                   : 'bg-slate-900/50 border-slate-700/50'
-              }`}
+                }`}
             >
               <button
                 type="button"
                 onClick={() => toggleOption(index)}
                 disabled={disabled}
-                className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${
-                  selectedOptions[index]
+                className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${selectedOptions[index]
                     ? 'bg-purple-600 border-purple-500 text-white'
                     : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {selectedOptions[index] && '✓'}
               </button>
-              <span className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm flex-shrink-0 ${
-                selectedOptions[index]
+              <span className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm flex-shrink-0 ${selectedOptions[index]
                   ? 'bg-gradient-to-br from-purple-600 to-purple-400 text-white'
                   : 'bg-slate-700 text-slate-400'
-              }`}>
+                }`}>
                 {index + 1}
               </span>
               <input

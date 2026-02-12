@@ -142,6 +142,7 @@ export const ptBR = {
     questionPlaceholder: 'Digite sua pergunta aqui...',
     historyAvailable: 'histórico disponível',
     timer: 'Tempo (segundos)',
+    showStatusBar: 'Mostrar Barra de Status',
     options: 'Opções',
     optionsHint: 'marque as opções que deseja incluir na enquete',
     optionPlaceholder: 'Opção',

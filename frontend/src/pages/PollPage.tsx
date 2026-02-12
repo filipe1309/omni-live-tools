@@ -107,6 +107,7 @@ export function PollPage () {
     question: string;
     options: PollOption[];
     timer: number;
+    showStatusBar?: boolean;
   } | null>(loadSavedSetupConfig);
 
   // Track external config updates from popup
@@ -114,6 +115,7 @@ export function PollPage () {
     question: string;
     options: PollOption[];
     timer: number;
+    showStatusBar?: boolean;
   } | null>(loadSavedSetupConfig);
 
   // Full options config for persistence (all 12 options + selection state)
@@ -138,7 +140,7 @@ export function PollPage () {
     });
   }, [onConfigUpdate]);
 
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[]) => {
+  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean) => {
     // Skip the first onChange if we have saved config (PollSetup sends default values on mount)
     if (hasSavedConfig.current && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
@@ -150,6 +152,7 @@ export function PollPage () {
       question,
       options, // Options already have their original IDs preserved
       timer,
+      showStatusBar: showStatusBar ?? true,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
@@ -411,6 +414,7 @@ export function PollPage () {
       { id: 2, text: 'Não' },
     ],
     timer: POLL_TIMER.DEFAULT,
+    showStatusBar: true,
   };
 
   // Keyboard shortcuts for poll control
@@ -530,6 +534,7 @@ export function PollPage () {
             initialOptions={savedFullOptions?.allOptions}
             initialSelectedOptions={savedFullOptions?.selectedOptions}
             initialTimer={loadSavedSetupConfig()?.timer}
+            initialShowStatusBar={loadSavedSetupConfig()?.showStatusBar}
           />
         </div>
 
@@ -585,6 +590,7 @@ export function PollPage () {
               pollState={pollState}
               getPercentage={getPercentage}
               getTotalVotes={getTotalVotes}
+              showStatusBar={currentSetupConfig.showStatusBar ?? true}
             />
           ) : (
             <PollResults
@@ -597,6 +603,7 @@ export function PollPage () {
               }}
               getPercentage={() => 0}
               getTotalVotes={() => 0}
+              showStatusBar={currentSetupConfig.showStatusBar ?? true}
             />
           )}
         </div>

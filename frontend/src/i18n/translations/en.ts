@@ -144,6 +144,7 @@ export const en: TranslationKeys = {
     questionPlaceholder: 'Type your question here...',
     historyAvailable: 'history available',
     timer: 'Time (seconds)',
+    showStatusBar: 'Show Status Bar',
     options: 'Options',
     optionsHint: 'check the options you want to include in the poll',
     optionPlaceholder: 'Option',
