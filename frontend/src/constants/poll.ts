@@ -84,6 +84,7 @@ export interface KeyboardShortcut {
 // Examples:
 //   { key: 'm', ctrl: true }              -> CTRL+M
 //   { key: 'Enter' }                      -> Enter alone
+//   { key: 'Escape' }                     -> Escape alone
 //   { key: 's', ctrl: true, shift: true } -> CTRL+SHIFT+S
 //   { key: ' ' }                          -> Spacebar alone
 //   { key: 'R' }                          -> R alone
@@ -96,7 +97,7 @@ export const POLL_SHORTCUTS: {
     { key: 'm', ctrl: true },       // CTRL+m to start
   ],
   STOP: [
-    { key: 'Escape' },      // Escape to stop
+    { key: ',', ctrl: true },      // CTRL+, to stop
   ],
   RESET: [
     { key: '.', ctrl: true },           // CTRL+. to reset
