@@ -461,25 +461,25 @@ export function PollPage () {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048]">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-4 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+        <div className="text-center mb-4">
+          <h1 className="text-3xl font-bold text-white mb-1">
             🗳️ {t.poll.title}
           </h1>
-          <p className="text-slate-400 text-lg">
+          <p className="text-slate-400 text-base">
             {t.poll.description}
           </p>
         </div>
 
         {/* Connection Section */}
-        <div className={`card mb-6 border transition-all duration-300 ${connection.isAnyConnected
+        <div className={`card mb-3 border transition-all duration-300 ${connection.isAnyConnected
           ? 'border-green-500/50 bg-green-500/5'
           : 'border-slate-700/50'
           }`}>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-white">🔗 {t.poll.connection}</h2>
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-white">🔗 {t.poll.connection}</h2>
               {/* Connection Status Indicator */}
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${connection.isAnyConnected
                 ? 'bg-green-500/20 text-green-400 border border-green-500/30'
@@ -520,8 +520,8 @@ export function PollPage () {
         </div>
 
         {/* Configuration Section */}
-        <div className={`card mb-6 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
-          <h2 className="text-xl font-bold text-white mb-4 pb-4 border-b border-slate-700/50">
+        <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+          <h2 className="text-lg font-bold text-white mb-2 pb-2 border-b border-slate-700/50">
             ⚙️ {t.poll.configuration}
           </h2>
           <PollSetup
@@ -539,7 +539,7 @@ export function PollPage () {
         </div>
 
         {/* Controls Section - Centered */}
-        <div className={`card mb-6 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+        <div className={`card mb-3 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
           <PollControlButtons
             onStart={() => handleStartPoll(
               currentSetupConfig.question,
@@ -555,9 +555,9 @@ export function PollPage () {
         </div>
 
         {/* Results Section */}
-        <div className={`card mb-6 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
-          <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
-            <h2 className="text-xl font-bold text-white">📊 {t.poll.results}</h2>
+        <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+          <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-700/50">
+            <h2 className="text-lg font-bold text-white">📊 {t.poll.results}</h2>
             <button
               onClick={openResultsPopup}
               className="btn-secondary text-sm"
@@ -573,6 +573,7 @@ export function PollPage () {
               getPercentage={getPercentage}
               getTotalVotes={getTotalVotes}
               showStatusBar={currentSetupConfig.showStatusBar ?? true}
+              size="large"
             />
           ) : (
             <PollResults
@@ -586,13 +587,14 @@ export function PollPage () {
               getPercentage={() => 0}
               getTotalVotes={() => 0}
               showStatusBar={currentSetupConfig.showStatusBar ?? true}
+              size="large"
             />
           )}
         </div>
 
         {/* Vote Log Section */}
         <div className={`card border border-slate-700/50 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
-          <h2 className="text-xl font-bold text-white mb-4 pb-4 border-b border-slate-700/50">
+          <h2 className="text-lg font-bold text-white mb-2 pb-2 border-b border-slate-700/50">
             📝 {t.poll.voteLog}
           </h2>
           <VoteLog

@@ -15,6 +15,7 @@ interface PollResultsProps {
   getTotalVotes: () => number;
   showStatusBar?: boolean;
   compact?: boolean;
+  size?: 'normal' | 'large';
   // Optional control callbacks for keyboard shortcuts
   onStart?: () => void;
   onStop?: () => void;
@@ -29,6 +30,7 @@ export function PollResults ({
   getTotalVotes,
   showStatusBar = true,
   compact = false,
+  size = 'normal',
   onStart,
   onStop,
   onReset,
@@ -37,6 +39,10 @@ export function PollResults ({
 }: PollResultsProps) {
   const totalVotes = getTotalVotes();
   const { t } = useLanguage();
+
+  const isLarge = size === 'large';
+  const questionClass = isLarge ? '[&_h3]:text-5xl' : '[&_h3]:text-3xl';
+  const optionSize = compact ? 'compact' : (isLarge ? 'large' : 'normal');
 
   const {
     winnerIds,
@@ -101,7 +107,7 @@ export function PollResults ({
           isRunning={pollState.isRunning}
           timeLeft={pollState.timeLeft}
           timer={pollState.timer}
-          className="[&_h3]:text-3xl"
+          className={questionClass}
         />
       )}
 
@@ -115,7 +121,7 @@ export function PollResults ({
             percentage={getPercentage(option.id)}
             totalVotes={totalVotes}
             isWinner={winnerIds.includes(option.id)}
-            size={compact ? 'compact' : 'normal'}
+            size={optionSize}
           />
         ))}
       </div>
