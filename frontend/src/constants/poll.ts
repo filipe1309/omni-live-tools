@@ -94,13 +94,13 @@ export const POLL_SHORTCUTS: {
   RESET: KeyboardShortcut[];
 } = {
   START: [
-    { key: 'm', ctrl: true },       // CTRL+m to start
+    { key: 'M', ctrl: true, shift: true },       // CTRL+SHIFT+M to start
   ],
   STOP: [
-    { key: ',', ctrl: true },      // CTRL+, to stop
+    { key: ',', ctrl: true, shift: true },      // CTRL+SHIFT+, to stop
   ],
   RESET: [
-    { key: '.', ctrl: true },           // CTRL+. to reset
+    { key: '.', ctrl: true, shift: true },           // CTRL+SHIFT+. to reset
   ],
 };
 

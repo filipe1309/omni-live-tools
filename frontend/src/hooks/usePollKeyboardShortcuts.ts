@@ -27,9 +27,13 @@ export function usePollKeyboardShortcuts ({
     if (!onStart && !onStop && !onReset) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input field
+      // Allow shortcuts with modifier keys (Ctrl, Alt, Meta) even in input fields
+      // Only block plain keypresses without modifiers when typing
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      const isInInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const hasModifier = e.ctrlKey || e.altKey || e.metaKey;
+
+      if (isInInputField && !hasModifier) {
         return;
       }
 

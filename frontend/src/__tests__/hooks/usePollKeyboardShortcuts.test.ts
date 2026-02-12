@@ -132,7 +132,7 @@ describe('usePollKeyboardShortcuts', () => {
     expect(mockOnReset).not.toHaveBeenCalled();
   });
 
-  it('should ignore keypresses when input is focused', () => {
+  it('should allow shortcuts with modifier keys when input is focused', () => {
     const input = document.createElement('input');
     document.body.appendChild(input);
     input.focus();
@@ -148,8 +148,33 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    // Create event with input as target
+    // Create event with input as target - Ctrl+M should work even in input
     const event = new KeyboardEvent('keydown', { key: 'm', ctrlKey: true });
+    Object.defineProperty(event, 'target', { value: input });
+    window.dispatchEvent(event);
+
+    expect(mockOnStart).toHaveBeenCalledTimes(1);
+    document.body.removeChild(input);
+  });
+
+  it('should ignore plain keypresses without modifiers when input is focused', () => {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    renderHook(() =>
+      usePollKeyboardShortcuts({
+        onStart: mockOnStart,
+        onStop: mockOnStop,
+        onReset: mockOnReset,
+        isConnected: true,
+        isRunning: false,
+        isCountingDown: false,
+      })
+    );
+
+    // Create event with input as target - plain key should be ignored
+    const event = new KeyboardEvent('keydown', { key: 'm' });
     Object.defineProperty(event, 'target', { value: input });
     window.dispatchEvent(event);
 
