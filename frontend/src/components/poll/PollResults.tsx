@@ -1,4 +1,3 @@
-import { useLanguage } from '@/i18n';
 import type { PollState } from '@/types';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
@@ -38,7 +37,6 @@ export function PollResults ({
   showControlButtons = false,
 }: PollResultsProps) {
   const totalVotes = getTotalVotes();
-  const { t } = useLanguage();
 
   const isLarge = size === 'large';
   const questionClass = isLarge ? '[&_h3]:text-5xl' : '[&_h3]:text-3xl';
@@ -125,15 +123,6 @@ export function PollResults ({
           />
         ))}
       </div>
-
-      {/* Footer stats */}
-      {!compact && (
-        <div className="text-center text-slate-400 text-xl pt-4 border-t border-slate-700">
-          {t.poll.totalVotes}: <span className="font-bold text-white">{totalVotes}</span>
-          <span className="mx-3">•</span>
-          {t.poll.uniqueVoters}: <span className="font-bold text-white">{pollState.voters.size}</span>
-        </div>
-      )}
     </div>
   );
 }

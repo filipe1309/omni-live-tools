@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { 
-  RoomState, 
-  ChatMessage, 
-  GiftMessage, 
-  LikeMessage, 
-  MemberMessage, 
-  RoomUserMessage, 
+import type {
+  RoomState,
+  ChatMessage,
+  GiftMessage,
+  LikeMessage,
+  MemberMessage,
+  RoomUserMessage,
   SocialMessage,
   ConnectionOptions,
   TwitchConnectionState,
@@ -74,14 +74,14 @@ interface UseMultiPlatformConnectionReturn {
  * Hook for managing connections to multiple streaming platforms (TikTok + Twitch)
  * Uses a single socket connection for efficiency
  */
-export function useMultiPlatformConnection(
+export function useMultiPlatformConnection (
   handlers: MultiPlatformEventHandlers = {}
 ): UseMultiPlatformConnectionReturn {
   const socketRef = useRef<Socket | null>(null);
   const handlersRef = useRef(handlers);
   const wasConnectedToTikTokRef = useRef(false);
   const wasConnectedToTwitchRef = useRef(false);
-  
+
   const [tiktokState, setTikTokState] = useState<TikTokState>({
     status: 'disconnected',
     roomId: null,
@@ -148,7 +148,7 @@ export function useMultiPlatformConnection(
       // TikTok chat (original format)
       console.log('[MultiPlatform] Received TikTok chat:', msg);
       handlersRef.current.onTikTokChat?.(msg);
-      
+
       // Convert to unified format for onChat
       if (handlersRef.current.onChat) {
         const unified: UnifiedChatMessage = {
@@ -169,7 +169,7 @@ export function useMultiPlatformConnection(
 
     socket.on('gift', (msg: GiftMessage) => {
       handlersRef.current.onGift?.(msg);
-      
+
       // Update diamonds count for non-pending streaks
       if (msg.giftType !== 1 || msg.repeatEnd) {
         if (msg.diamondCount > 0) {
@@ -254,13 +254,14 @@ export function useMultiPlatformConnection(
 
         socket.emit('setUniqueId', uniqueId, { enableExtendedGiftInfo: true, ...options });
 
-        const timeout = setTimeout(() => {
-          reject('Connection Timeout');
-          setTikTokState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
-        }, 15000);
-
-        socket.once('tiktokConnected', (roomState: RoomState) => {
+        const cleanup = () => {
           clearTimeout(timeout);
+          socket.off('tiktokConnected', onConnected);
+          socket.off('tiktokDisconnected', onDisconnected);
+        };
+
+        const onConnected = (roomState: RoomState) => {
+          cleanup();
           wasConnectedToTikTokRef.current = true;
           setTikTokState(prev => ({
             ...prev,
@@ -269,17 +270,26 @@ export function useMultiPlatformConnection(
             error: null,
           }));
           resolve(roomState);
-        });
+        };
 
-        socket.once('tiktokDisconnected', (errorMessage: string) => {
-          clearTimeout(timeout);
+        const onDisconnected = (errorMessage: string) => {
+          cleanup();
           setTikTokState(prev => ({
             ...prev,
             status: 'error',
             error: errorMessage,
           }));
           reject(errorMessage);
-        });
+        };
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          setTikTokState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
+          reject('Connection Timeout');
+        }, 15000);
+
+        socket.once('tiktokConnected', onConnected);
+        socket.once('tiktokDisconnected', onDisconnected);
       });
     },
     []
@@ -319,13 +329,14 @@ export function useMultiPlatformConnection(
         const normalizedChannel = channel.replace(/^#/, '').toLowerCase().trim();
         socket.emit('setTwitchChannel', normalizedChannel);
 
-        const timeout = setTimeout(() => {
-          reject('Connection Timeout');
-          setTwitchState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
-        }, 15000);
-
-        socket.once('twitchConnected', (connectionState: TwitchConnectionState) => {
+        const cleanup = () => {
           clearTimeout(timeout);
+          socket.off('twitchConnected', onConnected);
+          socket.off('twitchDisconnected', onDisconnected);
+        };
+
+        const onConnected = (connectionState: TwitchConnectionState) => {
+          cleanup();
           wasConnectedToTwitchRef.current = true;
           setTwitchState(prev => ({
             ...prev,
@@ -334,17 +345,26 @@ export function useMultiPlatformConnection(
             error: null,
           }));
           resolve(connectionState);
-        });
+        };
 
-        socket.once('twitchDisconnected', (errorMessage: string) => {
-          clearTimeout(timeout);
+        const onDisconnected = (errorMessage: string) => {
+          cleanup();
           setTwitchState(prev => ({
             ...prev,
             status: 'error',
             error: errorMessage,
           }));
           reject(errorMessage);
-        });
+        };
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          setTwitchState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
+          reject('Connection Timeout');
+        }, 15000);
+
+        socket.once('twitchConnected', onConnected);
+        socket.once('twitchDisconnected', onDisconnected);
       });
     },
     []
