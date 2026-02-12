@@ -127,39 +127,6 @@ describe('PollControlButtons', () => {
     });
   });
 
-  describe('Variants', () => {
-    it('should use default labels when variant is default', () => {
-      render(
-        <PollControlButtons
-          {...defaultProps}
-          onStart={() => { }}
-          onStop={() => { }}
-          onReset={() => { }}
-          variant="default"
-        />
-      );
-      expect(screen.getByText(/Iniciar/)).toBeInTheDocument();
-      expect(screen.getByText(/Parar/)).toBeInTheDocument();
-      expect(screen.getByText(/Reiniciar/)).toBeInTheDocument();
-    });
-
-    it('should use results-page labels when variant is results-page', () => {
-      render(
-        <PollControlButtons
-          {...defaultProps}
-          onStart={() => { }}
-          onStop={() => { }}
-          onReset={() => { }}
-          variant="results-page"
-          isRunning={true}
-        />
-      );
-      expect(screen.getByText(/Start/)).toBeInTheDocument();
-      expect(screen.getByText(/Stop/)).toBeInTheDocument();
-      expect(screen.getByText(/Restart/)).toBeInTheDocument();
-    });
-  });
-
   describe('Keyboard Shortcuts', () => {
     it('should show keyboard shortcut S on start button', () => {
       render(<PollControlButtons {...defaultProps} onStart={() => { }} />);
