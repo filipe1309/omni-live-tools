@@ -1,10 +1,10 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useMultiPlatformConnection, usePoll, useToast } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
-import { MultiPlatformConnectionForm, PollSetup, PollResults, VoteLog } from '@/components';
+import { MultiPlatformConnectionForm, PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
-import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, POLL_SHORTCUT_LABELS, matchesShortcut } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
 import { safeSetItem } from '@/utils';
 
 export function PollPage () {
@@ -539,37 +539,19 @@ export function PollPage () {
         </div>
 
         {/* Controls Section - Centered */}
-        <div className={`card mb-6 bg-purple-500/10 border-2 border-purple-500/30 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <button
-              onClick={() => handleStartPoll(
-                currentSetupConfig.question,
-                currentSetupConfig.options,
-                currentSetupConfig.timer
-              )}
-              disabled={!connection.isAnyConnected || pollState.isRunning || pollState.countdown !== undefined}
-              className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white hover:from-green-500 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title={`${POLL_SHORTCUT_LABELS.START} / Enter`}
-            >
-              ▶️ {t.poll.startPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.START}</kbd>
-            </button>
-            <button
-              onClick={stopPoll}
-              disabled={!pollState.isRunning && pollState.countdown === undefined}
-              className="px-8 py-3 text-lg font-bold rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title={POLL_SHORTCUT_LABELS.STOP}
-            >
-              ⏹️ {t.poll.stopPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.STOP}</kbd>
-            </button>
-            <button
-              onClick={resetPoll}
-              disabled={pollState.isRunning}
-              className="btn-secondary px-8 py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              title={POLL_SHORTCUT_LABELS.RESET}
-            >
-              🔄 {t.poll.resetPoll} <kbd className="ml-2 px-2 py-0.5 text-sm bg-white/20 rounded">{POLL_SHORTCUT_LABELS.RESET}</kbd>
-            </button>
-          </div>
+        <div className={`card mb-6 transition-all duration-300 ${!connection.isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+          <PollControlButtons
+            onStart={() => handleStartPoll(
+              currentSetupConfig.question,
+              currentSetupConfig.options,
+              currentSetupConfig.timer
+            )}
+            onStop={stopPoll}
+            onReset={resetPoll}
+            isConnected={connection.isAnyConnected}
+            isRunning={pollState.isRunning}
+            isCountingDown={pollState.countdown !== undefined}
+          />
         </div>
 
         {/* Results Section */}
