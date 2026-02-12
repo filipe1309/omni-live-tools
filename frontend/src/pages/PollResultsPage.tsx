@@ -296,7 +296,6 @@ export function PollResultsPage () {
           isConnected={isConnected}
           isRunning={pollState.isRunning}
           isCountingDown={isCountingDown}
-          variant="results-page"
         />
 
         {/* Results Section */}

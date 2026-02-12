@@ -8,7 +8,6 @@ interface PollControlButtonsProps {
   isConnected?: boolean;
   isRunning: boolean;
   isCountingDown: boolean;
-  variant?: 'default' | 'results-page';
 }
 
 export function PollControlButtons ({
@@ -18,14 +17,13 @@ export function PollControlButtons ({
   isConnected = true,
   isRunning,
   isCountingDown,
-  variant = 'default',
 }: PollControlButtonsProps) {
   const { t } = useLanguage();
 
   const labels = {
-    start: variant === 'results-page' ? t.pollResults.start : t.poll.startPoll,
-    stop: variant === 'results-page' ? t.pollResults.stop : t.poll.stopPoll,
-    reset: variant === 'results-page' ? t.pollResults.restart : t.poll.resetPoll,
+    start: `▶️ ${t.poll.startPoll}`,
+    stop: `⏹️ ${t.poll.stopPoll}`,
+    reset: `🔄 ${t.poll.resetPoll}`,
   };
 
   return (
