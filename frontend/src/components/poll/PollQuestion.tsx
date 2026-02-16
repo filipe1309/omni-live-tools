@@ -44,10 +44,10 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
     <div
       className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${getContainerClasses()} ${className}`}
     >
-      {/* Animated Timer Bar */}
+      {/* Animated Timer Bar - Full Background */}
       {isRunning && timer > 0 && (
         <div
-          className={`absolute bottom-0 left-0 h-1.5 transition-all duration-1000 ease-linear ${getTimerBarClasses()}`}
+          className={`absolute inset-0 h-full opacity-30 transition-all duration-1000 ease-linear ${getTimerBarClasses()}`}
           style={{
             width: `${(timeLeft / timer) * 100}%`,
           }}
@@ -55,9 +55,9 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
       )}
       {/* Static bar when not running */}
       {!isRunning && (
-        <div className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-purple-600/50 to-purple-400/50" />
+        <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-purple-600/30 to-purple-400/30" />
       )}
-      <div className="text-center py-5 px-6">
+      <div className="relative z-10 text-center py-5 px-6">
         <h3 className={`font-bold transition-colors duration-500 ${getTextClasses()}`}>
           {question}
         </h3>
