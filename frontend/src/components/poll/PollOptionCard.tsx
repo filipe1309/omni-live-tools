@@ -14,25 +14,25 @@ interface PollOptionCardProps {
 
 const sizeConfig = {
   compact: {
-    padding: 'p-4',
-    badge: 'w-12 h-12 text-xl',
-    text: 'text-xl',
-    votes: 'text-xl',
-    percentText: 'text-xl',
+    padding: 'p-2',
+    badge: 'w-8 h-8 text-base',
+    text: 'text-base',
+    votes: 'text-base',
+    percentText: 'text-base',
   },
   normal: {
-    padding: 'p-6',
-    badge: 'w-14 h-14 text-2xl',
+    padding: 'p-3',
+    badge: 'w-10 h-10 text-xl',
+    text: 'text-xl',
+    votes: 'text-xl',
+    percentText: 'text-lg',
+  },
+  large: {
+    padding: 'p-3',
+    badge: 'w-12 h-12 text-2xl',
     text: 'text-2xl',
     votes: 'text-2xl',
     percentText: 'text-xl',
-  },
-  large: {
-    padding: 'p-5',
-    badge: 'w-16 h-16 text-3xl',
-    text: 'text-3xl',
-    votes: 'text-3xl',
-    percentText: 'text-2xl',
   },
 };
 
@@ -51,15 +51,15 @@ export function PollOptionCard ({
   return (
     <div
       className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
-          ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
-          : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
+        ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
+        : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
         }`}
     >
       {/* Background Progress Bar */}
       <div
         className={`absolute inset-0 transition-all duration-500 ease-out ${isWinner
-            ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
-            : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
+          ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
+          : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
           }`}
         style={{ width: `${percentage}%` }}
       />
@@ -69,8 +69,8 @@ export function PollOptionCard ({
         <div className="flex items-center gap-5">
           <span
             className={`${config.badge} flex items-center justify-center rounded-full font-bold text-white flex-shrink-0 ${isWinner
-                ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
-                : 'bg-gradient-to-br from-purple-600 to-purple-400'
+              ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
+              : 'bg-gradient-to-br from-purple-600 to-purple-400'
               }`}
           >
             {option.id}
@@ -92,11 +92,11 @@ export function PollOptionCard ({
       </div>
 
       {/* Progress Bar Track */}
-      <div className="h-2 bg-slate-900/50">
+      <div className="h-1 bg-slate-900/50">
         <div
           className={`h-full transition-all duration-500 ease-out rounded-r ${isWinner
-              ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-              : 'bg-gradient-to-r from-purple-600 to-purple-400'
+            ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+            : 'bg-gradient-to-r from-purple-600 to-purple-400'
             }`}
           style={{ width: `${percentage}%` }}
         />
