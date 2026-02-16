@@ -6,6 +6,7 @@
         frontend-install frontend-dev frontend-build frontend-lint frontend-clean \
         frontend-test frontend-test-watch frontend-test-coverage \
         electron-dev electron-build-ts electron-dist electron-clean \
+        version-update version-update-dry version-update-yes \
         install dev build start lint clean clean-all info test test-watch test-coverage
 
 # Variables
@@ -89,6 +90,11 @@ help:
 	@printf "  $(GREEN)electron-build-ts$(NC) Compile Electron TypeScript\n"
 	@printf "  $(GREEN)electron-dist$(NC)    Build distributable installers\n"
 	@printf "  $(GREEN)electron-clean$(NC)   Remove Electron build artifacts\n"
+	@printf "\n"
+	@printf "$(CYAN)▸ Version Commands$(NC)\n"
+	@printf "  $(GREEN)version-update$(NC)   Update version based on commits\n"
+	@printf "  $(GREEN)version-update-dry$(NC) Preview version changes\n"
+	@printf "  $(GREEN)version-update-yes$(NC) Update version (skip confirm)\n"
 	@printf "\n"
 
 # =============================================================================
@@ -365,7 +371,7 @@ electron-dev: check-electron-deps check-backend-deps build
 	@$(NPM) run electron:dev
 
 ## electron-dist: Build distributable Electron installers (.dmg, .exe, etc.)
-electron-dist: check-electron-deps check-backend-deps frontend-build
+electron-dist: check-electron-deps check-backend-deps frontend-build version-update
 	@printf "$(BLUE)🔨 Building Electron distributables...$(NC)\n"
 	@chmod +x build-exe-electron.sh
 	@./build-exe-electron.sh
@@ -377,3 +383,19 @@ electron-clean:
 	@rm -rf $(DIST_ELECTRON_DIR)
 	@rm -rf $(RELEASE_DIR)
 	@printf "$(GREEN)✓ Electron clean complete$(NC)\n"
+
+# =============================================================================
+# Version Commands
+# =============================================================================
+
+## version-update: Update package version based on commits (with confirmation)
+version-update:
+	@./scripts/update-version.sh
+
+## version-update-dry: Preview version changes without applying
+version-update-dry:
+	@./scripts/update-version.sh --dry-run
+
+## version-update-yes: Update version without confirmation prompt
+version-update-yes:
+	@./scripts/update-version.sh --yes
