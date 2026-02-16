@@ -51,6 +51,7 @@ interface PollSetupProps {
   initialTimer?: number;
   initialShowStatusBar?: boolean;
   showStartButton?: boolean;
+  hideStatusBarToggle?: boolean;
   externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
@@ -65,6 +66,7 @@ export function PollSetup ({
   initialTimer = POLL_TIMER.DEFAULT,
   initialShowStatusBar = true,
   showStartButton = true,
+  hideStatusBarToggle = false,
   externalConfig = null,
   externalFullOptions = null
 }: PollSetupProps) {
@@ -394,27 +396,29 @@ export function PollSetup ({
         </div>
 
         {/* Show Status Bar Toggle */}
-        <div className="flex items-end">
-          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showStatusBar
+        {!hideStatusBarToggle && (
+          <div className="flex items-end">
+            <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showStatusBar
               ? 'bg-purple-900/30 border-purple-500/50'
               : 'bg-slate-900/50 border-slate-700/50'
-            }`}>
-            <button
-              type="button"
-              onClick={() => handleShowStatusBarChange(!showStatusBar)}
-              disabled={disabled}
-              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showStatusBar
+              }`}>
+              <button
+                type="button"
+                onClick={() => handleShowStatusBarChange(!showStatusBar)}
+                disabled={disabled}
+                className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showStatusBar
                   ? 'bg-purple-600 border-purple-500 text-white'
                   : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {showStatusBar && '✓'}
-            </button>
-            <span className="text-sm text-slate-300 whitespace-nowrap">
-              📊 {t.poll.showStatusBar}
-            </span>
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {showStatusBar && '✓'}
+              </button>
+              <span className="text-sm text-slate-300 whitespace-nowrap">
+                📊 {t.poll.showStatusBar}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Options Grid with Checkboxes */}
@@ -427,8 +431,8 @@ export function PollSetup ({
             <div
               key={index}
               className={`flex items-center gap-2 p-2 rounded-lg border transition-all overflow-hidden ${selectedOptions[index]
-                  ? 'bg-purple-900/30 border-purple-500/50'
-                  : 'bg-slate-900/50 border-slate-700/50'
+                ? 'bg-purple-900/30 border-purple-500/50'
+                : 'bg-slate-900/50 border-slate-700/50'
                 }`}
             >
               <button
@@ -436,15 +440,15 @@ export function PollSetup ({
                 onClick={() => toggleOption(index)}
                 disabled={disabled}
                 className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${selectedOptions[index]
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                  ? 'bg-purple-600 border-purple-500 text-white'
+                  : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {selectedOptions[index] && '✓'}
               </button>
               <span className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-sm flex-shrink-0 ${selectedOptions[index]
-                  ? 'bg-gradient-to-br from-purple-600 to-purple-400 text-white'
-                  : 'bg-slate-700 text-slate-400'
+                ? 'bg-gradient-to-br from-purple-600 to-purple-400 text-white'
+                : 'bg-slate-700 text-slate-400'
                 }`}>
                 {index + 1}
               </span>

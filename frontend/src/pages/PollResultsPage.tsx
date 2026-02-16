@@ -279,6 +279,7 @@ export function PollResultsPage () {
             onChange={handleSetupChange}
             disabled={pollState.isRunning}
             showStartButton={false}
+            hideStatusBarToggle={true}
             externalConfig={setupConfig}
             externalFullOptions={fullOptionsConfig}
             initialQuestion={setupConfig?.question}
