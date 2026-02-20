@@ -31,9 +31,16 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   private reconnectCount = 0;
   private reconnectDelayMs: number;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private reconnectResetTimeout: NodeJS.Timeout | null = null;
   private connected = false;
 
-  constructor(
+  /**
+   * Time in milliseconds that a connection must be stable before resetting reconnect counter.
+   * This prevents infinite reconnect loops when connection succeeds but immediately drops.
+   */
+  private static readonly RECONNECT_RESET_DELAY_MS = 10000;
+
+  constructor (
     private readonly uniqueId: string,
     options: ConnectionOptions,
     private readonly reconnectConfig: ReconnectConfig = DEFAULT_RECONNECT_CONFIG,
@@ -52,14 +59,14 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   /**
    * Connect to TikTok live stream
    */
-  async connect(uniqueId?: string, options?: ConnectionOptions): Promise<ConnectionState> {
+  async connect (uniqueId?: string, options?: ConnectionOptions): Promise<ConnectionState> {
     return this.performConnect(false);
   }
 
   /**
    * Disconnect from TikTok
    */
-  disconnect(): void {
+  disconnect (): void {
     this.log('Client connection disconnected');
 
     this.clientDisconnected = true;
@@ -68,6 +75,11 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
+    }
+
+    if (this.reconnectResetTimeout) {
+      clearTimeout(this.reconnectResetTimeout);
+      this.reconnectResetTimeout = null;
     }
 
     try {
@@ -80,21 +92,21 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   /**
    * Check if connected
    */
-  isConnected(): boolean {
+  isConnected (): boolean {
     return this.connected && !this.clientDisconnected;
   }
 
   /**
    * Get the underlying connection for event forwarding
    */
-  getConnection(): WebcastPushConnection {
+  getConnection (): WebcastPushConnection {
     return this.connection;
   }
 
   /**
    * Set up connection event handlers
    */
-  private setupConnectionEvents(): void {
+  private setupConnectionEvents (): void {
     this.connection.on('streamEnd', () => {
       this.log('Stream ended, giving up connection');
       this.reconnectEnabled = false;
@@ -104,6 +116,13 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
       this.connected = false;
       this.onConnectionCountChange?.(-1);
       this.log('TikTok connection disconnected');
+
+      // Cancel reconnect state reset - connection was not stable
+      if (this.reconnectResetTimeout) {
+        clearTimeout(this.reconnectResetTimeout);
+        this.reconnectResetTimeout = null;
+      }
+
       this.scheduleReconnect();
     });
 
@@ -116,10 +135,10 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   /**
    * Perform connection attempt
    */
-  private async performConnect(isReconnect: boolean): Promise<ConnectionState> {
+  private async performConnect (isReconnect: boolean): Promise<ConnectionState> {
     try {
       const state = await this.connection.connect();
-      
+
       this.log(
         `${isReconnect ? 'Reconnected' : 'Connected'} to roomId ${state.roomId}`
       );
@@ -127,9 +146,21 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
       this.connected = true;
       this.onConnectionCountChange?.(1);
 
-      // Reset reconnect state
-      this.reconnectCount = 0;
-      this.reconnectDelayMs = this.reconnectConfig.initialDelayMs;
+      // Cancel any pending reconnect reset from previous connection
+      if (this.reconnectResetTimeout) {
+        clearTimeout(this.reconnectResetTimeout);
+        this.reconnectResetTimeout = null;
+      }
+
+      // Delay resetting reconnect state to prevent infinite loops
+      // Only reset after connection has been stable for a while
+      // This prevents rapid reconnect/disconnect cycles from looping forever
+      this.reconnectResetTimeout = setTimeout(() => {
+        this.reconnectCount = 0;
+        this.reconnectDelayMs = this.reconnectConfig.initialDelayMs;
+        this.reconnectResetTimeout = null;
+        this.log('Reconnect state reset after stable connection');
+      }, TikTokConnectionWrapper.RECONNECT_RESET_DELAY_MS);
 
       // Client disconnected while establishing connection
       if (this.clientDisconnected) {
@@ -165,7 +196,7 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   /**
    * Schedule a reconnection attempt
    */
-  private scheduleReconnect(reason?: string): void {
+  private scheduleReconnect (reason?: string): void {
     if (!this.reconnectEnabled) {
       return;
     }
@@ -198,7 +229,7 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   /**
    * Log message with prefix
    */
-  private log(message: string): void {
+  private log (message: string): void {
     if (this.enableLog) {
       console.log(`WRAPPER @${this.uniqueId}: ${message}`);
     }
@@ -208,7 +239,7 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
 /**
  * Factory function to create TikTok connection wrapper
  */
-export function createTikTokConnectionWrapper(
+export function createTikTokConnectionWrapper (
   onConnectionCountChange?: (delta: number) => void,
   enableLog: boolean = true
 ) {
