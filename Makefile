@@ -389,16 +389,16 @@ electron-clean:
 # =============================================================================
 
 ## bump-version: Update package version based on commits (with confirmation)
-bv: 
+bv: bump-version
 bump-version:
 	@./scripts/update-version.sh
 
 ## bump-version-dry: Preview version changes without applying
-bv-dry:
+bv-dry: bump-version-dry
 bump-version-dry:
 	@./scripts/update-version.sh --dry-run
 
 ## bump-version-yes: Update version without confirmation prompt
-bv-yes:
+bv-yes: bump-version-yes
 bump-version-yes:
 	@./scripts/update-version.sh --yes
