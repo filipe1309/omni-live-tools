@@ -1,5 +1,6 @@
 export { ProfilePicture } from './ProfilePicture';
 export { ConnectionForm } from './ConnectionForm';
+export { ConnectionStatusBanner } from './ConnectionStatusBanner';
 export { MultiPlatformConnectionForm } from './MultiPlatformConnectionForm';
 export { ConnectionModal } from './ConnectionModal';
 export { RoomStats } from './RoomStats';

@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePoll, useToast } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
-import { PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
+import { PollSetup, PollResults, VoteLog, PollControlButtons, ConnectionStatusBanner } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
@@ -17,7 +17,6 @@ export function PollPage () {
     tiktok,
     twitch,
     isAnyConnected,
-    connectedPlatforms,
     selectedPlatforms,
     autoReconnect,
     registerChatHandler,
@@ -323,55 +322,8 @@ export function PollPage () {
           </p>
         </div>
 
-        {/* Connection Status Section */}
-        <div className={`card mb-3 border transition-all duration-300 ${isAnyConnected
-          ? 'border-green-500/50 bg-green-500/5'
-          : 'border-slate-700/50'
-          }`}>
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">🔗 {t.poll.connection}</h2>
-              {/* Connection Status Indicator */}
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${isAnyConnected
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                : 'bg-slate-700/50 text-slate-400 border border-slate-600/30'
-                }`}>
-                <span className={`w-2 h-2 rounded-full ${isAnyConnected
-                  ? 'bg-green-400 animate-pulse'
-                  : 'bg-slate-500'
-                  }`} />
-                {isAnyConnected
-                  ? `${connectedPlatforms.length} ${t.common.platforms}`
-                  : t.common.disconnected}
-              </div>
-            </div>
-
-            {/* Connected platforms badges */}
-            <div className="flex flex-wrap gap-2">
-              {tiktok.isConnected && (
-                <div className="px-3 py-1.5 bg-tiktok-cyan/10 border border-tiktok-cyan/30 rounded-lg text-tiktok-cyan text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  TikTok: @{tiktok.username}
-                </div>
-              )}
-              {twitch.isConnected && (
-                <div className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400 text-sm flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  Twitch: #{twitch.channel}
-                </div>
-              )}
-
-              {/* Auto-reconnect status indicator */}
-              {autoReconnect && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-purple-900/30 border-purple-500/50">
-                  <span className="text-sm text-slate-300">
-                    🔄 {t.connection.autoReconnect} ✓
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Connection Status Banner */}
+        <ConnectionStatusBanner tiktok={tiktok} twitch={twitch} className="mb-3" />
 
         {/* Configuration Section */}
         <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
