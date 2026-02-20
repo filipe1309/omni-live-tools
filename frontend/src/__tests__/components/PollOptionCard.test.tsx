@@ -65,20 +65,20 @@ describe('PollOptionCard', () => {
   it('should render with compact size', () => {
     const { container } = render(<PollOptionCard {...defaultProps} size="compact" />);
     expect(container.firstChild).toBeInTheDocument();
-    // Compact size should have p-4 padding
-    expect(container.querySelector('.p-4')).toBeInTheDocument();
+    // Compact size should have p-2 padding
+    expect(container.querySelector('.p-2')).toBeInTheDocument();
   });
 
   it('should render with normal size by default', () => {
     const { container } = render(<PollOptionCard {...defaultProps} />);
-    // Normal size should have p-6 padding
-    expect(container.querySelector('.p-6')).toBeInTheDocument();
+    // Normal size should have p-3 padding
+    expect(container.querySelector('.p-3')).toBeInTheDocument();
   });
 
   it('should render with large size', () => {
     const { container } = render(<PollOptionCard {...defaultProps} size="large" />);
-    // Large size should have p-5 padding
-    expect(container.querySelector('.p-5')).toBeInTheDocument();
+    // Large size should have p-3 padding
+    expect(container.querySelector('.p-3')).toBeInTheDocument();
   });
 
   it('should apply winner styling when isWinner is true', () => {

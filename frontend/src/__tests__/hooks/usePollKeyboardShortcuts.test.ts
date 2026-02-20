@@ -15,7 +15,7 @@ describe('usePollKeyboardShortcuts', () => {
     vi.clearAllMocks();
   });
 
-  const triggerKeyDown = (key: string, options: { ctrlKey?: boolean } = {}) => {
+  const triggerKeyDown = (key: string, options: { ctrlKey?: boolean; shiftKey?: boolean } = {}) => {
     const event = new KeyboardEvent('keydown', { key, ...options });
     window.dispatchEvent(event);
   };
@@ -32,7 +32,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('m', { ctrlKey: true });
+    triggerKeyDown('M', { ctrlKey: true, shiftKey: true });
     expect(mockOnStart).toHaveBeenCalledTimes(1);
   });
 
@@ -48,7 +48,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('m', { ctrlKey: true });
+    triggerKeyDown('M', { ctrlKey: true, shiftKey: true });
     expect(mockOnStart).not.toHaveBeenCalled();
   });
 
@@ -64,11 +64,11 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('m', { ctrlKey: true });
+    triggerKeyDown('M', { ctrlKey: true, shiftKey: true });
     expect(mockOnStart).not.toHaveBeenCalled();
   });
 
-  it('should call onStop when CTRL+, is pressed during running poll', () => {
+  it('should call onStop when CTRL+SHIFT+, is pressed during running poll', () => {
     renderHook(() =>
       usePollKeyboardShortcuts({
         onStart: mockOnStart,
@@ -80,7 +80,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown(',', { ctrlKey: true });
+    triggerKeyDown(',', { ctrlKey: true, shiftKey: true });
     expect(mockOnStop).toHaveBeenCalledTimes(1);
   });
 
@@ -96,11 +96,11 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown(',', { ctrlKey: true });
+    triggerKeyDown(',', { ctrlKey: true, shiftKey: true });
     expect(mockOnStop).not.toHaveBeenCalled();
   });
 
-  it('should call onReset when CTRL+. is pressed and not running', () => {
+  it('should call onReset when CTRL+SHIFT+. is pressed and not running', () => {
     renderHook(() =>
       usePollKeyboardShortcuts({
         onStart: mockOnStart,
@@ -112,7 +112,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('.', { ctrlKey: true });
+    triggerKeyDown('.', { ctrlKey: true, shiftKey: true });
     expect(mockOnReset).toHaveBeenCalledTimes(1);
   });
 
@@ -128,7 +128,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('.', { ctrlKey: true });
+    triggerKeyDown('.', { ctrlKey: true, shiftKey: true });
     expect(mockOnReset).not.toHaveBeenCalled();
   });
 
@@ -148,8 +148,8 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    // Create event with input as target - Ctrl+M should work even in input
-    const event = new KeyboardEvent('keydown', { key: 'm', ctrlKey: true });
+    // Create event with input as target - Ctrl+Shift+M should work even in input
+    const event = new KeyboardEvent('keydown', { key: 'M', ctrlKey: true, shiftKey: true });
     Object.defineProperty(event, 'target', { value: input });
     window.dispatchEvent(event);
 
@@ -182,7 +182,7 @@ describe('usePollKeyboardShortcuts', () => {
     document.body.removeChild(input);
   });
 
-  it('should work with CTRL+M shortcut', () => {
+  it('should work with CTRL+SHIFT+M shortcut', () => {
     renderHook(() =>
       usePollKeyboardShortcuts({
         onStart: mockOnStart,
@@ -194,7 +194,7 @@ describe('usePollKeyboardShortcuts', () => {
       })
     );
 
-    triggerKeyDown('m', { ctrlKey: true });
+    triggerKeyDown('M', { ctrlKey: true, shiftKey: true });
     expect(mockOnStart).toHaveBeenCalledTimes(1);
   });
 
