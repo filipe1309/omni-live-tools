@@ -32,7 +32,7 @@ export interface SetupConfig {
 }
 
 /**
- * Full options configuration including all 12 options and selection state
+ * Full options configuration including all 4 options and selection state
  */
 export interface FullOptionsConfig {
   allOptions: string[];

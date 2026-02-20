@@ -83,7 +83,7 @@ export function PollPage () {
     showStatusBar?: boolean;
   } | null>(loadSavedSetupConfig);
 
-  // Full options config for persistence (all 12 options + selection state)
+  // Full options config for persistence (all 4 options + selection state)
   const savedFullOptions = loadFullOptionsConfig();
 
   // Flag to skip first onChange if we have saved config (to prevent overwriting)

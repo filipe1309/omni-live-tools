@@ -426,7 +426,7 @@ export function PollSetup ({
         <label className="block text-sm font-medium text-slate-300 mb-1">
           {t.poll.options} ({t.poll.optionsHint})
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {options.map((option, index) => (
             <div
               key={index}

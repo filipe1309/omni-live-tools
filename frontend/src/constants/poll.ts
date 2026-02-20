@@ -15,7 +15,7 @@ export const POLL_TIMER = {
 
 // Options settings
 export const POLL_OPTIONS = {
-  TOTAL: 12,
+  TOTAL: 4,
   MIN_SELECTED: 2,
 } as const;
 
@@ -25,26 +25,17 @@ export const QUESTION_HISTORY = {
   STORAGE_KEY: 'tiktok-poll-questionHistory',
 } as const;
 
-// Default poll options (fixed 12 options)
+// Default poll options (fixed 4 options)
 export const DEFAULT_OPTIONS = [
   'Sim',
   'Não',
   'Correr',
   'Pular',
-  'Laboratório',
-  '',
-  '',
-  '',
-  '',
-  '',
-  '',
-  '',
 ] as const;
 
 // Default selected options (indices 0 and 1 - "Sim" and "Não")
 export const DEFAULT_SELECTED_OPTIONS = [
-  true, true, false, false, false, false,
-  false, false, false, false, false, false,
+  true, true, false, false,
 ] as const;
 
 // Default poll options as typed PollOption array (for components)
