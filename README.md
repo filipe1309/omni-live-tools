@@ -31,12 +31,15 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 - 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE and Twitch instantly
 - 🌐 **Multi-Platform Support** - Connect to TikTok and Twitch simultaneously
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
-- 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software
+- 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with enhanced Twitch integration
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
-- � **Multi-language Support** - Available in Portuguese (PT-BR) and English (EN)
-- �🏗️ **Clean Architecture** - Well-structured TypeScript codebase
+- 🌍 **Multi-language Support** - Available in Portuguese (PT-BR) and English (EN) with in-app language selector
+- 🏗️ **Clean Architecture** - Well-structured TypeScript codebase
 - ⚡ **Rate Limiting** - Built-in protection against excessive requests
 - 🔌 **Socket.IO Integration** - Real-time bidirectional communication
+- 🔄 **Auto-Reconnect** - Automatic reconnection with visual indicator when connection is lost
+- 🔔 **Notification Sounds** - Audio feedback for poll events
+- ✨ **Enhanced UI** - Neon glow effects, animations, and video splash screens
 
 ## 🌐 Supported Platforms
 
@@ -81,7 +84,10 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 - **Real-time results** - Vote counts and percentages update instantly
 - **Platform badges** - Visual indicators show which platform each vote came from
 - **Vote logging** - Optional detailed log of each vote with platform info
-- **Timer display** - Countdown shows remaining time
+- **Timer display** - Countdown shows remaining time with glitch animation effects
+- **Notification sounds** - Audio feedback when votes are received
+- **Auto-reconnect** - Automatically reconnects if connection is lost during a poll
+- **Neon glow effects** - Enhanced visual feedback with shake animations
 
 ### 💬 Real-time Chat Reading
 
@@ -101,10 +107,11 @@ The application reads chat messages from TikTok LIVE and Twitch in real-time, di
 
 - **Multi-platform support** - Connect to TikTok and Twitch simultaneously
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
-- **OBS overlay** - Dedicated page optimized for streaming software
+- **OBS overlay** - Dedicated page optimized for streaming software with enhanced Twitch integration
 - **Rate limiting** - Protect against excessive requests
-- **Multi-language support** - Display messages in Portuguese (PT-BR) or English (
-EN)
+- **Multi-language support** - Display messages in Portuguese (PT-BR) or English (EN)
+- **Auto-reconnect** - Automatically reconnects if connection is lost
+- **Connection modal** - Easy connection management with language selector
 
 
 
