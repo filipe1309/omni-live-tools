@@ -1,20 +1,24 @@
 import { useState } from 'react';
 import { useLanguage } from '@/i18n';
+import { PlatformSelector } from '@/components';
+import { PlatformType } from '@/types';
 
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
+function hexToRgb (hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    }
     : { r: 0, g: 0, b: 0 };
 }
 
-export function OverlayPage() {
+export function OverlayPage () {
   const { t } = useLanguage();
-  const [username, setUsername] = useState('jamesbonfim');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>([PlatformType.TIKTOK]);
+  const [tiktokUsername, setTiktokUsername] = useState('jamesbonfim');
+  const [twitchChannel, setTwitchChannel] = useState('');
   const [settings, setSettings] = useState({
     showChats: true,
     showGifts: true,
@@ -28,6 +32,9 @@ export function OverlayPage() {
   const [fontSize, setFontSize] = useState('1.3em');
   const [copied, setCopied] = useState(false);
 
+  const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
+  const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
+
   const FONT_SIZE_OPTIONS = [
     { value: '1em', label: `${t.overlay.fontSizes.small} (1em)` },
     { value: '1.3em', label: `${t.overlay.fontSizes.medium} (1.3em)` },
@@ -36,30 +43,45 @@ export function OverlayPage() {
   ];
 
   const baseUrl = window.location.origin;
-  
+
   const generateUrl = () => {
-    if (!username.trim()) return '';
-    
+    // Require at least one platform with a valid identifier
+    const hasTikTok = showTikTok && tiktokUsername.trim();
+    const hasTwitch = showTwitch && twitchChannel.trim();
+
+    if (!hasTikTok && !hasTwitch) return '';
+
     const params = new URLSearchParams();
-    params.set('username', username);
+
+    // Platform selection
+    params.set('platforms', selectedPlatforms.join(','));
+
+    if (hasTikTok) {
+      params.set('username', tiktokUsername);
+    }
+    if (hasTwitch) {
+      params.set('channel', twitchChannel);
+    }
+
     params.set('showChats', settings.showChats ? '1' : '0');
     params.set('showGifts', settings.showGifts ? '1' : '0');
     params.set('showLikes', settings.showLikes ? '1' : '0');
     params.set('showJoins', settings.showJoins ? '1' : '0');
     params.set('showFollows', settings.showFollows ? '1' : '0');
     params.set('showShares', settings.showShares ? '1' : '0');
-    
+
     // Convert hex colors to rgb format for OBS compatibility
     const bgRgb = hexToRgb(bgColor);
     const fontRgb = hexToRgb(fontColor);
     params.set('bgColor', `rgb(${bgRgb.r},${bgRgb.g},${bgRgb.b})`);
     params.set('fontColor', `rgb(${fontRgb.r},${fontRgb.g},${fontRgb.b})`);
     params.set('fontSize', fontSize);
-    
+
     return `${baseUrl}/obs?${params.toString()}`;
   };
 
   const overlayUrl = generateUrl();
+  const hasValidInput = (showTikTok && tiktokUsername.trim()) || (showTwitch && twitchChannel.trim());
 
   const copyToClipboard = () => {
     if (overlayUrl) {
@@ -79,19 +101,45 @@ export function OverlayPage() {
         </p>
 
         <div className="space-y-6">
-          {/* Username Input */}
+          {/* Platform Selector */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              {t.overlay.tiktokUser}
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={t.overlay.userPlaceholder}
-              className="input-field w-full"
+            <PlatformSelector
+              selectedPlatforms={selectedPlatforms}
+              onChange={setSelectedPlatforms}
             />
           </div>
+
+          {/* TikTok Username Input */}
+          {showTikTok && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                {t.connection.tiktokUser}
+              </label>
+              <input
+                type="text"
+                value={tiktokUsername}
+                onChange={(e) => setTiktokUsername(e.target.value)}
+                placeholder={t.connection.userPlaceholder}
+                className="input-field w-full"
+              />
+            </div>
+          )}
+
+          {/* Twitch Channel Input */}
+          {showTwitch && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                {t.connection.twitchChannel}
+              </label>
+              <input
+                type="text"
+                value={twitchChannel}
+                onChange={(e) => setTwitchChannel(e.target.value)}
+                placeholder={t.connection.channelPlaceholder}
+                className="input-field w-full"
+              />
+            </div>
+          )}
 
           {/* Settings Toggles */}
           <div>
@@ -128,7 +176,7 @@ export function OverlayPage() {
             <label className="block text-sm font-medium text-slate-300 mb-3">
               {t.overlay.appearance}
             </label>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Background Color */}
@@ -199,12 +247,12 @@ export function OverlayPage() {
             <label className="block text-sm font-medium text-slate-300 mb-3">
               {t.overlay.preview}
             </label>
-            <div 
+            <div
               className="p-4 rounded-lg"
-              style={{ 
-                backgroundColor: bgColor, 
-                color: fontColor, 
-                fontSize: fontSize 
+              style={{
+                backgroundColor: bgColor,
+                color: fontColor,
+                fontSize: fontSize
               }}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -225,7 +273,7 @@ export function OverlayPage() {
       </div>
 
       {/* Generated URL */}
-      {username && (
+      {hasValidInput && (
         <div className="card">
           <h3 className="text-lg font-bold mb-4">📋 {t.overlay.yourOverlayUrl}</h3>
           <div className="flex gap-3">
@@ -238,14 +286,14 @@ export function OverlayPage() {
             <button onClick={copyToClipboard} className="btn-secondary">
               {copied ? `✅ ${t.common.copied}` : `📋 ${t.common.copy}`}
             </button>
-            <button 
+            <button
               onClick={() => window.open(overlayUrl, '_blank')}
               className="btn-primary"
             >
               🚀 {t.common.open}
             </button>
           </div>
-          
+
           <div className="mt-6 p-4 bg-slate-700/50 rounded-lg">
             <h4 className="font-bold text-white mb-2">{t.overlay.howToUse}</h4>
             <ol className="text-sm text-slate-300 space-y-2 list-decimal list-inside">

@@ -9,20 +9,41 @@ interface ObsChatMessageProps {
  * Chat message component for OBS overlay
  * Matches the style from public/app.js addChatItem function
  */
-export function ObsChatMessage({ item, fontColor }: ObsChatMessageProps) {
+export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
+  const isTwitch = item.platform === 'twitch';
+  const profileUrl = isTwitch
+    ? `https://www.twitch.tv/${item.user.uniqueId}`
+    : `https://www.tiktok.com/@${item.user.uniqueId}`;
+
+  const hasProfilePicture = item.user.profilePictureUrl && item.user.profilePictureUrl.trim() !== '';
+  const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0).toUpperCase();
+
   return (
     <div className="flex items-start gap-2">
-      <img
-        src={item.user.profilePictureUrl}
-        alt=""
-        className="w-5 h-5 rounded-full flex-shrink-0"
-      />
+      {hasProfilePicture ? (
+        <img
+          src={item.user.profilePictureUrl}
+          alt=""
+          className="w-5 h-5 rounded-full flex-shrink-0"
+        />
+      ) : (
+        <div
+          className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
+          style={{
+            backgroundColor: isTwitch ? '#9146ff' : '#00f2ea',
+            color: '#fff'
+          }}
+        >
+          {initial}
+        </div>
+      )}
       <span>
         <a
-          href={`https://www.tiktok.com/@${item.user.uniqueId}`}
+          href={profileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[rgb(102,143,217)] font-bold hover:underline"
+          className="font-bold hover:underline"
+          style={{ color: isTwitch ? '#9146ff' : 'rgb(102,143,217)' }}
         >
           {item.user.uniqueId}
         </a>

@@ -92,7 +92,7 @@ export const ptBR = {
   // Overlay Page
   overlay: {
     title: 'Gerar URL do Overlay',
-    description: 'Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming. O overlay conectará automaticamente e exibirá os eventos da LIVE do TikTok especificada.',
+    description: 'Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming. O overlay conectará automaticamente e exibirá eventos do TikTok LIVE e/ou streams da Twitch.',
     tiktokUser: 'Usuário do TikTok',
     userPlaceholder: 'Digite o @usuário',
     displayEvents: 'Exibir Eventos',

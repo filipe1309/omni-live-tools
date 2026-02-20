@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useTikTokConnection } from '@/hooks';
+import { useMultiPlatformConnection } from '@/hooks';
 import { ObsEventContainer } from '@/components/chat';
-import type { ChatItem, ChatMessage, GiftMessage, LikeMessage, MemberMessage, SocialMessage, RoomUserMessage } from '@/types';
+import type { ChatItem, ChatMessage, GiftMessage, LikeMessage, MemberMessage, SocialMessage, RoomUserMessage, UnifiedChatMessage } from '@/types';
 
 // Generate unique ID for chat items
 let chatIdCounter = 0;
-function generateId(): string {
+function generateId (): string {
   return `obs-${Date.now()}-${++chatIdCounter}`;
 }
 
 // Check if gift is in pending streak
-function isPendingStreak(gift: GiftMessage): boolean {
+function isPendingStreak (gift: GiftMessage): boolean {
   return gift.giftType === 1 && !gift.repeatEnd;
 }
 
 interface Settings {
+  platforms: string[];
   username: string;
+  channel: string;
   showChats: boolean;
   showGifts: boolean;
   showLikes: boolean;
@@ -34,7 +36,7 @@ interface RoomStats {
   diamondsCount: number;
 }
 
-export function ObsOverlayPage() {
+export function ObsOverlayPage () {
   const [searchParams] = useSearchParams();
   const [items, setItems] = useState<ChatItem[]>([]);
   const [roomStats, setRoomStats] = useState<RoomStats>({
@@ -43,13 +45,16 @@ export function ObsOverlayPage() {
     diamondsCount: 0,
   });
   const [connectionState, setConnectionState] = useState<string>('');
-  
+
   // Join message delay handling (matches public/app.js)
   const joinMsgDelayRef = useRef(0);
-  
+
   // Parse settings from URL
+  const platformsParam = searchParams.get('platforms');
   const settings: Settings = {
+    platforms: platformsParam ? platformsParam.split(',') : ['tiktok'],
     username: searchParams.get('username') || '',
+    channel: searchParams.get('channel') || '',
     showChats: searchParams.get('showChats') !== '0',
     showGifts: searchParams.get('showGifts') !== '0',
     showLikes: searchParams.get('showLikes') !== '0',
@@ -61,21 +66,25 @@ export function ObsOverlayPage() {
     fontSize: searchParams.get('fontSize') || '1.3em',
   };
 
+  const showTikTok = settings.platforms.includes('tiktok') && settings.username;
+  const showTwitch = settings.platforms.includes('twitch') && settings.channel;
+
   // Add chat item with optional summarize behavior (for join messages)
   const addItem = useCallback((
     type: ChatItem['type'],
     user: ChatMessage | LikeMessage | MemberMessage | SocialMessage,
     content: string,
     color?: string,
-    isTemporary = false
+    isTemporary = false,
+    platform: 'tiktok' | 'twitch' = 'tiktok'
   ) => {
     setItems(prev => {
       // Remove temporary items when adding new non-temporary messages
       const filtered = isTemporary ? prev : prev.filter(item => !item.isTemporary);
-      
+
       // Trim to max 500 items, keep latest 300
       const trimmed = filtered.length > 500 ? filtered.slice(-300) : filtered;
-      
+
       return [...trimmed, {
         id: generateId(),
         type,
@@ -84,6 +93,7 @@ export function ObsOverlayPage() {
         color,
         timestamp: new Date(),
         isTemporary,
+        platform,
       }];
     });
   }, []);
@@ -96,9 +106,9 @@ export function ObsOverlayPage() {
     setItems(prev => {
       // Find existing streak item
       const existingIndex = prev.findIndex(
-        item => item.type === 'gift' && 
-                item.giftData && 
-                `${item.giftData.userId}_${item.giftData.giftId}` === streakId
+        item => item.type === 'gift' &&
+          item.giftData &&
+          `${item.giftData.userId}_${item.giftData.giftId}` === streakId
       );
 
       if (existingIndex >= 0) {
@@ -130,15 +140,35 @@ export function ObsOverlayPage() {
     });
   }, []);
 
-  const connection = useTikTokConnection({
-    // Chat messages
-    onChat: (msg: ChatMessage) => {
+  const connection = useMultiPlatformConnection({
+    // TikTok Chat messages
+    onTikTokChat: (msg: ChatMessage) => {
       if (settings.showChats) {
-        addItem('chat', msg, msg.comment);
+        addItem('chat', msg, msg.comment, undefined, false, 'tiktok');
       }
     },
-    
-    // Gift handling with diamond tracking
+
+    // Twitch Chat messages
+    onTwitchChat: (msg: UnifiedChatMessage) => {
+      if (settings.showChats) {
+        // Convert Twitch message to ChatItem format
+        const twitchUser = {
+          uniqueId: msg.username,
+          nickname: msg.displayName,
+          userId: msg.odlUserId,
+          profilePictureUrl: '',
+          followRole: 0,
+          userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
+          isModerator: msg.isMod || false,
+          isNewGifter: false,
+          isSubscriber: msg.isSubscriber || false,
+          topGifterRank: null,
+        };
+        addItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, 'twitch');
+      }
+    },
+
+    // Gift handling with diamond tracking (TikTok only)
     onGift: (msg: GiftMessage) => {
       // Track diamonds for completed gifts (non-pending streaks)
       if (!isPendingStreak(msg) && msg.diamondCount > 0) {
@@ -147,13 +177,13 @@ export function ObsOverlayPage() {
           diamondsCount: prev.diamondsCount + (msg.diamondCount * msg.repeatCount),
         }));
       }
-      
+
       if (settings.showGifts) {
         addGiftItem(msg);
       }
     },
-    
-    // Like handling with stats update
+
+    // Like handling with stats update (TikTok only)
     onLike: (msg: LikeMessage) => {
       // Update total like count
       if (typeof msg.totalLikeCount === 'number') {
@@ -162,17 +192,17 @@ export function ObsOverlayPage() {
           likeCount: msg.totalLikeCount,
         }));
       }
-      
+
       if (settings.showLikes && typeof msg.likeCount === 'number') {
         // Format label like public/app.js: "{user} liked x{count}"
         const label = msg.label
           .replace('{0:user}', '')
           .replace('likes', `${msg.likeCount} likes`);
-        addItem('like', msg, label, '#447dd4');
+        addItem('like', msg, label, '#447dd4', false, 'tiktok');
       }
     },
-    
-    // Member join handling with delay (matches public/app.js joinMsgDelay logic)
+
+    // Member join handling with delay (TikTok only)
     onMember: (msg: MemberMessage) => {
       if (!settings.showJoins) return;
 
@@ -185,25 +215,25 @@ export function ObsOverlayPage() {
 
       setTimeout(() => {
         joinMsgDelayRef.current -= addDelay;
-        addItem('member', msg, 'joined', '#21b2c2', true);
+        addItem('member', msg, 'joined', '#21b2c2', true, 'tiktok');
       }, addDelay > 0 ? joinMsgDelayRef.current - addDelay : 0);
     },
-    
-    // Social events (follow & share)
+
+    // Social events (follow & share) - TikTok only
     onSocial: (msg: SocialMessage) => {
       const isFollow = msg.displayType.includes('follow');
       const isShare = msg.displayType.includes('share');
-      
+
       if (isFollow && settings.showFollows) {
         const label = msg.label.replace('{0:user}', '');
-        addItem('social', msg, label, '#ff005e');
+        addItem('social', msg, label, '#ff005e', false, 'tiktok');
       } else if (isShare && settings.showShares) {
         const label = msg.label.replace('{0:user}', '');
-        addItem('social', msg, label, '#2fb816');
+        addItem('social', msg, label, '#2fb816', false, 'tiktok');
       }
     },
-    
-    // Room user stats (viewer count)
+
+    // Room user stats (viewer count) - TikTok only
     onRoomUser: (msg: RoomUserMessage) => {
       if (typeof msg.viewerCount === 'number') {
         setRoomStats(prev => ({
@@ -214,23 +244,35 @@ export function ObsOverlayPage() {
     },
   });
 
-  // Auto-connect when username is provided (matches public/app.js behavior)
+  // Auto-connect to TikTok when username is provided
   useEffect(() => {
-    if (settings.username) {
-      setConnectionState('Connecting...');
-      connection.connect(settings.username, { enableExtendedGiftInfo: true })
+    if (showTikTok) {
+      setConnectionState(prev => prev ? `${prev}\nTikTok: Connecting...` : 'TikTok: Connecting...');
+      connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
         .then((state) => {
-          setConnectionState(`Connected to roomId ${state.roomId}`);
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+            lines.push(`TikTok: Connected to roomId ${state.roomId}`);
+            return lines.join('\n');
+          });
           // Reset stats on new connection
           setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
         })
         .catch((error) => {
-          setConnectionState(String(error));
-          // Schedule reconnect after 30s (like public/app.js)
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+            lines.push(`TikTok: ${String(error)}`);
+            return lines.join('\n');
+          });
+          // Schedule reconnect after 30s
           if (settings.username) {
             setTimeout(() => {
-              setConnectionState('Reconnecting...');
-              connection.connect(settings.username, { enableExtendedGiftInfo: true })
+              setConnectionState(prev => {
+                const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+                lines.push('TikTok: Reconnecting...');
+                return lines.join('\n');
+              });
+              connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
                 .catch(console.error);
             }, 30000);
           }
@@ -238,43 +280,93 @@ export function ObsOverlayPage() {
     }
   }, [settings.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle stream end reconnection (matches public/app.js streamEnd handler)
+  // Auto-connect to Twitch when channel is provided
   useEffect(() => {
-    if (settings.username && connection.status === 'disconnected' && connectionState.includes('Connected')) {
-      setConnectionState('Stream ended. Reconnecting in 30s...');
+    if (showTwitch) {
+      setConnectionState(prev => prev ? `${prev}\nTwitch: Connecting...` : 'Twitch: Connecting...');
+      connection.twitch.connect(settings.channel)
+        .then((state) => {
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('Twitch:'));
+            lines.push(`Twitch: Connected to ${state.channel}`);
+            return lines.join('\n');
+          });
+        })
+        .catch((error) => {
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('Twitch:'));
+            lines.push(`Twitch: ${String(error)}`);
+            return lines.join('\n');
+          });
+          // Schedule reconnect after 30s
+          if (settings.channel) {
+            setTimeout(() => {
+              setConnectionState(prev => {
+                const lines = prev.split('\n').filter(l => !l.startsWith('Twitch:'));
+                lines.push('Twitch: Reconnecting...');
+                return lines.join('\n');
+              });
+              connection.twitch.connect(settings.channel)
+                .catch(console.error);
+            }, 30000);
+          }
+        });
+    }
+  }, [settings.channel]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle TikTok stream end reconnection
+  useEffect(() => {
+    if (showTikTok && connection.tiktok.status === 'disconnected' && connectionState.includes('TikTok: Connected')) {
+      setConnectionState(prev => {
+        const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+        lines.push('TikTok: Stream ended. Reconnecting in 30s...');
+        return lines.join('\n');
+      });
       const timeout = setTimeout(() => {
-        setConnectionState('Connecting...');
-        connection.connect(settings.username, { enableExtendedGiftInfo: true })
+        setConnectionState(prev => {
+          const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+          lines.push('TikTok: Connecting...');
+          return lines.join('\n');
+        });
+        connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
           .then((state) => {
-            setConnectionState(`Connected to roomId ${state.roomId}`);
+            setConnectionState(prev => {
+              const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+              lines.push(`TikTok: Connected to roomId ${state.roomId}`);
+              return lines.join('\n');
+            });
             setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
           })
           .catch((error) => {
-            setConnectionState(String(error));
+            setConnectionState(prev => {
+              const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
+              lines.push(`TikTok: ${String(error)}`);
+              return lines.join('\n');
+            });
           });
       }, 30000);
       return () => clearTimeout(timeout);
     }
-  }, [connection.status, settings.username]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connection.tiktok.status, settings.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!settings.username) {
+  if (!showTikTok && !showTwitch) {
     return (
-      <div 
+      <div
         className="flex items-center justify-center h-screen"
-        style={{ 
+        style={{
           backgroundColor: settings.bgColor,
           color: settings.fontColor,
         }}
       >
-        No username provided in URL
+        No username or channel provided in URL
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       className="h-screen overflow-hidden p-2"
-      style={{ 
+      style={{
         backgroundColor: settings.bgColor,
         color: settings.fontColor,
         fontSize: settings.fontSize,
@@ -288,20 +380,22 @@ export function ObsOverlayPage() {
             <td className="align-top">
               <pre className="m-0 whitespace-pre-wrap text-sm">{connectionState}</pre>
             </td>
-            <td className="text-right align-top">
-              <div className="text-sm">
-                Viewers: <strong className="mr-5">{roomStats.viewerCount.toLocaleString()}</strong>
-                Likes: <strong className="mr-5">{roomStats.likeCount.toLocaleString()}</strong>
-                Earned Diamonds: <strong>{roomStats.diamondsCount.toLocaleString()}</strong>
-              </div>
-            </td>
+            {showTikTok && (
+              <td className="text-right align-top">
+                <div className="text-sm">
+                  Viewers: <strong className="mr-5">{roomStats.viewerCount.toLocaleString()}</strong>
+                  Likes: <strong className="mr-5">{roomStats.likeCount.toLocaleString()}</strong>
+                  Earned Diamonds: <strong>{roomStats.diamondsCount.toLocaleString()}</strong>
+                </div>
+              </td>
+            )}
           </tr>
         </tbody>
       </table>
 
       {/* Events Container (matches public/obs.html eventcontainer) */}
-      <ObsEventContainer 
-        items={items} 
+      <ObsEventContainer
+        items={items}
         fontColor={settings.fontColor}
         maxHeight="calc(100vh - 90px)"
       />
