@@ -25,6 +25,8 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     setTikTokUsername,
     setTwitchChannel,
     isAnyConnected,
+    autoReconnect,
+    setAutoReconnect,
   } = useConnectionContext();
 
   const { t } = useLanguage();
@@ -246,6 +248,26 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Auto-reconnect option */}
+          <div className={`flex items-center justify-center gap-3 p-3 rounded-lg border transition-all ${autoReconnect
+            ? 'bg-purple-900/30 border-purple-500/50'
+            : 'bg-slate-700/30 border-slate-700/50'
+            }`}>
+            <button
+              type="button"
+              onClick={() => setAutoReconnect(!autoReconnect)}
+              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${autoReconnect
+                ? 'bg-purple-600 border-purple-500 text-white'
+                : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                }`}
+            >
+              {autoReconnect && '✓'}
+            </button>
+            <span className="text-sm text-slate-300">
+              🔄 {t.connection.autoReconnect}
+            </span>
           </div>
         </div>
       </div>

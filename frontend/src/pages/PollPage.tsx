@@ -19,17 +19,14 @@ export function PollPage () {
     isAnyConnected,
     connectedPlatforms,
     selectedPlatforms,
+    autoReconnect,
     registerChatHandler,
     registerTikTokChatHandler,
     registerDisconnectHandler,
     registerSocketReconnectHandler,
   } = useConnectionContext();
 
-  // Auto-reconnect state (keep this for popup functionality)
-  const [autoReconnect, setAutoReconnect] = useState(() => {
-    const saved = localStorage.getItem('tiktok-poll-autoReconnect');
-    return saved === 'true';
-  });
+  // Keep ref for stable handler callbacks
   const autoReconnectRef = useRef(autoReconnect);
   useEffect(() => {
     autoReconnectRef.current = autoReconnect;
@@ -232,77 +229,10 @@ export function PollPage () {
     }
   }, [pendingReconnect, tiktok, twitch, selectedPlatforms, toast, t]);
 
-  // Polling auto-reconnect: try every 10 seconds if disconnected and auto-reconnect is enabled
-  useEffect(() => {
-    if (!autoReconnect) return;
-    if (isAnyConnected) return;
-
-    const tiktokSelected = selectedPlatforms.includes('tiktok' as PlatformType);
-    const twitchSelected = selectedPlatforms.includes('twitch' as PlatformType);
-
-    // Check if we have any credentials to reconnect with
-    const hasTikTokCredentials = tiktokSelected && tiktok.username;
-    const hasTwitchCredentials = twitchSelected && twitch.channelName;
-
-    if (!hasTikTokCredentials && !hasTwitchCredentials) return;
-
-    console.log('[PollPage] Starting auto-reconnect polling (every 10s)');
-
-    // Try to reconnect immediately on first run
-    const attemptReconnect = () => {
-      if (!autoReconnectRef.current) return;
-
-      // Reconnect TikTok if needed
-      if (tiktokSelected && tiktok.username && !tiktok.isConnected && tiktok.status !== 'connecting') {
-        console.log('[PollPage] Auto-reconnect attempt to TikTok:', tiktok.username);
-        tiktok.connect(tiktok.username)
-          .then(() => {
-            console.log('[PollPage] TikTok auto-reconnect successful!');
-            toast.success(interpolate(t.toast.tiktokReconnected, { username: tiktok.username }));
-          })
-          .catch((error: unknown) => {
-            console.log('[PollPage] TikTok auto-reconnect failed, will retry:', error);
-          });
-      }
-
-      // Reconnect Twitch if needed
-      if (twitchSelected && twitch.channelName && !twitch.isConnected && twitch.status !== 'connecting') {
-        console.log('[PollPage] Auto-reconnect attempt to Twitch:', twitch.channelName);
-        twitch.connect(twitch.channelName)
-          .then(() => {
-            console.log('[PollPage] Twitch auto-reconnect successful!');
-            toast.success(interpolate(t.toast.twitchReconnected, { channel: twitch.channelName }));
-          })
-          .catch((error: unknown) => {
-            console.log('[PollPage] Twitch auto-reconnect failed, will retry:', error);
-          });
-      }
-    };
-
-    // First attempt after 3 seconds
-    const initialTimeout = setTimeout(attemptReconnect, 3000);
-
-    // Then retry every 10 seconds
-    const intervalId = setInterval(attemptReconnect, 10000);
-
-    return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(intervalId);
-    };
-  }, [autoReconnect, isAnyConnected, tiktok, twitch, selectedPlatforms, toast, t]);
-
   // Broadcast connection status to popup (connected if any platform is connected)
   useEffect(() => {
     setConnectionStatus(isAnyConnected);
   }, [isAnyConnected, setConnectionStatus]);
-
-  const handleAutoReconnectChange = (enabled: boolean) => {
-    setAutoReconnect(enabled);
-    localStorage.setItem('tiktok-poll-autoReconnect', String(enabled));
-    if (enabled) {
-      toast.success(t.connection.autoReconnectEnabled);
-    }
-  };
 
   // Register reconnect callback for popup - only once on mount
   useEffect(() => {
@@ -431,25 +361,14 @@ export function PollPage () {
                 </div>
               )}
 
-              {/* Auto-reconnect checkbox */}
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${autoReconnect
-                ? 'bg-purple-900/30 border-purple-500/50'
-                : 'bg-slate-900/50 border-slate-700/50'
-                }`}>
-                <button
-                  type="button"
-                  onClick={() => handleAutoReconnectChange(!autoReconnect)}
-                  className={`w-4 h-4 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-xs ${autoReconnect
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                    }`}
-                >
-                  {autoReconnect && '✓'}
-                </button>
-                <span className="text-sm text-slate-300">
-                  🔄 {t.connection.autoReconnect}
-                </span>
-              </div>
+              {/* Auto-reconnect status indicator */}
+              {autoReconnect && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-purple-900/30 border-purple-500/50">
+                  <span className="text-sm text-slate-300">
+                    🔄 {t.connection.autoReconnect} ✓
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
 import { useMultiPlatformConnection, useToast } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
 import type {
@@ -48,6 +48,9 @@ interface ConnectionContextType {
   // Modal state
   showConnectionModal: boolean;
   setShowConnectionModal: (show: boolean) => void;
+  // Auto-reconnect
+  autoReconnect: boolean;
+  setAutoReconnect: (enabled: boolean) => void;
   // Event registration for pages
   registerChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
   registerTikTokChatHandler: (handler: (msg: ChatMessage) => void) => () => void;
@@ -85,6 +88,16 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
 
   // Modal state
   const [showConnectionModal, setShowConnectionModal] = useState(false);
+
+  // Auto-reconnect state
+  const [autoReconnect, setAutoReconnectState] = useState(() => {
+    const saved = localStorage.getItem('shared-autoReconnect');
+    return saved === 'true';
+  });
+  const autoReconnectRef = useRef(autoReconnect);
+  useEffect(() => {
+    autoReconnectRef.current = autoReconnect;
+  }, [autoReconnect]);
 
   const [selectedPlatforms, setSelectedPlatformsState] = useState<PlatformType[]>(() => {
     const saved = localStorage.getItem('shared-selected-platforms');
@@ -245,6 +258,71 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     }
   }, [connection.twitch, toast, t, handleSetTwitchChannel]);
 
+  // Auto-reconnect handler
+  const setAutoReconnect = useCallback((enabled: boolean) => {
+    setAutoReconnectState(enabled);
+    localStorage.setItem('shared-autoReconnect', String(enabled));
+    if (enabled) {
+      toast.success(t.connection.autoReconnectEnabled);
+    }
+  }, [toast, t]);
+
+  // Auto-reconnect polling effect
+  useEffect(() => {
+    if (!autoReconnect) return;
+    if (connection.isAnyConnected) return;
+
+    const tiktokSelected = selectedPlatforms.includes('tiktok' as PlatformType);
+    const twitchSelected = selectedPlatforms.includes('twitch' as PlatformType);
+
+    // Check if we have any credentials to reconnect with
+    const hasTikTokCredentials = tiktokSelected && tiktokUsername;
+    const hasTwitchCredentials = twitchSelected && twitchChannel;
+
+    if (!hasTikTokCredentials && !hasTwitchCredentials) return;
+
+    console.log('[ConnectionContext] Starting auto-reconnect polling (every 10s)');
+
+    const attemptReconnect = () => {
+      if (!autoReconnectRef.current) return;
+
+      // Reconnect TikTok if needed
+      if (tiktokSelected && tiktokUsername && !connection.tiktok.isConnected && connection.tiktok.status !== 'connecting') {
+        console.log('[ConnectionContext] Auto-reconnect attempt to TikTok:', tiktokUsername);
+        connectTikTok(tiktokUsername)
+          .then(() => {
+            console.log('[ConnectionContext] TikTok auto-reconnect successful!');
+          })
+          .catch((error: unknown) => {
+            console.log('[ConnectionContext] TikTok auto-reconnect failed, will retry:', error);
+          });
+      }
+
+      // Reconnect Twitch if needed
+      if (twitchSelected && twitchChannel && !connection.twitch.isConnected && connection.twitch.status !== 'connecting') {
+        console.log('[ConnectionContext] Auto-reconnect attempt to Twitch:', twitchChannel);
+        connectTwitch(twitchChannel)
+          .then(() => {
+            console.log('[ConnectionContext] Twitch auto-reconnect successful!');
+          })
+          .catch((error: unknown) => {
+            console.log('[ConnectionContext] Twitch auto-reconnect failed, will retry:', error);
+          });
+      }
+    };
+
+    // First attempt after 3 seconds
+    const initialTimeout = setTimeout(attemptReconnect, 3000);
+
+    // Then retry every 10 seconds
+    const intervalId = setInterval(attemptReconnect, 10000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(intervalId);
+    };
+  }, [autoReconnect, connection.isAnyConnected, connection.tiktok, connection.twitch, selectedPlatforms, tiktokUsername, twitchChannel, connectTikTok, connectTwitch]);
+
   const value: ConnectionContextType = {
     tiktok: {
       ...connection.tiktok,
@@ -264,6 +342,8 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     setTwitchChannel: handleSetTwitchChannel,
     showConnectionModal,
     setShowConnectionModal,
+    autoReconnect,
+    setAutoReconnect,
     registerChatHandler,
     registerTikTokChatHandler,
     registerGiftHandler,
