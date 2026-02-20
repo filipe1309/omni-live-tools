@@ -447,4 +447,98 @@
   .nav-item.nav-language .nav-icon {
     color: #60a5fa;
   }
+
+  /* Connection Button - Dedicated Styles */
+  .connection-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(30, 41, 59, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    gap: 8px;
+  }
+
+  .connection-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+  }
+
+  .connection-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  .connection-btn:hover::before {
+    opacity: 1;
+  }
+
+  .connection-btn:hover::after {
+    opacity: 0.6;
+  }
+
+  .connection-btn-icon {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .connection-btn-text {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #fff;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease,
+                margin 0.3s ease;
+    margin-left: 0;
+  }
+
+  .connection-btn:hover .connection-btn-text {
+    max-width: 150px;
+    opacity: 1;
+    margin-left: 8px;
+  }
+
+  .connection-btn-connected::before {
+    background: linear-gradient(135deg, 
+      rgba(34, 197, 94, 0.4) 0%, 
+      rgba(16, 185, 129, 0.4) 100%);
+  }
+
+  .connection-btn-connected::after {
+    background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+  }
+
+  .connection-btn-disconnected::before {
+    background: linear-gradient(135deg, 
+      rgba(239, 68, 68, 0.4) 0%, 
+      rgba(220, 38, 38, 0.4) 100%);
+  }
+
+  .connection-btn-disconnected::after {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
 }

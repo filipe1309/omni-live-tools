@@ -45,26 +45,21 @@ export function Header () {
           {/* Connection Status Button - Center */}
           <button
             onClick={() => setShowConnectionModal(true)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${isAnyConnected
-              ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20'
-              : 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
-              }`}
+            className={`connection-btn ${isAnyConnected ? 'connection-btn-connected' : 'connection-btn-disconnected'}`}
             title={t.connectionModal.manageTitle}
           >
-            {isAnyConnected ? (
-              <>
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="hidden sm:flex items-center gap-1 text-sm">
+            <span className="connection-btn-icon">
+              {isAnyConnected ? (
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   {tiktok.isConnected && <TikTokIcon className="w-4 h-4 text-tiktok-cyan" />}
                   {twitch.isConnected && <TwitchIcon className="w-4 h-4 text-purple-400" />}
                 </span>
-              </>
-            ) : (
-              <>
+              ) : (
                 <span className="w-2 h-2 bg-red-500 rounded-full" />
-                <span className="text-sm text-red-400">{t.common.disconnected}</span>
-              </>
-            )}
+              )}
+            </span>
+            <span className="connection-btn-text">{t.connectionModal.manageTitle}</span>
           </button>
 
           <div className="flex items-center gap-6">
