@@ -33,12 +33,19 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private reconnectResetTimeout: NodeJS.Timeout | null = null;
   private connected = false;
+  private connectedAt: number | null = null;
 
   /**
    * Time in milliseconds that a connection must be stable before resetting reconnect counter.
    * This prevents infinite reconnect loops when connection succeeds but immediately drops.
    */
   private static readonly RECONNECT_RESET_DELAY_MS = 10000;
+
+  /**
+   * Time in milliseconds that a connection must be stable before auto-reconnect kicks in.
+   * If disconnect happens before this, treat it as a connection failure.
+   */
+  private static readonly MIN_STABLE_CONNECTION_MS = 3000;
 
   constructor (
     private readonly uniqueId: string,
@@ -71,6 +78,7 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
 
     this.clientDisconnected = true;
     this.reconnectEnabled = false;
+    this.connectedAt = null;
 
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
@@ -113,7 +121,9 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
     });
 
     this.connection.on('disconnected', () => {
+      const wasConnectedAt = this.connectedAt;
       this.connected = false;
+      this.connectedAt = null;
       this.onConnectionCountChange?.(-1);
       this.log('TikTok connection disconnected');
 
@@ -121,6 +131,17 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
       if (this.reconnectResetTimeout) {
         clearTimeout(this.reconnectResetTimeout);
         this.reconnectResetTimeout = null;
+      }
+
+      // Check if connection was stable enough for auto-reconnect
+      const connectionDuration = wasConnectedAt ? Date.now() - wasConnectedAt : 0;
+      const wasConnectionStable = connectionDuration >= TikTokConnectionWrapper.MIN_STABLE_CONNECTION_MS;
+
+      if (!wasConnectionStable && !this.clientDisconnected) {
+        // Connection dropped too quickly - treat as connection failure
+        this.log(`Connection was unstable (${connectionDuration}ms < ${TikTokConnectionWrapper.MIN_STABLE_CONNECTION_MS}ms), not auto-reconnecting`);
+        this.emit('disconnected', 'Connection was not stable');
+        return;
       }
 
       this.scheduleReconnect();
@@ -144,6 +165,7 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
       );
 
       this.connected = true;
+      this.connectedAt = Date.now();
       this.onConnectionCountChange?.(1);
 
       // Cancel any pending reconnect reset from previous connection

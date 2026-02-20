@@ -41,12 +41,25 @@ export class TwitchConnectionWrapper extends EventEmitter {
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private reconnectResetTimeout: NodeJS.Timeout | null = null;
   private connected = false;
+  private connectedAt: number | null = null;
 
   /**
    * Time in milliseconds that a connection must be stable before resetting reconnect counter.
    * This prevents infinite reconnect loops when connection succeeds but immediately drops.
    */
   private static readonly RECONNECT_RESET_DELAY_MS = 10000;
+
+  /**
+   * Time in milliseconds that a connection must be stable before auto-reconnect kicks in.
+   * If disconnect happens before this, treat it as a connection failure.
+   */
+  private static readonly MIN_STABLE_CONNECTION_MS = 3000;
+
+  /**
+   * Time in milliseconds to wait after connect() resolves to verify the connection is stable.
+   * This catches cases where the connection appears successful but drops immediately.
+   */
+  private static readonly CONNECTION_VERIFY_DELAY_MS = 1500;
 
   constructor (
     private channel: string,
@@ -84,6 +97,7 @@ export class TwitchConnectionWrapper extends EventEmitter {
 
     this.clientDisconnected = true;
     this.reconnectEnabled = false;
+    this.connectedAt = null;
 
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
@@ -145,6 +159,7 @@ export class TwitchConnectionWrapper extends EventEmitter {
       this.log(`${isReconnect ? 'Reconnected' : 'Connected'} to channel #${this.channel}`);
 
       this.connected = true;
+      this.connectedAt = Date.now();
       this.onConnectionCountChange?.(1);
 
       // Cancel any pending reconnect reset from previous connection
@@ -174,7 +189,33 @@ export class TwitchConnectionWrapper extends EventEmitter {
         isConnected: true,
       };
 
+      // Wait a short time to verify the connection is actually stable before reporting success
+      // This catches cases where connect() succeeds but connection drops immediately (e.g., no internet)
       if (!isReconnect) {
+        await new Promise<void>((resolve, reject) => {
+          const verifyTimeout = setTimeout(() => {
+            // Connection is still up after verification period - it's stable
+            if (this.connected && !this.clientDisconnected) {
+              resolve();
+            } else {
+              reject(new Error('Connection dropped during verification'));
+            }
+          }, TwitchConnectionWrapper.CONNECTION_VERIFY_DELAY_MS);
+
+          // If disconnect happens during verification, reject immediately
+          const onEarlyDisconnect = () => {
+            clearTimeout(verifyTimeout);
+            reject(new Error('Connection was not stable'));
+          };
+
+          this.once('earlyDisconnect', onEarlyDisconnect);
+
+          // Clean up listener after timeout
+          setTimeout(() => {
+            this.off('earlyDisconnect', onEarlyDisconnect);
+          }, TwitchConnectionWrapper.CONNECTION_VERIFY_DELAY_MS + 100);
+        });
+
         this.emit('connected', connectionState);
       }
 
@@ -237,7 +278,9 @@ export class TwitchConnectionWrapper extends EventEmitter {
 
     // Handle disconnection
     this.chatClient.onDisconnect((manually, reason) => {
+      const wasConnectedAt = this.connectedAt;
       this.connected = false;
+      this.connectedAt = null;
       this.onConnectionCountChange?.(-1);
       this.log(`Twitch chat disconnected${manually ? ' (manually)' : ''}: ${reason || 'Unknown reason'}`);
 
@@ -247,7 +290,21 @@ export class TwitchConnectionWrapper extends EventEmitter {
         this.reconnectResetTimeout = null;
       }
 
+      // Emit early disconnect for verification period check
+      this.emit('earlyDisconnect');
+
       if (!manually && !this.clientDisconnected) {
+        // Check if connection was stable enough for auto-reconnect
+        const connectionDuration = wasConnectedAt ? Date.now() - wasConnectedAt : 0;
+        const wasConnectionStable = connectionDuration >= TwitchConnectionWrapper.MIN_STABLE_CONNECTION_MS;
+
+        if (!wasConnectionStable) {
+          // Connection dropped too quickly - treat as connection failure
+          this.log(`Connection was unstable (${connectionDuration}ms < ${TwitchConnectionWrapper.MIN_STABLE_CONNECTION_MS}ms), not auto-reconnecting`);
+          this.emit('disconnected', reason?.message || 'Connection was not stable');
+          return;
+        }
+
         this.scheduleReconnect(reason?.message);
       }
     });
