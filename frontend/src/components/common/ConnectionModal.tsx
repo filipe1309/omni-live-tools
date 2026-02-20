@@ -3,6 +3,7 @@ import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { PlatformType } from '@/types';
 import { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
+import { LanguageSelector } from './LanguageSelector';
 
 interface ConnectionModalProps {
   /** If true, modal is controlled externally */
@@ -124,18 +125,22 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
 
       {/* Modal content */}
       <div className="relative bg-slate-800 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-slate-700 my-auto">
-        {/* Close button - only show when in controlled mode and connected */}
-        {isControlled && isAnyConnected && onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors text-xl"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        )}
+        {/* Top bar with language selector and close button */}
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <LanguageSelector />
+          {/* Close button - only show when in controlled mode and connected */}
+          {isControlled && isAnyConnected && onClose && (
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white transition-colors text-xl"
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 mt-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-tiktok-red to-tiktok-cyan bg-clip-text text-transparent mb-2">
             {isControlled ? t.connectionModal.manageTitle : t.connectionModal.title}
           </h2>
