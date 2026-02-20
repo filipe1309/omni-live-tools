@@ -158,4 +158,85 @@
   .animate-glitch {
     animation: glitch 0.3s ease-in-out infinite;
   }
+
+  /* Shake Effect for Poll Question */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-4px) rotate(-0.5deg); }
+    20% { transform: translateX(4px) rotate(0.5deg); }
+    30% { transform: translateX(-4px) rotate(-0.5deg); }
+    40% { transform: translateX(4px) rotate(0.5deg); }
+    50% { transform: translateX(-2px) rotate(-0.25deg); }
+    60% { transform: translateX(2px) rotate(0.25deg); }
+    70% { transform: translateX(-2px) rotate(-0.25deg); }
+    80% { transform: translateX(2px) rotate(0.25deg); }
+    90% { transform: translateX(-1px); }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out infinite;
+  }
+
+  /* Neon Glow Text Effects */
+  .neon-glow-green {
+    text-shadow: 
+      0 0 5px #22c55e,
+      0 0 10px #22c55e,
+      0 0 20px #22c55e,
+      0 0 40px #22c55e;
+  }
+
+  .neon-glow-yellow {
+    text-shadow: 
+      0 0 5px #eab308,
+      0 0 10px #eab308,
+      0 0 20px #eab308,
+      0 0 40px #fde047;
+    animation: neon-pulse-yellow 1s ease-in-out infinite alternate;
+  }
+
+  .neon-glow-red {
+    text-shadow: 
+      0 0 5px #ef4444,
+      0 0 10px #ef4444,
+      0 0 20px #ef4444,
+      0 0 40px #f87171,
+      0 0 60px #ef4444;
+    animation: neon-pulse-red 0.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes neon-pulse-yellow {
+    from {
+      text-shadow: 
+        0 0 5px #eab308,
+        0 0 10px #eab308,
+        0 0 20px #eab308,
+        0 0 40px #fde047;
+    }
+    to {
+      text-shadow: 
+        0 0 8px #eab308,
+        0 0 15px #eab308,
+        0 0 30px #eab308,
+        0 0 50px #fde047;
+    }
+  }
+
+  @keyframes neon-pulse-red {
+    from {
+      text-shadow: 
+        0 0 5px #ef4444,
+        0 0 10px #ef4444,
+        0 0 20px #ef4444,
+        0 0 40px #f87171;
+    }
+    to {
+      text-shadow: 
+        0 0 10px #ef4444,
+        0 0 20px #ef4444,
+        0 0 40px #ef4444,
+        0 0 60px #f87171,
+        0 0 80px #ef4444;
+    }
+  }
 }

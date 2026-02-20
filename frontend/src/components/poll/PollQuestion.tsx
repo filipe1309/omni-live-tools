@@ -34,10 +34,18 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
 
   const getTextClasses = () => {
     if (isRunning) {
-      if (timeLeft <= TIMER_THRESHOLDS.CRITICAL) return 'text-red-300';
-      if (timeLeft <= TIMER_THRESHOLDS.WARNING) return 'text-yellow-300';
+      if (timeLeft <= TIMER_THRESHOLDS.CRITICAL) return 'text-red-300 neon-glow-red';
+      if (timeLeft <= TIMER_THRESHOLDS.WARNING) return 'text-yellow-300 neon-glow-yellow';
+      return 'text-white neon-glow-green';
     }
     return 'text-white';
+  };
+
+  const getShakeClass = () => {
+    if (isRunning && timeLeft <= TIMER_THRESHOLDS.CRITICAL) {
+      return 'animate-shake';
+    }
+    return '';
   };
 
   return (
@@ -57,7 +65,7 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
       {!isRunning && (
         <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-purple-600/30 to-purple-400/30" />
       )}
-      <div className="relative z-10 text-center py-5 px-6">
+      <div className={`relative z-10 text-center py-5 px-6 ${getShakeClass()}`}>
         <h3 className={`font-bold transition-colors duration-500 ${getTextClasses()}`}>
           {question}
         </h3>
