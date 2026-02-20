@@ -40,6 +40,13 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 - 🔄 **Auto-Reconnect** - Automatic reconnection with visual indicator when connection is lost
 - 🔔 **Notification Sounds** - Audio feedback for poll events
 - ✨ **Enhanced UI** - Neon glow effects, animations, and video splash screens
+- 🧪 **Testing** - Comprehensive unit and integration tests with Jest and React Testing Library
+- 🛠️ **Makefile** - Simplified development workflow with Make commands
+<!-- electron builder -->
+- 📦 **Electron Builder** - Easy packaging and distribution of desktop applications
+<!-- changelog -->
+- 📝 **Changelog** - Detailed changelog with version history and release notes, available ([here](CHANGELOG.md))
+
 
 ## 🌐 Supported Platforms
 
