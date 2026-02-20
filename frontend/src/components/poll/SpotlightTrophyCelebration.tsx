@@ -54,10 +54,10 @@ export function SpotlightTrophyCelebration ({ onComplete, winnerText }: Spotligh
           <div className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow">
             🏆
           </div>
-          <div className="text-3xl font-black text-yellow-400 mt-2 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
+          <div className="text-3xl font-black text-yellow-400 mt-1 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
             {t.poll.winner}
           </div>
-          <div className="text-6xl font-black mt-4 leading-normal drop-shadow-[0_0_40px_rgba(255,215,0,0.8)] animate-winner-text bg-gradient-to-r from-yellow-300 via-white to-yellow-300 bg-clip-text text-transparent">
+          <div className="text-6xl font-black mt-1 leading-normal drop-shadow-[0_0_40px_rgba(255,215,0,0.8)] animate-winner-text bg-gradient-to-r from-yellow-300 via-white to-yellow-300 bg-clip-text text-transparent">
             {winnerText}
           </div>
         </div>
