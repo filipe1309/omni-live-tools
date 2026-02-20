@@ -418,7 +418,7 @@ electron-dev ed: check-electron-deps check-backend-deps build
 
 .PHONY: electron-dist edist
 ## electron-dist: Build distributable installers [alias: edist]
-electron-dist edist: check-electron-deps check-backend-deps frontend-build bump-version
+electron-dist edist: check-electron-deps check-backend-deps frontend-build bump-version-changelog
 	@printf "$(BLUE)🔨 Building Electron distributables...$(NC)\n"
 	@chmod +x build-exe-electron.sh
 	@./build-exe-electron.sh
@@ -440,6 +440,11 @@ electron-clean ec:
 ## bump-version: Update version based on commits [alias: bv]
 bump-version bv:
 	@./scripts/update-version.sh
+
+.PHONY: bump-version-changelog bvc
+## bump-version-changelog: Update version and changelog [alias: bvc]
+bump-version-changelog bvc:
+	@./scripts/update-version.sh --changelog
 
 .PHONY: bump-version-dry bvd
 ## bump-version-dry: Preview version changes without applying [alias: bvd]
