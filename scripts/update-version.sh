@@ -2,7 +2,7 @@
 
 # Script to update package version based on commit history
 # Follows Conventional Commits specification for semantic versioning
-# Usage: ./scripts/update-version.sh [--since DATE] [--dry-run] [--no-tag] [--yes]
+# Usage: ./scripts/update-version.sh [--since DATE] [--dry-run] [--no-tag] [--changelog] [--yes]
 
 set -e
 
@@ -18,6 +18,7 @@ DRY_RUN=false
 SINCE_DATE=""
 CREATE_TAG=true
 SKIP_CONFIRM=false
+UPDATE_CHANGELOG=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -38,14 +39,19 @@ while [[ $# -gt 0 ]]; do
       SKIP_CONFIRM=true
       shift
       ;;
+    --changelog)
+      UPDATE_CHANGELOG=true
+      shift
+      ;;
     -h|--help)
-      echo "Usage: $0 [--since DATE] [--dry-run] [--no-tag] [--yes]"
+      echo "Usage: $0 [--since DATE] [--dry-run] [--no-tag] [--changelog] [--yes]"
       echo ""
       echo "Options:"
       echo "  --since DATE   Analyze commits since DATE (e.g., '2026-02-16' or 'yesterday')"
       echo "                 If not provided, analyzes commits since last tag"
       echo "  --dry-run      Show what would be done without making changes"
       echo "  --no-tag       Skip creating a git tag for the new version"
+      echo "  --changelog    Update CHANGELOG.md after creating the tag"
       echo "  --yes, -y      Skip confirmation prompt"
       echo "  -h, --help     Show this help message"
       exit 0
@@ -213,5 +219,16 @@ if $CREATE_TAG; then
     git tag -a "$TAG_NAME" -m "Release $NEW_VERSION"
     echo -e "${GREEN}✓ Created git tag: $TAG_NAME${NC}"
     echo -e "${BLUE}  To push the tag, run: ${YELLOW}git push origin $TAG_NAME${NC}"
+  fi
+fi
+
+# Update changelog
+if $UPDATE_CHANGELOG; then
+  CHANGELOG_SCRIPT="$REPO_ROOT/scripts/update-changelog.sh"
+  if [[ -x "$CHANGELOG_SCRIPT" ]]; then
+    echo -e "\n${BLUE}Updating CHANGELOG.md...${NC}"
+    "$CHANGELOG_SCRIPT"
+  else
+    echo -e "${YELLOW}⚠ Changelog script not found or not executable: $CHANGELOG_SCRIPT${NC}"
   fi
 fi

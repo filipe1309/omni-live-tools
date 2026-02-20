@@ -451,6 +451,16 @@ bump-version-dry bvd:
 bump-version-yes bvy:
 	@./scripts/update-version.sh --yes
 
+.PHONY: changelog cl
+## changelog: Regenerate CHANGELOG.md from git tags [alias: cl]
+changelog cl:
+	@./scripts/update-changelog.sh
+
+.PHONY: changelog-dry cld
+## changelog-dry: Preview changelog without applying [alias: cld]
+changelog-dry cld:
+	@./scripts/update-changelog.sh --dry-run
+
 # ------------------------------------------------------------------------------
 ## @Utility Commands
 # ------------------------------------------------------------------------------
