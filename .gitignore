@@ -108,3 +108,6 @@ backend/dist
 # Electron
 release/
 electron/dist-electron/
+
+# Mac
+.DS_Store
