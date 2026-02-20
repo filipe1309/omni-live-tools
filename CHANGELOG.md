@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.9.0] - 2026-02-20
+
+### Added
+
+- Add bump-version-changelog target to update version and changelog
+- Add changelog generation commands and update version script to support changelog updates
+- Enhance connection stability checks in TikTok and Twitch wrappers
+- Update HomePage component links for TikTok and Twitch
+- Add dedicated styles for Connection Status Button in Header component
+- Update LanguageSelector component with dropdown menu and styles
+- Enhance Header component with animated navigation bar and new styles
+- Add ConnectionStatusBanner component and integrate it into ChatPage and PollPage
+- Update keyboard shortcuts to require Shift key for actions
+- Update poll feature demo image and replace with new GIF
+- Enhance README with new features including auto-reconnect, notification sounds, and improved OBS overlay support
+- Add language selector to ConnectionModal and adjust layout for close button
+- Add auto-reconnect functionality and UI indicator in ConnectionModal and PollPage
+- Add connection modal and improve connection handling across pages
+- Enhance multi-platform support in OBS overlay with Twitch integration and improved user interface
+- Add target="_blank" to GitHub link in HomePage for external navigation
+- Implement neon flicker glow hover effect for header navigation links
+- Add .DS_Store to .gitignore for macOS compatibility
+- Update omni logo video intro for enhanced visual experience
+- Add useNotificationSound hook and integrate into usePollDisplay for notification sounds
+- Add LoadScreen and update SplashScreen to use video; integrate into HomePage and PollResultsPage
+
+### Changed
+
+- Add initial changelog for project version history
+- Clean up empty code change sections in the changes log
+- Update version to 1.8.0 in package.json
+
+### Fixed
+
+- Infinite loop on internet disconnection
+
 ## [1.8.0] - 2026-02-19
 
 ### Added
@@ -126,6 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.9.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.5.0...v1.6.0
