@@ -1,47 +1,72 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 interface SplashScreenProps {
-  duration?: number;
   onComplete: () => void;
 }
 
-export function SplashScreen({ duration = 2500, onComplete }: SplashScreenProps) {
+export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [fadeOut, setFadeOut] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hasCompletedRef = useRef(false);
+
+  const handleComplete = useCallback(() => {
+    if (hasCompletedRef.current) return;
+    hasCompletedRef.current = true;
+    setFadeOut(true);
+    setTimeout(() => {
+      onComplete();
+    }, 500);
+  }, [onComplete]);
+
+  const handleVideoEnd = useCallback(() => {
+    handleComplete();
+  }, [handleComplete]);
+
+  const handleVideoError = useCallback(() => {
+    // Fallback if video fails to load - complete after a short delay
+    setTimeout(() => {
+      handleComplete();
+    }, 1000);
+  }, [handleComplete]);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => {
-      setFadeOut(true);
-    }, duration - 500);
+    const video = videoRef.current;
+    if (video) {
+      // Attempt to play the video
+      video.play().catch(() => {
+        // If autoplay fails (e.g., browser policy), complete after delay
+        setTimeout(() => {
+          handleComplete();
+        }, 2000);
+      });
+    }
 
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, duration);
+    // Fallback timeout in case video doesn't trigger onEnded
+    const fallbackTimer = setTimeout(() => {
+      handleComplete();
+    }, 15000); // 15 seconds max
 
     return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(completeTimer);
+      clearTimeout(fallbackTimer);
     };
-  }, [duration, onComplete]);
+  }, [handleComplete]);
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-500 ${
         fadeOut ? 'opacity-0' : 'opacity-100'
       }`}
+      style={{ backgroundColor: '#040517' }}
     >
-      <div className="flex flex-col items-center space-y-6">
-        <img
-          src="/omni-logo.jpg"
-          alt="Omni LIVE Tools"
-          className={`w-48 h-48 rounded-2xl shadow-2xl transform transition-all duration-700 ${
-            fadeOut ? 'scale-95 opacity-0' : 'scale-100 opacity-100 animate-pulse'
-          }`}
-        />
-        <div className={`text-center transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
-          <h1 className="text-3xl font-bold text-white tracking-wide">Omni LIVE Tools</h1>
-          <p className="text-gray-400 mt-2 text-sm">Loading...</p>
-        </div>
-      </div>
+      <video
+        ref={videoRef}
+        src="/omni-logo-video-intro.mp4"
+        className="w-64 h-64 object-contain"
+        onEnded={handleVideoEnd}
+        onError={handleVideoError}
+        playsInline
+        muted={false}
+      />
     </div>
   );
 }

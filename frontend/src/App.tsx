@@ -1,22 +1,14 @@
-import { useState, useCallback } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Header, ToastContainer, SplashScreen, ErrorBoundary } from './components';
+import { Header, ToastContainer, ErrorBoundary } from './components';
 import { ToastProvider } from './hooks';
 import { LanguageProvider } from './i18n';
 import { HomePage, ChatPage, PollPage, PollResultsPage, OverlayPage, ObsOverlayPage } from './pages';
 
 function App () {
-  const [showSplash, setShowSplash] = useState(true);
-
-  const handleSplashComplete = useCallback(() => {
-    setShowSplash(false);
-  }, []);
-
   return (
     <ErrorBoundary>
       <LanguageProvider>
         <ToastProvider>
-          {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
           <BrowserRouter>
             <Routes>
               {/* OBS Overlay - No header */}

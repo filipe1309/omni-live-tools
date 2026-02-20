@@ -7,4 +7,5 @@ export { ToastContainer } from './ToastContainer';
 export { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
 export { LanguageSelector } from './LanguageSelector';
 export { SplashScreen } from './SplashScreen';
+export { LoadScreen } from './LoadScreen';
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';

@@ -7,6 +7,7 @@ import { PollQuestion } from '@/components/poll/PollQuestion';
 import { PollOptionCard } from '@/components/poll/PollOptionCard';
 import { PollControlButtons } from '@/components/poll/PollControlButtons';
 import { DisconnectedModal } from '@/components/poll/DisconnectedModal';
+import { LoadScreen } from '@/components';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
@@ -55,6 +56,7 @@ const LEADER_KEY = 'poll-results-leader';
 
 export function PollResultsPage () {
   const { t } = useLanguage();
+  const [showLoadScreen, setShowLoadScreen] = useState(true);
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
   const [isWaiting, setIsWaiting] = useState(true);
@@ -261,86 +263,89 @@ export function PollResultsPage () {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5 relative">
-      {/* Disconnected Modal with Blur Background */}
-      {!isConnected && (
-        <DisconnectedModal
-          isReconnecting={isReconnecting}
-          isAutoReconnectEnabled={isAutoReconnectEnabled}
-          onReconnect={sendReconnect}
-        />
-      )}
-
-      <div className="flex-1 flex flex-col gap-4">
-        {/* Setup Section - Above Results */}
-        <div className="p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30">
-          <PollSetup
-            onStart={() => { }} // Not used - we have separate control buttons
-            onChange={handleSetupChange}
-            disabled={pollState.isRunning}
-            showStartButton={false}
-            hideStatusBarToggle={true}
-            externalConfig={setupConfig}
-            externalFullOptions={fullOptionsConfig}
-            initialQuestion={setupConfig?.question}
-            initialOptions={fullOptionsConfig?.allOptions}
-            initialSelectedOptions={fullOptionsConfig?.selectedOptions}
-            initialTimer={setupConfig?.timer}
+    <>
+      {showLoadScreen && <LoadScreen onComplete={() => setShowLoadScreen(false)} />}
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5 relative">
+        {/* Disconnected Modal with Blur Background */}
+        {!isConnected && (
+          <DisconnectedModal
+            isReconnecting={isReconnecting}
+            isAutoReconnectEnabled={isAutoReconnectEnabled}
+            onReconnect={sendReconnect}
           />
-        </div>
+        )}
 
-        {/* Control Buttons */}
-        <PollControlButtons
-          onStart={() => sendCommand('start')}
-          onStop={() => sendCommand('stop')}
-          onReset={() => sendCommand('reset')}
-          isConnected={isConnected}
-          isRunning={pollState.isRunning}
-          isCountingDown={isCountingDown}
-        />
-
-        {/* Results Section */}
-        <div className="flex-1 space-y-3 relative">
-          {/* Spotlight + Trophy Celebration */}
-          {showCelebration && (
-            <SpotlightTrophyCelebration
-              onComplete={handleCelebrationComplete}
-              winnerText={winnerText}
+        <div className="flex-1 flex flex-col gap-4">
+          {/* Setup Section - Above Results */}
+          <div className="p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30">
+            <PollSetup
+              onStart={() => { }} // Not used - we have separate control buttons
+              onChange={handleSetupChange}
+              disabled={pollState.isRunning}
+              showStartButton={false}
+              hideStatusBarToggle={true}
+              externalConfig={setupConfig}
+              externalFullOptions={fullOptionsConfig}
+              initialQuestion={setupConfig?.question}
+              initialOptions={fullOptionsConfig?.allOptions}
+              initialSelectedOptions={fullOptionsConfig?.selectedOptions}
+              initialTimer={setupConfig?.timer}
             />
-          )}
+          </div>
 
-          {/* Countdown Overlay */}
-          {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
-
-          {/* Question */}
-          <PollQuestion
-            question={displayQuestion || t.pollResults.voteNow}
+          {/* Control Buttons */}
+          <PollControlButtons
+            onStart={() => sendCommand('start')}
+            onStop={() => sendCommand('stop')}
+            onReset={() => sendCommand('reset')}
+            isConnected={isConnected}
             isRunning={pollState.isRunning}
-            timeLeft={pollState.timeLeft}
-            timer={pollState.timer}
-            className="[&_h3]:text-5xl"
+            isCountingDown={isCountingDown}
           />
 
-          {/* Results */}
-          <div className="space-y-3 flex-1 min-h-[440px]">
-            {displayOptions.map((option) => {
-              const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
+          {/* Results Section */}
+          <div className="flex-1 space-y-3 relative">
+            {/* Spotlight + Trophy Celebration */}
+            {showCelebration && (
+              <SpotlightTrophyCelebration
+                onComplete={handleCelebrationComplete}
+                winnerText={winnerText}
+              />
+            )}
 
-              return (
-                <PollOptionCard
-                  key={option.id}
-                  option={option}
-                  votes={pollState.votes[option.id] || 0}
-                  percentage={percentage}
-                  totalVotes={totalVotes}
-                  isWinner={winnerIds.includes(option.id)}
-                  size="large"
-                />
-              );
-            })}
+            {/* Countdown Overlay */}
+            {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
+
+            {/* Question */}
+            <PollQuestion
+              question={displayQuestion || t.pollResults.voteNow}
+              isRunning={pollState.isRunning}
+              timeLeft={pollState.timeLeft}
+              timer={pollState.timer}
+              className="[&_h3]:text-5xl"
+            />
+
+            {/* Results */}
+            <div className="space-y-3 flex-1 min-h-[440px]">
+              {displayOptions.map((option) => {
+                const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
+
+                return (
+                  <PollOptionCard
+                    key={option.id}
+                    option={option}
+                    votes={pollState.votes[option.id] || 0}
+                    percentage={percentage}
+                    totalVotes={totalVotes}
+                    isWinner={winnerIds.includes(option.id)}
+                    size="large"
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
