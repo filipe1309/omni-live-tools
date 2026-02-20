@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
 import { SplashScreen, ConnectionModal } from '@/components';
@@ -17,24 +17,40 @@ export function HomePage () {
     setShowSplash(false);
   }, []);
 
+  const [cardsVisible, setCardsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!showSplash && isAnyConnected) {
+      // Trigger entrance animation after connection is established
+      const timer = setTimeout(() => setCardsVisible(true), 100);
+      return () => clearTimeout(timer);
+    } else if (!isAnyConnected) {
+      // Reset animation when disconnected
+      setCardsVisible(false);
+    }
+  }, [showSplash, isAnyConnected]);
+
   const menuCards = [
     {
       to: '/chat',
       icon: '💬',
       title: t.home.cards.chatReader.title,
       description: t.home.cards.chatReader.description,
+      gradient: { from: '#00f5d4', to: '#22d3ee' },
     },
     {
       to: '/overlay',
       icon: '🎬',
       title: t.home.cards.overlay.title,
       description: t.home.cards.overlay.description,
+      gradient: { from: '#ff0050', to: '#fb923c' },
     },
     {
       to: '/poll',
       icon: '🗳️',
       title: t.home.cards.poll.title,
       description: t.home.cards.poll.description,
+      gradient: { from: '#8b5cf6', to: '#ec4899' },
     },
   ];
 
@@ -60,17 +76,41 @@ export function HomePage () {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {menuCards.map((card) => (
+          {menuCards.map((card, index) => (
             <Link
               key={card.to}
               to={card.to}
-              className="group card hover:scale-105 hover:shadow-xl hover:shadow-tiktok-red/10 transition-all duration-300"
+              className={`group relative p-[2px] rounded-xl transition-all duration-500 hover:scale-105
+                ${cardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+              style={{
+                transitionDelay: cardsVisible ? `${index * 150}ms` : '0ms',
+                background: 'linear-gradient(to right, rgb(51, 65, 85), rgb(51, 65, 85))'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `linear-gradient(to right, ${card.gradient.from}, ${card.gradient.to})`;
+                e.currentTarget.style.boxShadow = `0 20px 25px -5px ${card.gradient.from}33, 0 8px 10px -6px ${card.gradient.from}33`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(to right, rgb(51, 65, 85), rgb(51, 65, 85))';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
-              <div className="text-5xl mb-4">{card.icon}</div>
-              <h2 className="text-xl font-bold text-white mb-2 group-hover:text-tiktok-cyan transition-colors">
-                {card.title}
-              </h2>
-              <p className="text-slate-400 text-sm">{card.description}</p>
+              <div className="card h-full bg-slate-800 rounded-xl">
+                <div className="text-5xl mb-4 icon-bounce-float">{card.icon}</div>
+                <h2
+                  className="text-xl font-bold mb-2 text-white transition-colors"
+                  style={{ '--hover-color': card.gradient.from } as React.CSSProperties}
+                >
+                  <span className="group-hover:hidden">{card.title}</span>
+                  <span
+                    className="hidden group-hover:inline text-transparent bg-clip-text"
+                    style={{ backgroundImage: `linear-gradient(to right, ${card.gradient.from}, ${card.gradient.to})` }}
+                  >
+                    {card.title}
+                  </span>
+                </h2>
+                <p className="text-slate-400 text-sm">{card.description}</p>
+              </div>
             </Link>
           ))}
         </div>
