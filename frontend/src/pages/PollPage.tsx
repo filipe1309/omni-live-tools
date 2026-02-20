@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePoll, useToast } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
-import { PollSetup, PollResults, VoteLog, PollControlButtons, ConnectionStatusBanner } from '@/components';
+import { PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
@@ -321,9 +321,6 @@ export function PollPage () {
             {t.poll.description}
           </p>
         </div>
-
-        {/* Connection Status Banner */}
-        <ConnectionStatusBanner tiktok={tiktok} twitch={twitch} className="mb-3" />
 
         {/* Configuration Section */}
         <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>

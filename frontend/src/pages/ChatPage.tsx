@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
-import { RoomStats, ChatContainer, GiftContainer, ConnectionStatusBanner } from '@/components';
+import { RoomStats, ChatContainer, GiftContainer } from '@/components';
 import type { ChatItem, GiftMessage, ChatMessage, LikeMessage, MemberMessage, SocialMessage, UnifiedChatMessage } from '@/types';
 
 // Helper to check if gift is in pending streak
@@ -27,7 +27,6 @@ export function ChatPage () {
 
   const {
     tiktok,
-    twitch,
     registerTikTokChatHandler,
     registerGiftHandler,
     registerLikeHandler,
@@ -142,9 +141,6 @@ export function ChatPage () {
   return (
     <div className="min-h-screen w-full bg-chat-gradient">
       <div className="container mx-auto px-4 py-6">
-        {/* Connection Status Banner */}
-        <ConnectionStatusBanner tiktok={tiktok} twitch={twitch} className="mb-6" />
-
         {tiktok.isConnected && (
           <div className="mb-6 card">
             <RoomStats
