@@ -43,33 +43,56 @@ export function Header () {
           </Link>
 
           <div className="flex items-center gap-6">
-            <nav className="hidden md:flex items-center gap-6">
-              <Link
-                to="/chat"
-                className="text-slate-300 neon-flicker-hover"
-              >
-                {t.header.nav.chatReader}
-              </Link>
-              <Link
-                to="/overlay"
-                className="text-slate-300 neon-flicker-hover"
-              >
-                {t.header.nav.overlay}
-              </Link>
-              <Link
-                to="/poll"
-                className="text-slate-300 neon-flicker-hover"
-              >
-                {t.header.nav.livePoll}
-              </Link>
+            <nav className="hidden md:flex items-center">
+              <ul className="nav-animated">
+                <li>
+                  <Link to="/chat" className="nav-item nav-chat">
+                    <div className="nav-item-content">
+                      <span className="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                      </span>
+                      <span className="nav-title">{t.header.nav.chatReader}</span>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/overlay" className="nav-item nav-overlay">
+                    <div className="nav-item-content">
+                      <span className="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <rect x="7" y="7" width="10" height="10" rx="1" ry="1" />
+                        </svg>
+                      </span>
+                      <span className="nav-title">{t.header.nav.overlay}</span>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/poll" className="nav-item nav-poll">
+                    <div className="nav-item-content">
+                      <span className="nav-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="4" y="14" width="4" height="7" />
+                          <rect x="10" y="10" width="4" height="11" />
+                          <rect x="16" y="3" width="4" height="18" />
+                        </svg>
+                      </span>
+                      <span className="nav-title">{t.header.nav.livePoll}</span>
+                    </div>
+                  </Link>
+                </li>
+              </ul>
             </nav>
 
             {/* Connection Status Button */}
             <button
               onClick={() => setShowConnectionModal(true)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${isAnyConnected
-                  ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20'
-                  : 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
+                ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/20'
+                : 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20'
                 }`}
               title={t.connectionModal.manageTitle}
             >

@@ -269,4 +269,168 @@
     color: #fff;
     animation: neon-flicker 1.5s infinite alternate;
   }
+
+  /* Animated Navigation Bar - Expanding Menu Items */
+  .nav-animated {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(30, 41, 59, 0.8);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.3s ease,
+                box-shadow 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  /* Gradient overlay - ::before */
+  .nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 0, 80, 0.3) 0%, 
+      rgba(0, 245, 212, 0.3) 50%, 
+      rgba(139, 92, 246, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  /* Blurred glow - ::after */
+  .nav-item::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, 
+      #ff0050 0%, 
+      #00f5d4 50%, 
+      #8b5cf6 100%);
+    border-radius: 14px;
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  .nav-item:hover {
+    width: 140px;
+    background: rgba(30, 41, 59, 0.95);
+  }
+
+  .nav-item:hover::before {
+    opacity: 1;
+  }
+
+  .nav-item:hover::after {
+    opacity: 0.6;
+  }
+
+  .nav-item-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 2;
+    padding: 0 12px;
+    width: 100%;
+  }
+
+  .nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+  }
+
+  .nav-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .nav-item:hover .nav-icon {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  .nav-title {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    color: #fff;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+  }
+
+  .nav-item:hover .nav-title {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  /* Individual nav item color variations */
+  .nav-item.nav-chat::before {
+    background: linear-gradient(135deg, 
+      rgba(0, 245, 212, 0.4) 0%, 
+      rgba(34, 211, 238, 0.4) 100%);
+  }
+
+  .nav-item.nav-chat::after {
+    background: linear-gradient(135deg, #00f5d4 0%, #22d3ee 100%);
+  }
+
+  .nav-item.nav-chat .nav-icon {
+    color: #00f5d4;
+  }
+
+  .nav-item.nav-overlay::before {
+    background: linear-gradient(135deg, 
+      rgba(139, 92, 246, 0.4) 0%, 
+      rgba(236, 72, 153, 0.4) 100%);
+  }
+
+  .nav-item.nav-overlay::after {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  }
+
+  .nav-item.nav-overlay .nav-icon {
+    color: #a78bfa;
+  }
+
+  .nav-item.nav-poll::before {
+    background: linear-gradient(135deg, 
+      rgba(255, 0, 80, 0.4) 0%, 
+      rgba(251, 146, 60, 0.4) 100%);
+  }
+
+  .nav-item.nav-poll::after {
+    background: linear-gradient(135deg, #ff0050 0%, #fb923c 100%);
+  }
+
+  .nav-item.nav-poll .nav-icon {
+    color: #ff0050;
+  }
 }
