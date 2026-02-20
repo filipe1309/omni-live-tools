@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { PollState, PollOption } from '@/types';
 import { TIMER_THRESHOLDS } from '@/constants';
 import { useLanguage } from '@/i18n';
+import { useNotificationSound } from './useNotificationSound';
 
 interface UsePollDisplayOptions {
   pollState: PollState;
@@ -17,6 +18,7 @@ export function usePollDisplay ({ pollState, displayOptions }: UsePollDisplayOpt
   const { t } = useLanguage();
   const [showCelebration, setShowCelebration] = useState(false);
   const hasTriggeredCelebration = useRef(false);
+  const { playNotificationSound } = useNotificationSound();
 
   // Calculate total votes
   const totalVotes = useMemo(() => {
@@ -56,8 +58,9 @@ export function usePollDisplay ({ pollState, displayOptions }: UsePollDisplayOpt
     if (pollState.finished && totalVotes > 0 && winnerIds.length > 0 && !hasTriggeredCelebration.current) {
       hasTriggeredCelebration.current = true;
       setShowCelebration(true);
+      playNotificationSound();
     }
-  }, [pollState.finished, totalVotes, winnerIds.length]);
+  }, [pollState.finished, totalVotes, winnerIds.length, playNotificationSound]);
 
   // Reset celebration flag when countdown starts (new poll) or poll starts running
   useEffect(() => {

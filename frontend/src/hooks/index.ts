@@ -9,6 +9,7 @@ export type { TimerCallbacks } from './usePollTimer';
 export { usePollSync, toSerializableState } from './usePollSync';
 export { usePollDisplay } from './usePollDisplay';
 export { usePollKeyboardShortcuts } from './usePollKeyboardShortcuts';
+export { useNotificationSound } from './useNotificationSound';
 export { useLeaderElection } from './useLeaderElection';
 export { useToast, ToastProvider } from './useToast';
 export type { Toast, ToastType } from './useToast';
