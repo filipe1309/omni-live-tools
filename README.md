@@ -63,7 +63,7 @@ The application supports multiple languages with easy switching:
 
 The poll feature allows viewers to vote by typing numbers in chat from **TikTok LIVE** and/or **Twitch**.
 
-![Poll Feature Demo](docs/tcrjb_poll.gif)
+![Poll Feature Demo](docs/omni-poll.gif)
 
 #### How It Works
 
