@@ -1,24 +1,66 @@
+import { useState, useRef, useEffect } from 'react';
 import { useLanguage, type Language } from '@/i18n';
 
-export function LanguageSelector() {
+export function LanguageSelector () {
   const { language, setLanguage, t } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value as Language);
+  const languages = [
+    { code: 'pt-BR' as Language, flag: '🇧🇷', label: t.language.portuguese },
+    { code: 'en' as Language, flag: '🇺🇸', label: t.language.english },
+  ];
+
+  const currentLang = languages.find((l) => l.code === language) || languages[0];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (code: Language) => {
+    setLanguage(code);
+    setIsOpen(false);
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-400 hidden sm:inline">🌐</span>
-      <select
-        value={language}
-        onChange={handleChange}
-        className="bg-slate-700 text-slate-200 text-sm rounded-lg border border-slate-600 px-2 py-1.5 focus:ring-tiktok-cyan focus:border-tiktok-cyan cursor-pointer hover:bg-slate-600 transition-colors"
+    <div ref={dropdownRef} className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="nav-item nav-language"
         aria-label={t.language.label}
+        aria-expanded={isOpen}
       >
-        <option value="pt-BR">🇧🇷 {t.language.portuguese}</option>
-        <option value="en">🇺🇸 {t.language.english}</option>
-      </select>
+        <div className="nav-item-content">
+          <span className="nav-icon">
+            <span className="text-lg">{currentLang.flag}</span>
+          </span>
+          <span className="nav-title">{currentLang.label}</span>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 bg-slate-800 border border-slate-600 rounded-lg shadow-xl overflow-hidden z-50 min-w-[140px]">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => handleSelect(lang.code)}
+              className={`w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors ${lang.code === language
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+            >
+              <span>{lang.flag}</span>
+              <span>{lang.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
