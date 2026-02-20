@@ -9,9 +9,9 @@ export function CountdownOverlay ({ countdown }: CountdownOverlayProps) {
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden rounded-xl">
-      <div className="text-center animate-pulse">
+      <div className="text-center">
         {countdown === 0 ? (
-          <div className="text-7xl font-black text-green-400 animate-bounce drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
+          <div className="text-[10rem] font-black text-green-400 animate-glitch drop-shadow-[0_0_30px_rgba(74,222,128,0.8)]">
             {t.poll.go}
           </div>
         ) : (
