@@ -408,30 +408,30 @@
 
   .nav-item.nav-overlay::before {
     background: linear-gradient(135deg, 
-      rgba(139, 92, 246, 0.4) 0%, 
-      rgba(236, 72, 153, 0.4) 100%);
-  }
-
-  .nav-item.nav-overlay::after {
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  }
-
-  .nav-item.nav-overlay .nav-icon {
-    color: #a78bfa;
-  }
-
-  .nav-item.nav-poll::before {
-    background: linear-gradient(135deg, 
       rgba(255, 0, 80, 0.4) 0%, 
       rgba(251, 146, 60, 0.4) 100%);
   }
 
-  .nav-item.nav-poll::after {
+  .nav-item.nav-overlay::after {
     background: linear-gradient(135deg, #ff0050 0%, #fb923c 100%);
   }
 
-  .nav-item.nav-poll .nav-icon {
+  .nav-item.nav-overlay .nav-icon {
     color: #ff0050;
+  }
+
+  .nav-item.nav-poll::before {
+    background: linear-gradient(135deg, 
+      rgba(139, 92, 246, 0.4) 0%, 
+      rgba(236, 72, 153, 0.4) 100%);
+  }
+
+  .nav-item.nav-poll::after {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  }
+
+  .nav-item.nav-poll .nav-icon {
+    color: #a78bfa;
   }
 
   .nav-item.nav-language::before {
@@ -540,5 +540,21 @@
 
   .connection-btn-disconnected::after {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  /* Overlay Page Background Gradient */
+  .bg-overlay-gradient {
+    background: 
+      radial-gradient(ellipse at top left, rgba(255, 0, 80, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(255, 0, 80, 0.05) 0%, rgba(251, 146, 60, 0.05) 100%);
+  }
+
+  /* Chat Page Background Gradient */
+  .bg-chat-gradient {
+    background: 
+      radial-gradient(ellipse at top left, rgba(0, 245, 212, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(34, 211, 238, 0.15) 0%, transparent 50%),
+      linear-gradient(135deg, rgba(0, 245, 212, 0.05) 0%, rgba(34, 211, 238, 0.05) 100%);
   }
 }

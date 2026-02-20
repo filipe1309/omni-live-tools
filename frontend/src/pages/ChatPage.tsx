@@ -140,24 +140,26 @@ export function ChatPage () {
   }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler]);
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Connection Status Banner */}
-      <ConnectionStatusBanner tiktok={tiktok} twitch={twitch} className="mb-6" />
+    <div className="min-h-screen w-full bg-chat-gradient">
+      <div className="container mx-auto px-4 py-6">
+        {/* Connection Status Banner */}
+        <ConnectionStatusBanner tiktok={tiktok} twitch={twitch} className="mb-6" />
 
-      {tiktok.isConnected && (
-        <div className="mb-6 card">
-          <RoomStats
-            viewerCount={tiktok.viewerCount}
-            likeCount={tiktok.likeCount}
-            diamondsCount={tiktok.diamondsCount}
-            roomId={tiktok.roomId}
-          />
+        {tiktok.isConnected && (
+          <div className="mb-6 card">
+            <RoomStats
+              viewerCount={tiktok.viewerCount}
+              likeCount={tiktok.likeCount}
+              diamondsCount={tiktok.diamondsCount}
+              roomId={tiktok.roomId}
+            />
+          </div>
+        )}
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          <ChatContainer items={chatItems} title={`💬 ${t.chat.chats}`} />
+          <GiftContainer gifts={gifts} title={`🎁 ${t.chat.gifts}`} />
         </div>
-      )}
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        <ChatContainer items={chatItems} title={`💬 ${t.chat.chats}`} />
-        <GiftContainer gifts={gifts} title={`🎁 ${t.chat.gifts}`} />
       </div>
     </div>
   );
