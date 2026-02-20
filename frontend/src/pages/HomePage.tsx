@@ -49,22 +49,13 @@ export function HomePage () {
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto">
             {t.home.description}{' '}
-            <a href="https://www.tiktok.com/live" className="text-tiktok-cyan hover:underline">
-              TikTok LIVE
-            </a>{' '}
-            {t.home.using}{' '}
-            <a href="https://github.com/zerodytrash/TikTok-Live-Connector" className="text-tiktok-cyan hover:underline">
-              TikTok-Live-Connector
+            <a href="https://www.tiktok.com/live" className="text-tiktok-cyan hover:underline" target="_blank" rel="noopener noreferrer">
+              TikTok
             </a>{' '}
             {t.home.and}{' '}
-            <a href="https://socket.io/" className="text-tiktok-cyan hover:underline">
-              Socket.IO
-            </a>{' '}
-            {t.home.and}{' '}
-            <a href="https://twurple.js.org/" className="text-tiktok-cyan hover:underline">
-              Twurple
-            </a>{' '}
-            {t.home.for} Twitch.
+            <a href="https://www.twitch.tv/" className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer">
+              Twitch.
+            </a>
           </p>
         </div>
 
