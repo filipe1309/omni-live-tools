@@ -61,6 +61,53 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock AudioContext for notification sounds
+class MockAudioContext {
+  createOscillator = vi.fn(() => ({
+    connect: vi.fn(),
+    start: vi.fn(),
+    stop: vi.fn(),
+    frequency: { setValueAtTime: vi.fn() },
+    type: 'sine',
+  }));
+  createGain = vi.fn(() => ({
+    connect: vi.fn(),
+    gain: {
+      setValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn(),
+      linearRampToValueAtTime: vi.fn(),
+    },
+  }));
+  destination = {};
+  currentTime = 0;
+  close = vi.fn();
+}
+vi.stubGlobal('AudioContext', MockAudioContext);
+vi.stubGlobal('webkitAudioContext', MockAudioContext);
+
+// Suppress React error boundary console.error noise during tests
+const originalConsoleError = console.error;
+console.error = (...args: unknown[]) => {
+  // Filter out React error boundary noise
+  const message = args[0]?.toString() || '';
+  if (
+    message.includes('The above error occurred in') ||
+    message.includes('Error: Uncaught') ||
+    message.includes('React will try to recreate') ||
+    message.includes('Test error')
+  ) {
+    return;
+  }
+  originalConsoleError.apply(console, args);
+};
+
+// Suppress window error events from ErrorBoundary tests (jsdom logs these to stderr)
+window.addEventListener('error', (event) => {
+  if (event.error?.message === 'Test error') {
+    event.preventDefault();
+  }
+});
+
 // Reset localStorage between tests
 afterEach(() => {
   localStorageMock.clear();

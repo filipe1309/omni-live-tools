@@ -10,7 +10,7 @@ const ThrowingComponent = ({ shouldThrow = true }: { shouldThrow?: boolean }) =>
   return <div>No error</div>;
 };
 
-// Suppress console.error for cleaner test output
+// Suppress React's error logging for intentional error boundary tests
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => { });
 });
