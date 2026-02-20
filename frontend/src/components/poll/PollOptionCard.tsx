@@ -15,24 +15,24 @@ interface PollOptionCardProps {
 const sizeConfig = {
   compact: {
     padding: 'p-2',
-    badge: 'w-8 h-8 text-base',
-    text: 'text-base',
-    votes: 'text-base',
-    percentText: 'text-base',
-  },
-  normal: {
-    padding: 'p-3',
-    badge: 'w-10 h-10 text-xl',
-    text: 'text-xl',
-    votes: 'text-xl',
+    badge: 'w-10 h-10 text-lg',
+    text: 'text-lg',
+    votes: 'text-lg',
     percentText: 'text-lg',
   },
-  large: {
+  normal: {
     padding: 'p-3',
     badge: 'w-12 h-12 text-2xl',
     text: 'text-2xl',
     votes: 'text-2xl',
     percentText: 'text-xl',
+  },
+  large: {
+    padding: 'p-3',
+    badge: 'w-14 h-14 text-3xl',
+    text: 'text-3xl',
+    votes: 'text-3xl',
+    percentText: 'text-2xl',
   },
 };
 
