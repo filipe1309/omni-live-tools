@@ -3,6 +3,7 @@ export type { ConnectionStatus } from './useTikTokConnection';
 export { useTwitchConnection } from './useTwitchConnection';
 export type { TwitchConnectionStatus } from './useTwitchConnection';
 export { useMultiPlatformConnection } from './useMultiPlatformConnection';
+export { ConnectionProvider, useConnectionContext } from './useConnectionContext';
 export { usePoll } from './usePoll';
 export { usePollTimer } from './usePollTimer';
 export type { TimerCallbacks } from './usePollTimer';

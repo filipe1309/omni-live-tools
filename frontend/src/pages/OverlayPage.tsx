@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/i18n';
 import { PlatformSelector } from '@/components';
+import { useConnectionContext } from '@/hooks';
 import { PlatformType } from '@/types';
 
 function hexToRgb (hex: string): { r: number; g: number; b: number } {
@@ -16,9 +17,14 @@ function hexToRgb (hex: string): { r: number; g: number; b: number } {
 
 export function OverlayPage () {
   const { t } = useLanguage();
-  const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>([PlatformType.TIKTOK]);
-  const [tiktokUsername, setTiktokUsername] = useState('jamesbonfim');
-  const [twitchChannel, setTwitchChannel] = useState('');
+  const { tiktok, twitch, selectedPlatforms: connectedPlatforms } = useConnectionContext();
+
+  // Pre-fill with connected values, but allow user to modify
+  const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>(() =>
+    connectedPlatforms.length > 0 ? connectedPlatforms : [PlatformType.TIKTOK]
+  );
+  const [tiktokUsername, setTiktokUsername] = useState(() => tiktok.username || 'jamesbonfim');
+  const [twitchChannel, setTwitchChannel] = useState(() => twitch.channelName || '');
   const [settings, setSettings] = useState({
     showChats: true,
     showGifts: true,

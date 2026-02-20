@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
-import { SplashScreen } from '@/components';
+import { SplashScreen, ConnectionModal } from '@/components';
+import { useConnectionContext } from '@/hooks';
 
 export function HomePage () {
   const { t } = useLanguage();
+  const { isAnyConnected } = useConnectionContext();
   const [showSplash, setShowSplash] = useState(() => {
     // Only show splash once per session
     return !sessionStorage.getItem('splashShown');
@@ -39,7 +41,8 @@ export function HomePage () {
   return (
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <div className="container mx-auto px-4 py-8">
+      {!showSplash && <ConnectionModal />}
+      <div className={`container mx-auto px-4 py-8 transition-all duration-300 ${!isAnyConnected && !showSplash ? 'blur-sm pointer-events-none select-none' : ''}`}>
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-tiktok-red to-tiktok-cyan bg-clip-text text-transparent mb-4">
             {t.home.title}

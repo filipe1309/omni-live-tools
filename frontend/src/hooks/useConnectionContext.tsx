@@ -1,0 +1,293 @@
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { useMultiPlatformConnection, useToast } from '@/hooks';
+import { useLanguage, interpolate } from '@/i18n';
+import type {
+  PlatformType,
+  ChatMessage,
+  GiftMessage,
+  LikeMessage,
+  MemberMessage,
+  SocialMessage,
+  RoomUserMessage,
+  UnifiedChatMessage,
+} from '@/types';
+import type { ConnectionStatus } from './useTikTokConnection';
+
+interface ConnectionContextType {
+  // TikTok state
+  tiktok: {
+    status: ConnectionStatus;
+    roomId: string | null;
+    error: string | null;
+    viewerCount: number;
+    likeCount: number;
+    diamondsCount: number;
+    isConnected: boolean;
+    connect: (username: string) => Promise<void>;
+    disconnect: () => void;
+    username: string;
+  };
+  // Twitch state
+  twitch: {
+    status: ConnectionStatus;
+    channel: string | null;
+    error: string | null;
+    isConnected: boolean;
+    connect: (channel: string) => Promise<void>;
+    disconnect: () => void;
+    channelName: string;
+  };
+  // Combined state
+  isAnyConnected: boolean;
+  connectedPlatforms: PlatformType[];
+  selectedPlatforms: PlatformType[];
+  setSelectedPlatforms: (platforms: PlatformType[]) => void;
+  // Input values
+  setTikTokUsername: (username: string) => void;
+  setTwitchChannel: (channel: string) => void;
+  // Modal state
+  showConnectionModal: boolean;
+  setShowConnectionModal: (show: boolean) => void;
+  // Event registration for pages
+  registerChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
+  registerTikTokChatHandler: (handler: (msg: ChatMessage) => void) => () => void;
+  registerGiftHandler: (handler: (msg: GiftMessage) => void) => () => void;
+  registerLikeHandler: (handler: (msg: LikeMessage) => void) => () => void;
+  registerMemberHandler: (handler: (msg: MemberMessage) => void) => () => void;
+  registerSocialHandler: (handler: (msg: SocialMessage) => void) => () => void;
+  registerRoomUserHandler: (handler: (msg: RoomUserMessage) => void) => () => void;
+  registerTwitchChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
+  registerDisconnectHandler: (handler: (platform: PlatformType) => void) => () => void;
+  registerSocketReconnectHandler: (handler: () => void) => () => void;
+  registerStreamEndHandler: (handler: () => void) => () => void;
+}
+
+const ConnectionContext = createContext<ConnectionContextType | undefined>(undefined);
+
+interface ConnectionProviderProps {
+  children: ReactNode;
+}
+
+export function ConnectionProvider ({ children }: ConnectionProviderProps) {
+  const toast = useToast();
+  const { t } = useLanguage();
+
+  // Input state
+  const [tiktokUsername, setTikTokUsername] = useState(() => {
+    const saved = localStorage.getItem('shared-tiktok-username');
+    return saved ? JSON.parse(saved) : 'jamesbonfim';
+  });
+
+  const [twitchChannel, setTwitchChannel] = useState(() => {
+    const saved = localStorage.getItem('shared-twitch-channel');
+    return saved ? JSON.parse(saved) : '';
+  });
+
+  // Modal state
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
+
+  const [selectedPlatforms, setSelectedPlatformsState] = useState<PlatformType[]>(() => {
+    const saved = localStorage.getItem('shared-selected-platforms');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return ['tiktok'] as PlatformType[];
+      }
+    }
+    return ['tiktok'] as PlatformType[];
+  });
+
+  // Event handlers registry
+  const [chatHandlers] = useState<Set<(msg: UnifiedChatMessage) => void>>(() => new Set());
+  const [tiktokChatHandlers] = useState<Set<(msg: ChatMessage) => void>>(() => new Set());
+  const [giftHandlers] = useState<Set<(msg: GiftMessage) => void>>(() => new Set());
+  const [likeHandlers] = useState<Set<(msg: LikeMessage) => void>>(() => new Set());
+  const [memberHandlers] = useState<Set<(msg: MemberMessage) => void>>(() => new Set());
+  const [socialHandlers] = useState<Set<(msg: SocialMessage) => void>>(() => new Set());
+  const [roomUserHandlers] = useState<Set<(msg: RoomUserMessage) => void>>(() => new Set());
+  const [twitchChatHandlers] = useState<Set<(msg: UnifiedChatMessage) => void>>(() => new Set());
+  const [disconnectHandlers] = useState<Set<(platform: PlatformType) => void>>(() => new Set());
+  const [socketReconnectHandlers] = useState<Set<() => void>>(() => new Set());
+  const [streamEndHandlers] = useState<Set<() => void>>(() => new Set());
+
+  // Create registration functions
+  const registerChatHandler = useCallback((handler: (msg: UnifiedChatMessage) => void) => {
+    chatHandlers.add(handler);
+    return () => { chatHandlers.delete(handler); };
+  }, [chatHandlers]);
+
+  const registerTikTokChatHandler = useCallback((handler: (msg: ChatMessage) => void) => {
+    tiktokChatHandlers.add(handler);
+    return () => { tiktokChatHandlers.delete(handler); };
+  }, [tiktokChatHandlers]);
+
+  const registerGiftHandler = useCallback((handler: (msg: GiftMessage) => void) => {
+    giftHandlers.add(handler);
+    return () => { giftHandlers.delete(handler); };
+  }, [giftHandlers]);
+
+  const registerLikeHandler = useCallback((handler: (msg: LikeMessage) => void) => {
+    likeHandlers.add(handler);
+    return () => { likeHandlers.delete(handler); };
+  }, [likeHandlers]);
+
+  const registerMemberHandler = useCallback((handler: (msg: MemberMessage) => void) => {
+    memberHandlers.add(handler);
+    return () => { memberHandlers.delete(handler); };
+  }, [memberHandlers]);
+
+  const registerSocialHandler = useCallback((handler: (msg: SocialMessage) => void) => {
+    socialHandlers.add(handler);
+    return () => { socialHandlers.delete(handler); };
+  }, [socialHandlers]);
+
+  const registerRoomUserHandler = useCallback((handler: (msg: RoomUserMessage) => void) => {
+    roomUserHandlers.add(handler);
+    return () => { roomUserHandlers.delete(handler); };
+  }, [roomUserHandlers]);
+
+  const registerTwitchChatHandler = useCallback((handler: (msg: UnifiedChatMessage) => void) => {
+    twitchChatHandlers.add(handler);
+    return () => { twitchChatHandlers.delete(handler); };
+  }, [twitchChatHandlers]);
+
+  const registerDisconnectHandler = useCallback((handler: (platform: PlatformType) => void) => {
+    disconnectHandlers.add(handler);
+    return () => { disconnectHandlers.delete(handler); };
+  }, [disconnectHandlers]);
+
+  const registerSocketReconnectHandler = useCallback((handler: () => void) => {
+    socketReconnectHandlers.add(handler);
+    return () => { socketReconnectHandlers.delete(handler); };
+  }, [socketReconnectHandlers]);
+
+  const registerStreamEndHandler = useCallback((handler: () => void) => {
+    streamEndHandlers.add(handler);
+    return () => { streamEndHandlers.delete(handler); };
+  }, [streamEndHandlers]);
+
+  // Use the multi-platform connection hook with handlers that dispatch to all registered listeners
+  const connection = useMultiPlatformConnection({
+    onChat: (msg) => {
+      chatHandlers.forEach(handler => handler(msg));
+    },
+    onTikTokChat: (msg) => {
+      tiktokChatHandlers.forEach(handler => handler(msg));
+    },
+    onGift: (msg) => {
+      giftHandlers.forEach(handler => handler(msg));
+    },
+    onLike: (msg) => {
+      likeHandlers.forEach(handler => handler(msg));
+    },
+    onMember: (msg) => {
+      memberHandlers.forEach(handler => handler(msg));
+    },
+    onRoomUser: (msg) => {
+      roomUserHandlers.forEach(handler => handler(msg));
+    },
+    onSocial: (msg) => {
+      socialHandlers.forEach(handler => handler(msg));
+    },
+    onTwitchChat: (msg) => {
+      twitchChatHandlers.forEach(handler => handler(msg));
+    },
+    onDisconnect: (platform) => {
+      disconnectHandlers.forEach(handler => handler(platform));
+    },
+    onSocketReconnect: () => {
+      socketReconnectHandlers.forEach(handler => handler());
+    },
+    onTikTokStreamEnd: () => {
+      streamEndHandlers.forEach(handler => handler());
+    },
+  });
+
+  // Persist settings
+  const setSelectedPlatforms = useCallback((platforms: PlatformType[]) => {
+    setSelectedPlatformsState(platforms);
+    localStorage.setItem('shared-selected-platforms', JSON.stringify(platforms));
+  }, []);
+
+  const handleSetTikTokUsername = useCallback((username: string) => {
+    setTikTokUsername(username);
+    localStorage.setItem('shared-tiktok-username', JSON.stringify(username));
+  }, []);
+
+  const handleSetTwitchChannel = useCallback((channel: string) => {
+    setTwitchChannel(channel);
+    localStorage.setItem('shared-twitch-channel', JSON.stringify(channel));
+  }, []);
+
+  // Connect handlers with toast notifications
+  const connectTikTok = useCallback(async (username: string) => {
+    try {
+      await connection.tiktok.connect(username, { enableExtendedGiftInfo: true });
+      handleSetTikTokUsername(username);
+      toast.success(interpolate(t.toast.tiktokConnected, { username }));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(interpolate(t.toast.errorConnectingTikTok, { error: errorMessage }));
+      throw error;
+    }
+  }, [connection.tiktok, toast, t, handleSetTikTokUsername]);
+
+  const connectTwitch = useCallback(async (channel: string) => {
+    try {
+      await connection.twitch.connect(channel);
+      handleSetTwitchChannel(channel);
+      toast.success(interpolate(t.toast.twitchConnected, { channel }));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(interpolate(t.toast.errorConnectingTwitch, { error: errorMessage }));
+      throw error;
+    }
+  }, [connection.twitch, toast, t, handleSetTwitchChannel]);
+
+  const value: ConnectionContextType = {
+    tiktok: {
+      ...connection.tiktok,
+      connect: connectTikTok,
+      username: tiktokUsername,
+    },
+    twitch: {
+      ...connection.twitch,
+      connect: connectTwitch,
+      channelName: twitchChannel,
+    },
+    isAnyConnected: connection.isAnyConnected,
+    connectedPlatforms: connection.connectedPlatforms,
+    selectedPlatforms,
+    setSelectedPlatforms,
+    setTikTokUsername: handleSetTikTokUsername,
+    setTwitchChannel: handleSetTwitchChannel,
+    showConnectionModal,
+    setShowConnectionModal,
+    registerChatHandler,
+    registerTikTokChatHandler,
+    registerGiftHandler,
+    registerLikeHandler,
+    registerMemberHandler,
+    registerSocialHandler,
+    registerRoomUserHandler,
+    registerTwitchChatHandler,
+    registerDisconnectHandler,
+    registerSocketReconnectHandler,
+    registerStreamEndHandler,
+  };
+
+  return (
+    <ConnectionContext.Provider value={value}>
+      {children}
+    </ConnectionContext.Provider>
+  );
+}
+
+export function useConnectionContext () {
+  const context = useContext(ConnectionContext);
+  if (context === undefined) {
+    throw new Error('useConnectionContext must be used within a ConnectionProvider');
+  }
+  return context;
+}

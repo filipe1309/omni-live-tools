@@ -1,6 +1,7 @@
 export { ProfilePicture } from './ProfilePicture';
 export { ConnectionForm } from './ConnectionForm';
 export { MultiPlatformConnectionForm } from './MultiPlatformConnectionForm';
+export { ConnectionModal } from './ConnectionModal';
 export { RoomStats } from './RoomStats';
 export { Username } from './Username';
 export { ToastContainer } from './ToastContainer';

@@ -89,6 +89,14 @@ export const ptBR = {
     platformsLabel: 'Plataformas',
   },
 
+  // Connection Modal
+  connectionModal: {
+    title: 'Conectar à Stream',
+    description: 'Conecte-se a pelo menos uma plataforma para começar a usar as ferramentas',
+    manageTitle: 'Gerenciar Conexões',
+    manageDescription: 'Conecte-se ou desconecte-se das plataformas de streaming',
+  },
+
   // Overlay Page
   overlay: {
     title: 'Gerar URL do Overlay',

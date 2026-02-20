@@ -91,6 +91,14 @@ export const en: TranslationKeys = {
     platformsLabel: 'Platforms',
   },
 
+  // Connection Modal
+  connectionModal: {
+    title: 'Connect to Stream',
+    description: 'Connect to at least one platform to start using the tools',
+    manageTitle: 'Manage Connections',
+    manageDescription: 'Connect or disconnect from streaming platforms',
+  },
+
   // Overlay Page
   overlay: {
     title: 'Generate Overlay URL',
