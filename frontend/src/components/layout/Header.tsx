@@ -43,19 +43,19 @@ export function Header () {
             <nav className="hidden md:flex items-center gap-6">
               <Link
                 to="/chat"
-                className="text-slate-300 hover:text-white transition-colors"
+                className="text-slate-300 neon-flicker-hover"
               >
                 {t.header.nav.chatReader}
               </Link>
               <Link
                 to="/overlay"
-                className="text-slate-300 hover:text-white transition-colors"
+                className="text-slate-300 neon-flicker-hover"
               >
                 {t.header.nav.overlay}
               </Link>
               <Link
                 to="/poll"
-                className="text-slate-300 hover:text-white transition-colors"
+                className="text-slate-300 neon-flicker-hover"
               >
                 {t.header.nav.livePoll}
               </Link>
