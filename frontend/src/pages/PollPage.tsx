@@ -310,7 +310,7 @@ export function PollPage () {
   const isPollActive = pollState.question || pollState.options.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048]">
+    <div className="min-h-screen w-full bg-poll-gradient">
       <div className="container mx-auto px-4 py-4 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-4">

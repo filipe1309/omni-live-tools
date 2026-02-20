@@ -265,7 +265,7 @@ export function PollResultsPage () {
   return (
     <>
       {showLoadScreen && <LoadScreen onComplete={() => setShowLoadScreen(false)} />}
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5 relative">
+      <div className="min-h-screen w-full bg-poll-gradient flex flex-col p-5 relative">
         {/* Disconnected Modal with Blur Background */}
         {!isConnected && (
           <DisconnectedModal
