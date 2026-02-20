@@ -87,6 +87,7 @@ export function HomePage () {
             <a
               href="https://github.com/filipe1309/omni-live-tools"
               className="text-tiktok-cyan hover:underline"
+              target="_blank"
             >
               https://github.com/filipe1309/omni-live-tools
             </a>
