@@ -19,9 +19,9 @@ let mainWindow: BrowserWindow | null = null;
  * The bundle starts Express + Socket.IO and begins listening.
  */
 function startBackendServer (): void {
-  // Point static files to the bundled public-react inside the app
+  // Point static files to the bundled dist-frontend inside the app
   // __dirname is electron/dist-electron, so we go up 2 levels to reach root
-  const staticPath = path.join(__dirname, '../../public-react');
+  const staticPath = path.join(__dirname, '../../dist-frontend');
   process.env.STATIC_FILES_PATH = staticPath;
 
   // Import the compiled backend entry point — this starts the server
@@ -38,7 +38,7 @@ function createWindow (): void {
     minWidth: 800,
     minHeight: 600,
     title: 'Omni LIVE Tools',
-    icon: path.join(__dirname, '../../public-react/favicon.ico'),
+    icon: path.join(__dirname, '../../dist-frontend/favicon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -67,7 +67,7 @@ function createWindow (): void {
           x: parseFeature('left'),
           y: parseFeature('top'),
           title: 'Omni LIVE Tools',
-          icon: path.join(__dirname, '../../public-react/favicon.ico'),
+          icon: path.join(__dirname, '../../dist-frontend/favicon.ico'),
           webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,

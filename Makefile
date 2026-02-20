@@ -40,7 +40,7 @@ ELECTRON_DIR := electron
 DIST_DIR := $(BACKEND_DIR)/dist
 DIST_ELECTRON_DIR := $(ELECTRON_DIR)/dist-electron
 RELEASE_DIR := release
-PUBLIC_DIR := public-react
+PUBLIC_DIR := dist-frontend
 NODE_MODULES := node_modules
 
 # Colors for output (using printf-compatible format)

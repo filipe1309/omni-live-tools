@@ -89,7 +89,7 @@ The Vite dev server proxies `/socket.io` requests to `http://localhost:8081`.
 make frontend-build
 ```
 
-Outputs production build to `../public-react/`.
+Outputs production build to `../dist-frontend/`.
 
 ### Testing
 

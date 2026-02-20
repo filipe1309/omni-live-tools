@@ -16,7 +16,7 @@ export interface EnvConfig {
 /**
  * Load configuration from environment variables
  */
-export function loadConfig(): EnvConfig {
+export function loadConfig (): EnvConfig {
   return {
     port: parseInt(process.env.PORT || '8081', 10),
     sessionId: process.env.SESSIONID,
@@ -24,14 +24,14 @@ export function loadConfig(): EnvConfig {
     maxConnections: parseInt(process.env.MAX_CONNECTIONS || '10', 10),
     maxRequestsPerMinute: parseInt(process.env.MAX_REQUESTS_PER_MINUTE || '5', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
-    staticFilesPath: process.env.STATIC_FILES_PATH || path.join(__dirname, '../../public-react'),
+    staticFilesPath: process.env.STATIC_FILES_PATH || path.join(__dirname, '../../dist-frontend'),
   };
 }
 
 /**
  * Validate configuration
  */
-export function validateConfig(config: EnvConfig): void {
+export function validateConfig (config: EnvConfig): void {
   if (config.port < 1 || config.port > 65535) {
     throw new Error(`Invalid port number: ${config.port}`);
   }

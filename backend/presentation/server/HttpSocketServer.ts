@@ -17,7 +17,7 @@ interface EmbeddedFile {
 
 // Use globalThis to access EMBEDDED_FILES to prevent esbuild from optimizing away the check
 // EMBEDDED_FILES is injected at the top of the bundle during the build process
-function getEmbeddedFiles(): Record<string, EmbeddedFile> | undefined {
+function getEmbeddedFiles (): Record<string, EmbeddedFile> | undefined {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (globalThis as any).EMBEDDED_FILES;
 }
@@ -37,7 +37,7 @@ export interface ServerConfig {
 const DEFAULT_CONFIG: ServerConfig = {
   port: 8081,
   enableRateLimit: false,
-  staticFilesPath: path.join(__dirname, '../../../public-react'),
+  staticFilesPath: path.join(__dirname, '../../../dist-frontend'),
   corsOrigin: '*',
   statisticsIntervalMs: 5000,
 };
@@ -51,7 +51,7 @@ export class HttpSocketServer {
   private readonly io: SocketIOServer;
   private statisticsInterval: NodeJS.Timeout | null = null;
 
-  constructor(
+  constructor (
     private readonly config: ServerConfig = DEFAULT_CONFIG,
     private readonly rateLimiterService: RateLimiterService,
     private readonly statisticsService: StatisticsService
@@ -72,7 +72,7 @@ export class HttpSocketServer {
   /**
    * Start the server
    */
-  start(): void {
+  start (): void {
     this.httpServer.listen(this.config.port, () => {
       console.info(`Server running! Please visit http://localhost:${this.config.port}`);
     });
@@ -81,7 +81,7 @@ export class HttpSocketServer {
   /**
    * Stop the server
    */
-  stop(): Promise<void> {
+  stop (): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.statisticsInterval) {
         clearInterval(this.statisticsInterval);
@@ -114,21 +114,21 @@ export class HttpSocketServer {
   /**
    * Get the Express app instance (for testing)
    */
-  getApp(): Application {
+  getApp (): Application {
     return this.app;
   }
 
   /**
    * Get the Socket.IO server instance (for testing)
    */
-  getIO(): SocketIOServer {
+  getIO (): SocketIOServer {
     return this.io;
   }
 
   /**
    * Get MIME type for a file path
    */
-  private getMimeType(filePath: string): string {
+  private getMimeType (filePath: string): string {
     const ext = filePath.split('.').pop()?.toLowerCase() || '';
     const mimeTypes: Record<string, string> = {
       'html': 'text/html',
@@ -152,15 +152,15 @@ export class HttpSocketServer {
   /**
    * Set up Express middleware
    */
-  private setupMiddleware(): void {
+  private setupMiddleware (): void {
     const embeddedFiles = getEmbeddedFiles();
-    
+
     if (isPkg && embeddedFiles) {
       console.info('Running in packaged mode - serving embedded files');
       // Use embedded files when running as a packaged executable
       this.app.use((req: Request, res: Response, next: NextFunction) => {
         let filePath = req.path === '/' ? 'index.html' : req.path.substring(1);
-        
+
         // Check if file exists in embedded files
         if (embeddedFiles[filePath]) {
           const file = embeddedFiles[filePath];
@@ -172,13 +172,13 @@ export class HttpSocketServer {
           }
           return;
         }
-        
+
         // For SPA routing, serve index.html for non-asset paths
         if (!filePath.includes('.') && embeddedFiles['index.html']) {
           res.type('text/html').send(embeddedFiles['index.html'].content);
           return;
         }
-        
+
         next();
       });
     } else {
@@ -195,7 +195,7 @@ export class HttpSocketServer {
   /**
    * Set up Socket.IO connection handlers
    */
-  private setupSocketHandlers(): void {
+  private setupSocketHandlers (): void {
     this.io.on('connection', (socket) => {
       new SocketHandler(
         socket,
@@ -209,7 +209,7 @@ export class HttpSocketServer {
   /**
    * Set up statistics broadcast interval
    */
-  private setupStatisticsBroadcast(): void {
+  private setupStatisticsBroadcast (): void {
     this.statisticsInterval = setInterval(() => {
       this.io.emit(SocketEventType.STATISTIC, this.statisticsService.getStatistics());
     }, this.config.statisticsIntervalMs);

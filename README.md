@@ -180,7 +180,7 @@ Configure the application using environment variables:
 | `MAX_CONNECTIONS` | `10` | Maximum concurrent TikTok connections |
 | `MAX_REQUESTS_PER_MINUTE` | `5` | Rate limit threshold per client |
 | `NODE_ENV` | `development` | Environment mode (`development` or `production`) |
-| `STATIC_FILES_PATH` | `./public-react` | Path to static frontend files |
+| `STATIC_FILES_PATH` | `./dist-frontend` | Path to static frontend files |
 
 You can set these in a `.env` file in the backend directory or export them in your shell.
 

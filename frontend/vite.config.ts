@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../public-react',
+    outDir: '../dist-frontend',
     emptyOutDir: true,
   },
   test: {
