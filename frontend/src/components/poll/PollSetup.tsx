@@ -110,11 +110,54 @@ export function PollSetup ({
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const questionInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const questionContainerRef = useRef<HTMLDivElement>(null);
 
   // Option history state
   const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null);
   const [optionSuggestions, setOptionSuggestions] = useState<string[]>([]);
   const optionSuggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler for question dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showSuggestions &&
+        questionContainerRef.current &&
+        !questionContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSuggestions]);
+
+  // Click outside handler for option dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        activeOptionIndex !== null &&
+        optionSuggestionsRef.current &&
+        !optionSuggestionsRef.current.contains(event.target as Node)
+      ) {
+        // Check if click is inside any option input container
+        const target = event.target as HTMLElement;
+        const isInsideOptionContainer = target.closest('[data-option-container]');
+        if (!isInsideOptionContainer) {
+          setActiveOptionIndex(null);
+          setOptionSuggestions([]);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeOptionIndex]);
 
   // Update state when externalFullOptions changes (preferred - has complete state)
   const lastExternalFullOptionsRef = useRef<string | null>(null);
@@ -398,7 +441,7 @@ export function PollSetup ({
       {/* Question and Timer Row */}
       <div className="flex flex-wrap gap-4 items-end">
         {/* Question Input */}
-        <div className="flex-1 min-w-[300px] relative">
+        <div ref={questionContainerRef} className="flex-1 min-w-[300px] relative">
           <label className="block text-sm font-medium text-slate-300 mb-1">
             {t.poll.question} {loadQuestionHistory().length > 0 && <span className="text-slate-500 text-xs">({t.poll.historyAvailable})</span>}
           </label>
@@ -518,6 +561,7 @@ export function PollSetup ({
           {options.map((option, index) => (
             <div
               key={index}
+              data-option-container
               className={`relative flex items-center gap-2 p-2 rounded-lg border transition-all overflow-visible ${selectedOptions[index]
                 ? 'bg-purple-900/30 border-purple-500/50'
                 : 'bg-slate-900/50 border-slate-700/50'
