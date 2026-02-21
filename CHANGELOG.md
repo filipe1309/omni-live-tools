@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.11.0] - 2026-02-20
+
+### Added
+
+- Add click outside handlers for question and option dropdowns in PollSetup
+- Implement option history management with load and save functionality
+- Reduce poll options from 12 to 4 across components and update related configurations
+
+### Changed
+
+- Update version to 1.10.0 and enhance changelog with new features and fixes
+
 ## [1.10.0] - 2026-02-20
 
 ### Added
@@ -182,6 +194,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.11.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.7.0...v1.8.0
