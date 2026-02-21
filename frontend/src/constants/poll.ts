@@ -25,6 +25,12 @@ export const QUESTION_HISTORY = {
   STORAGE_KEY: 'tiktok-poll-questionHistory',
 } as const;
 
+// Option history settings
+export const OPTION_HISTORY = {
+  MAX_ITEMS: 10,
+  STORAGE_KEY: 'tiktok-poll-optionHistory',
+} as const;
+
 // Default poll options (fixed 4 options)
 export const DEFAULT_OPTIONS = [
   'Sim',

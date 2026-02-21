@@ -4,6 +4,7 @@ import {
   POLL_TIMER,
   POLL_OPTIONS,
   QUESTION_HISTORY,
+  OPTION_HISTORY,
   DEFAULT_OPTIONS,
   DEFAULT_SELECTED_OPTIONS,
   DEFAULT_QUESTION
@@ -33,6 +34,32 @@ const saveQuestionToHistory = (question: string) => {
   // Keep only last MAX_ITEMS
   const trimmed = filtered.slice(0, QUESTION_HISTORY.MAX_ITEMS);
   localStorage.setItem(QUESTION_HISTORY.STORAGE_KEY, JSON.stringify(trimmed));
+};
+
+// Load option history from localStorage
+const loadOptionHistory = (): string[] => {
+  const saved = localStorage.getItem(OPTION_HISTORY.STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+// Save option to history
+const saveOptionToHistory = (option: string) => {
+  if (!option.trim()) return;
+  const history = loadOptionHistory();
+  // Remove if already exists (to move to top)
+  const filtered = history.filter(o => o !== option.trim());
+  // Add to beginning
+  filtered.unshift(option.trim());
+  // Keep only last MAX_ITEMS
+  const trimmed = filtered.slice(0, OPTION_HISTORY.MAX_ITEMS);
+  localStorage.setItem(OPTION_HISTORY.STORAGE_KEY, JSON.stringify(trimmed));
 };
 
 // Option with preserved original ID
@@ -83,6 +110,11 @@ export function PollSetup ({
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const questionInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Option history state
+  const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null);
+  const [optionSuggestions, setOptionSuggestions] = useState<string[]>([]);
+  const optionSuggestionsRef = useRef<HTMLDivElement>(null);
 
   // Update state when externalFullOptions changes (preferred - has complete state)
   const lastExternalFullOptionsRef = useRef<string | null>(null);
@@ -189,12 +221,68 @@ export function PollSetup ({
     newOptions[index] = value;
     setOptions(newOptions);
 
+    // Update option suggestions based on input
+    const history = loadOptionHistory();
+    if (value.trim()) {
+      const filtered = history.filter(o =>
+        o.toLowerCase().includes(value.toLowerCase()) && o !== value
+      ).slice(0, OPTION_HISTORY.MAX_ITEMS);
+      setOptionSuggestions(filtered);
+    } else {
+      // Show all history when input is empty
+      setOptionSuggestions(history.slice(0, OPTION_HISTORY.MAX_ITEMS));
+    }
+
     // Notify parent of change with new state
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
       onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar);
     }
+  };
+
+  const handleOptionFocus = (index: number) => {
+    setActiveOptionIndex(index);
+    const history = loadOptionHistory();
+    const currentValue = options[index];
+    if (currentValue.trim()) {
+      const filtered = history.filter(o =>
+        o.toLowerCase().includes(currentValue.toLowerCase()) && o !== currentValue
+      ).slice(0, OPTION_HISTORY.MAX_ITEMS);
+      setOptionSuggestions(filtered.length > 0 ? filtered : history.slice(0, OPTION_HISTORY.MAX_ITEMS));
+    } else {
+      setOptionSuggestions(history.slice(0, OPTION_HISTORY.MAX_ITEMS));
+    }
+  };
+
+  const handleOptionArrowClick = (index: number) => {
+    // Toggle dropdown: if already showing this index, close it; otherwise open it
+    if (activeOptionIndex === index) {
+      setActiveOptionIndex(null);
+      setOptionSuggestions([]);
+    } else {
+      const history = loadOptionHistory();
+      setActiveOptionIndex(index);
+      setOptionSuggestions(history.slice(0, OPTION_HISTORY.MAX_ITEMS));
+    }
+  };
+
+  const handleOptionBlur = (index: number) => {
+    // Delay to allow click on suggestion
+    setTimeout(() => {
+      setActiveOptionIndex(null);
+      setOptionSuggestions([]);
+    }, 200);
+    // Save to history if non-empty
+    if (options[index].trim()) {
+      saveOptionToHistory(options[index].trim());
+    }
+  };
+
+  const handleSelectOptionSuggestion = (index: number, suggestion: string) => {
+    updateOption(index, suggestion);
+    setActiveOptionIndex(null);
+    setOptionSuggestions([]);
   };
 
   const toggleOption = (index: number) => {
@@ -430,7 +518,7 @@ export function PollSetup ({
           {options.map((option, index) => (
             <div
               key={index}
-              className={`flex items-center gap-2 p-2 rounded-lg border transition-all overflow-hidden ${selectedOptions[index]
+              className={`relative flex items-center gap-2 p-2 rounded-lg border transition-all overflow-visible ${selectedOptions[index]
                 ? 'bg-purple-900/30 border-purple-500/50'
                 : 'bg-slate-900/50 border-slate-700/50'
                 }`}
@@ -452,14 +540,50 @@ export function PollSetup ({
                 }`}>
                 {index + 1}
               </span>
-              <input
-                type="text"
-                value={option}
-                onChange={(e) => updateOption(index, e.target.value)}
-                placeholder={`${t.poll.optionPlaceholder} ${index + 1}`}
-                className="input-field flex-1 min-w-0 py-1 text-sm"
-                disabled={disabled}
-              />
+              <div className="relative flex-1 min-w-0">
+                <input
+                  type="text"
+                  value={option}
+                  onChange={(e) => updateOption(index, e.target.value)}
+                  onFocus={() => handleOptionFocus(index)}
+                  onBlur={() => handleOptionBlur(index)}
+                  placeholder={`${t.poll.optionPlaceholder} ${index + 1}`}
+                  className="input-field w-full py-1 pr-7 text-sm"
+                  disabled={disabled}
+                  autoComplete="off"
+                />
+                {loadOptionHistory().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleOptionArrowClick(index)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                    disabled={disabled}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+                {/* Option Suggestions Dropdown */}
+                {activeOptionIndex === index && optionSuggestions.length > 0 && (
+                  <div
+                    ref={optionSuggestionsRef}
+                    className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-48 overflow-y-auto"
+                  >
+                    {optionSuggestions.map((suggestion, suggestionIndex) => (
+                      <button
+                        key={suggestionIndex}
+                        type="button"
+                        onClick={() => handleSelectOptionSuggestion(index, suggestion)}
+                        className="w-full px-3 py-2 text-left text-slate-200 hover:bg-slate-700 transition-colors first:rounded-t-lg last:rounded-b-lg truncate text-sm"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
