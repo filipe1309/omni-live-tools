@@ -19,6 +19,7 @@ SINCE_DATE=""
 CREATE_TAG=true
 SKIP_CONFIRM=false
 UPDATE_CHANGELOG=false
+AUTO_COMMIT=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -43,6 +44,10 @@ while [[ $# -gt 0 ]]; do
       UPDATE_CHANGELOG=true
       shift
       ;;
+    --commit)
+      AUTO_COMMIT=true
+      shift
+      ;;
     -h|--help)
       echo "Usage: $0 [--since DATE] [--dry-run] [--no-tag] [--changelog] [--yes]"
       echo ""
@@ -52,6 +57,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --dry-run      Show what would be done without making changes"
       echo "  --no-tag       Skip creating a git tag for the new version"
       echo "  --changelog    Update CHANGELOG.md after creating the tag"
+      echo "  --commit       Auto-commit package.json and CHANGELOG.md after updates"
       echo "  --yes, -y      Skip confirmation prompt"
       echo "  -h, --help     Show this help message"
       exit 0
@@ -231,4 +237,15 @@ if $UPDATE_CHANGELOG; then
   else
     echo -e "${YELLOW}⚠ Changelog script not found or not executable: $CHANGELOG_SCRIPT${NC}"
   fi
+fi
+
+# Auto-commit changes
+if $AUTO_COMMIT; then
+  echo -e "\n${BLUE}Committing version changes...${NC}"
+  git add "$PACKAGE_JSON"
+  if $UPDATE_CHANGELOG && [[ -f "$REPO_ROOT/CHANGELOG.md" ]]; then
+    git add "$REPO_ROOT/CHANGELOG.md"
+  fi
+  git commit -m "chore(release): v$NEW_VERSION"
+  echo -e "${GREEN}✓ Committed changes with message: chore(release): v$NEW_VERSION${NC}"
 fi
