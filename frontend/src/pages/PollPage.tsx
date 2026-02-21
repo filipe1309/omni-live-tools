@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { useConnectionContext, usePoll, useToast } from '@/hooks';
+import { useConnectionContext, usePoll, useToast, useBackgroundKeepAlive } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
@@ -11,6 +11,9 @@ export function PollPage () {
   const { pollState, voteLog, startPoll, stopPoll, resetPoll, processVote, clearVoteLog, getTotalVotes, getPercentage, openResultsPopup, broadcastSetupConfig, setConnectionStatus, onConfigUpdate, onReconnect } = usePoll();
   const toast = useToast();
   const { t } = useLanguage();
+
+  // Keep animations and timers running even when window is in background (for screen sharing)
+  useBackgroundKeepAlive(pollState.isRunning);
 
   // Use shared connection context
   const {

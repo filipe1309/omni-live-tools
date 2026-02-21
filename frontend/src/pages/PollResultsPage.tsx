@@ -11,6 +11,7 @@ import { LoadScreen } from '@/components';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
+import { useBackgroundKeepAlive } from '@/hooks/useBackgroundKeepAlive';
 import { POLL_TIMER, DEFAULT_QUESTION, DEFAULT_POLL_OPTIONS } from '@/constants';
 import { useLanguage } from '@/i18n';
 
@@ -66,6 +67,9 @@ export function PollResultsPage () {
     return localStorage.getItem('tiktok-poll-autoReconnect') === 'true';
   });
   const [channelRef, setChannelRef] = useState<BroadcastChannel | null>(null);
+
+  // Keep animations running even when window is in background (for screen sharing)
+  useBackgroundKeepAlive(true);
 
   // Leader election - only the leader tab polls for updates
   const { isLeader } = useLeaderElection({

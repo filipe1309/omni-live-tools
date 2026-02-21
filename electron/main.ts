@@ -8,6 +8,12 @@
 import { app, BrowserWindow, shell } from 'electron';
 import path from 'path';
 
+// Disable Chromium's background throttling to keep animations running
+// when app window loses focus (e.g., Cmd+Tab)
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+
 // The backend port — matches the default in backend/config/env.ts
 const PORT = parseInt(process.env.PORT || '8081', 10);
 const SERVER_URL = `http://localhost:${PORT}`;
@@ -43,6 +49,7 @@ function createWindow (): void {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      backgroundThrottling: false, // Keep animations running when window is in background
     },
   });
 
@@ -72,6 +79,7 @@ function createWindow (): void {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             nodeIntegration: false,
+            backgroundThrottling: false, // Keep animations running when window is in background
           },
         },
       };

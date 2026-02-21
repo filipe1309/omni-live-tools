@@ -12,6 +12,7 @@ export { usePollDisplay } from './usePollDisplay';
 export { usePollKeyboardShortcuts } from './usePollKeyboardShortcuts';
 export { useNotificationSound } from './useNotificationSound';
 export { useLeaderElection } from './useLeaderElection';
+export { useBackgroundKeepAlive } from './useBackgroundKeepAlive';
 export { useToast, ToastProvider } from './useToast';
 export type { Toast, ToastType } from './useToast';
 
