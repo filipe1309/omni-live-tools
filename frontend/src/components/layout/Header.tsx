@@ -38,7 +38,10 @@ export function Header () {
             <img src="/omni-logo.jpg" alt="Omni Logo" className="w-10 h-10 rounded-xl object-cover" />
             <div>
               <h1 className="text-xl font-bold text-white">{t.header.title}</h1>
-              <p className="text-xs text-slate-400">{t.header.subtitle}</p>
+              <p className="text-xs text-slate-400">
+                {t.header.subtitle}
+                <span className="ml-2 text-slate-500">v{__APP_VERSION__}</span>
+              </p>
             </div>
           </Link>
 
