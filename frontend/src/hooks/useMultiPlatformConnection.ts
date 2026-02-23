@@ -10,6 +10,7 @@ import type {
   SocialMessage,
   ConnectionOptions,
   TwitchConnectionState,
+  YouTubeConnectionState,
   UnifiedChatMessage,
   PlatformType,
 } from '@/types';
@@ -31,6 +32,13 @@ interface TwitchState {
   error: string | null;
 }
 
+interface YouTubeState {
+  status: ConnectionStatus;
+  videoId: string | null;
+  channelName: string | null;
+  error: string | null;
+}
+
 interface MultiPlatformEventHandlers {
   // Unified chat handler (receives messages from both platforms)
   onChat?: (message: UnifiedChatMessage) => void;
@@ -47,6 +55,11 @@ interface MultiPlatformEventHandlers {
   onTwitchSub?: (data: unknown) => void;
   onTwitchResub?: (data: unknown) => void;
   onTwitchRaid?: (data: unknown) => void;
+  // YouTube-specific handlers
+  onYouTubeChat?: (message: UnifiedChatMessage) => void;
+  onYouTubeSuperchat?: (data: unknown) => void;
+  onYouTubeMember?: (data: unknown) => void;
+  onYouTubeStreamEnd?: () => void;
   // General handlers
   onDisconnect?: (platform: PlatformType) => void;
   onSocketReconnect?: () => void;
@@ -62,6 +75,12 @@ interface UseMultiPlatformConnectionReturn {
   // Twitch state and methods
   twitch: TwitchState & {
     connect: (channel: string) => Promise<TwitchConnectionState>;
+    disconnect: () => void;
+    isConnected: boolean;
+  };
+  // YouTube state and methods
+  youtube: YouTubeState & {
+    connect: (videoIdOrUrl: string) => Promise<YouTubeConnectionState>;
     disconnect: () => void;
     isConnected: boolean;
   };
@@ -81,6 +100,7 @@ export function useMultiPlatformConnection (
   const handlersRef = useRef(handlers);
   const wasConnectedToTikTokRef = useRef(false);
   const wasConnectedToTwitchRef = useRef(false);
+  const wasConnectedToYouTubeRef = useRef(false);
 
   const [tiktokState, setTikTokState] = useState<TikTokState>({
     status: 'disconnected',
@@ -94,6 +114,13 @@ export function useMultiPlatformConnection (
   const [twitchState, setTwitchState] = useState<TwitchState>({
     status: 'disconnected',
     channel: null,
+    error: null,
+  });
+
+  const [youtubeState, setYouTubeState] = useState<YouTubeState>({
+    status: 'disconnected',
+    videoId: null,
+    channelName: null,
     error: null,
   });
 
@@ -111,7 +138,7 @@ export function useMultiPlatformConnection (
     socket.on('connect', () => {
       console.info('[MultiPlatform] Socket connected!');
       // Trigger reconnect callbacks if we were previously connected
-      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current) {
+      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current) {
         console.info('[MultiPlatform] Socket reconnected - triggering onSocketReconnect');
         handlersRef.current.onSocketReconnect?.();
       }
@@ -121,11 +148,12 @@ export function useMultiPlatformConnection (
       console.warn('[MultiPlatform] Socket disconnected!');
       setTikTokState(prev => ({ ...prev, status: 'disconnected' }));
       setTwitchState(prev => ({ ...prev, status: 'disconnected' }));
+      setYouTubeState(prev => ({ ...prev, status: 'disconnected' }));
     });
 
     socket.io.on('reconnect', () => {
       console.info('[MultiPlatform] Socket.IO reconnected!');
-      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current) {
+      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current) {
         handlersRef.current.onSocketReconnect?.();
       }
     });
@@ -226,6 +254,34 @@ export function useMultiPlatformConnection (
 
     socket.on('twitchRaid', (data: unknown) => {
       handlersRef.current.onTwitchRaid?.(data);
+    });
+
+    // ============ YouTube Events ============
+    socket.on('youtubeDisconnected', (errMsg: string) => {
+      console.warn('[MultiPlatform] YouTube disconnected:', errMsg);
+      setYouTubeState(prev => ({ ...prev, status: 'disconnected', videoId: null, channelName: null }));
+      handlersRef.current.onDisconnect?.('youtube' as PlatformType);
+    });
+
+    socket.on('youtubeChat', (msg: UnifiedChatMessage) => {
+      console.log('[MultiPlatform] Received YouTube chat:', msg);
+      handlersRef.current.onYouTubeChat?.(msg);
+      handlersRef.current.onChat?.(msg);
+    });
+
+    socket.on('youtubeSuperchat', (data: unknown) => {
+      handlersRef.current.onYouTubeSuperchat?.(data);
+    });
+
+    socket.on('youtubeMember', (data: unknown) => {
+      handlersRef.current.onYouTubeMember?.(data);
+    });
+
+    socket.on('youtubeStreamEnd', () => {
+      console.warn('[MultiPlatform] YouTube stream ended!');
+      handlersRef.current.onYouTubeStreamEnd?.();
+      handlersRef.current.onDisconnect?.('youtube' as PlatformType);
+      setYouTubeState(prev => ({ ...prev, status: 'disconnected', videoId: null, channelName: null }));
     });
 
     return () => {
@@ -381,12 +437,88 @@ export function useMultiPlatformConnection (
     });
   }, []);
 
+  // ============ YouTube Methods ============
+  const connectYouTube = useCallback(
+    (videoIdOrUrl: string): Promise<YouTubeConnectionState> => {
+      return new Promise((resolve, reject) => {
+        const socket = socketRef.current;
+        if (!socket) {
+          reject('Socket not initialized');
+          return;
+        }
+
+        setYouTubeState(prev => ({
+          ...prev,
+          status: 'connecting',
+          error: null,
+        }));
+
+        // Send video ID or URL
+        const trimmed = videoIdOrUrl.trim();
+        socket.emit('setYouTubeVideo', trimmed);
+
+        const cleanup = () => {
+          clearTimeout(timeout);
+          socket.off('youtubeConnected', onConnected);
+          socket.off('youtubeDisconnected', onDisconnected);
+        };
+
+        const onConnected = (connectionState: YouTubeConnectionState) => {
+          cleanup();
+          wasConnectedToYouTubeRef.current = true;
+          setYouTubeState(prev => ({
+            ...prev,
+            status: 'connected',
+            videoId: connectionState.videoId,
+            channelName: connectionState.channelName,
+            error: null,
+          }));
+          resolve(connectionState);
+        };
+
+        const onDisconnected = (errorMessage: string) => {
+          cleanup();
+          setYouTubeState(prev => ({
+            ...prev,
+            status: 'error',
+            error: errorMessage,
+          }));
+          reject(errorMessage);
+        };
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          setYouTubeState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
+          reject('Connection Timeout');
+        }, 30000); // YouTube connections may take longer
+
+        socket.once('youtubeConnected', onConnected);
+        socket.once('youtubeDisconnected', onDisconnected);
+      });
+    },
+    []
+  );
+
+  const disconnectYouTube = useCallback(() => {
+    wasConnectedToYouTubeRef.current = false;
+    // Emit disconnect event to backend
+    socketRef.current?.emit('disconnectYouTube');
+    setYouTubeState({
+      status: 'disconnected',
+      videoId: null,
+      channelName: null,
+      error: null,
+    });
+  }, []);
+
   // Computed properties
   const tiktokConnected = tiktokState.status === 'connected';
   const twitchConnected = twitchState.status === 'connected';
+  const youtubeConnected = youtubeState.status === 'connected';
   const connectedPlatforms: PlatformType[] = [];
   if (tiktokConnected) connectedPlatforms.push('tiktok' as PlatformType);
   if (twitchConnected) connectedPlatforms.push('twitch' as PlatformType);
+  if (youtubeConnected) connectedPlatforms.push('youtube' as PlatformType);
 
   return {
     tiktok: {
@@ -401,7 +533,13 @@ export function useMultiPlatformConnection (
       disconnect: disconnectTwitch,
       isConnected: twitchConnected,
     },
-    isAnyConnected: tiktokConnected || twitchConnected,
+    youtube: {
+      ...youtubeState,
+      connect: connectYouTube,
+      disconnect: disconnectYouTube,
+      isConnected: youtubeConnected,
+    },
+    isAnyConnected: tiktokConnected || twitchConnected || youtubeConnected,
     connectedPlatforms,
   };
 }

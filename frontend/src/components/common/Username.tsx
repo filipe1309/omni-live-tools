@@ -1,17 +1,27 @@
 interface UsernameProps {
   uniqueId: string;
-  platform?: 'tiktok' | 'twitch';
+  platform?: 'tiktok' | 'twitch' | 'youtube';
   className?: string;
 }
 
 export function Username({ uniqueId, platform = 'tiktok', className = '' }: UsernameProps) {
-  const profileUrl = platform === 'twitch'
-    ? `https://www.twitch.tv/${uniqueId}`
-    : `https://www.tiktok.com/@${uniqueId}`;
+  let profileUrl: string;
+  if (platform === 'twitch') {
+    profileUrl = `https://www.twitch.tv/${uniqueId}`;
+  } else if (platform === 'youtube') {
+    profileUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(uniqueId)}`;
+  } else {
+    profileUrl = `https://www.tiktok.com/@${uniqueId}`;
+  }
   
-  const colorClass = platform === 'twitch' 
-    ? 'text-purple-400' 
-    : 'text-tiktok-cyan';
+  let colorClass: string;
+  if (platform === 'twitch') {
+    colorClass = 'text-purple-400';
+  } else if (platform === 'youtube') {
+    colorClass = 'text-red-500';
+  } else {
+    colorClass = 'text-tiktok-cyan';
+  }
 
   return (
     <a

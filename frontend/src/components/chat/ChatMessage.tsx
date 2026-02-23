@@ -1,20 +1,22 @@
 import { ProfilePicture } from '../common/ProfilePicture';
 import { Username } from '../common/Username';
-import { TikTokIcon, TwitchIcon } from '../common/PlatformSelector';
+import { TikTokIcon, TwitchIcon, YouTubeIcon } from '../common/PlatformSelector';
 import type { ChatItem } from '@/types';
 
 interface ChatMessageProps {
   item: ChatItem;
 }
 
-function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' }) {
+function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
   if (!platform) return null;
   
-  return platform === 'tiktok' ? (
-    <TikTokIcon className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-  ) : (
-    <TwitchIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />
-  );
+  if (platform === 'tiktok') {
+    return <TikTokIcon className="w-4 h-4 text-cyan-400 flex-shrink-0" />;
+  }
+  if (platform === 'youtube') {
+    return <YouTubeIcon className="w-4 h-4 text-red-500 flex-shrink-0" />;
+  }
+  return <TwitchIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />;
 }
 
 export function ChatMessage({ item }: ChatMessageProps) {

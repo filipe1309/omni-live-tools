@@ -2,7 +2,7 @@ import { FormEvent, KeyboardEvent, useRef } from 'react';
 import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { PlatformType } from '@/types';
-import { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
+import { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon } from './PlatformSelector';
 import { LanguageSelector } from './LanguageSelector';
 
 interface ConnectionModalProps {
@@ -21,10 +21,12 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   const {
     tiktok,
     twitch,
+    youtube,
     selectedPlatforms,
     setSelectedPlatforms,
     setTikTokUsername,
     setTwitchChannel,
+    setYouTubeVideo,
     isAnyConnected,
     autoReconnect,
     setAutoReconnect,
@@ -33,6 +35,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   const { t } = useLanguage();
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
+  const youtubeInputRef = useRef<HTMLInputElement>(null);
 
   const statusConfig = {
     disconnected: {
@@ -55,6 +58,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
 
   const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
   const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
+  const showYouTube = selectedPlatforms.includes(PlatformType.YOUTUBE);
 
   const handleTikTokSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -94,9 +98,29 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     }
   };
 
+  const handleYouTubeSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (youtube.status === 'connected') {
+      youtube.disconnect();
+    } else if (youtube.videoInput.trim()) {
+      try {
+        await youtube.connect(youtube.videoInput.trim());
+      } catch {
+        // Error handling is done in the context
+      }
+    }
+  };
+
+  const handleYouTubeKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleYouTubeSubmit(e);
+    }
+  };
+
   const isConnecting =
     (showTikTok && tiktok.status === 'connecting') ||
-    (showTwitch && twitch.status === 'connecting');
+    (showTwitch && twitch.status === 'connecting') ||
+    (showYouTube && youtube.status === 'connecting');
 
   // Determine if modal should be shown
   // If isOpen is provided (controlled mode), use it
@@ -158,6 +182,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
               disabled={isConnecting}
               tiktokConnected={tiktok.status === 'connected'}
               twitchConnected={twitch.status === 'connected'}
+              youtubeConnected={youtube.status === 'connected'}
             />
           </div>
 
@@ -249,6 +274,51 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                 {twitch.status === 'error' && twitch.error && (
                   <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-300">
                     {twitch.error}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* YouTube Connection */}
+            {showYouTube && (
+              <div className={`p-4 rounded-lg border-2 transition-all ${youtube.status === 'connected'
+                ? 'border-red-500/50 bg-red-500/5'
+                : 'border-slate-700/50 bg-slate-700/30'
+                }`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <YouTubeIcon className="w-5 h-5 text-red-500" />
+                  <span className="font-semibold text-white">YouTube</span>
+                  <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-bold border ${statusConfig[youtube.status].className}`}>
+                    {statusConfig[youtube.status].text}
+                  </span>
+                </div>
+
+                <form onSubmit={handleYouTubeSubmit} className="flex flex-wrap gap-2">
+                  <input
+                    ref={youtubeInputRef}
+                    type="text"
+                    value={youtube.videoInput}
+                    onChange={(e) => setYouTubeVideo(e.target.value)}
+                    onKeyUp={handleYouTubeKeyUp}
+                    placeholder={t.connection.videoPlaceholder || 'Video ID or URL'}
+                    className="input-field flex-1 min-w-0 disabled:cursor-not-allowed"
+                    disabled={youtube.status === 'connecting' || youtube.status === 'connected'}
+                  />
+                  <button
+                    type="submit"
+                    disabled={youtube.status === 'connecting' || (!youtube.videoInput.trim() && youtube.status !== 'connected')}
+                    className={`px-4 py-2 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${youtube.status === 'connected'
+                      ? 'bg-red-600 text-white hover:bg-red-500'
+                      : 'bg-red-600 text-white hover:bg-red-500'
+                      }`}
+                  >
+                    {youtube.status === 'connecting' ? '...' : youtube.status === 'connected' ? t.common.disconnect : t.common.connect}
+                  </button>
+                </form>
+
+                {youtube.status === 'error' && youtube.error && (
+                  <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-300">
+                    {youtube.error}
                   </div>
                 )}
               </div>

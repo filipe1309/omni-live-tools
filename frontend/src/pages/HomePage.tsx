@@ -68,10 +68,14 @@ export function HomePage () {
               {t.home.description}{' '}
               <a href="https://www.tiktok.com/live" className="text-tiktok-cyan hover:underline" target="_blank" rel="noopener noreferrer">
                 TikTok
-              </a>{' '}
-              {t.home.and}{' '}
+              </a>
+              {', '}
               <a href="https://www.twitch.tv/" className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer">
-                Twitch.
+                Twitch
+              </a>
+              {' '}{t.home.and}{' '}
+              <a href="https://www.youtube.com/live" className="text-red-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                YouTube.
               </a>
             </p>
           </div>

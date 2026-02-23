@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
 import { useConnectionContext } from '@/hooks';
 import { LanguageSelector } from '../common/LanguageSelector';
-import { TikTokIcon, TwitchIcon } from '../common';
+import { TikTokIcon, TwitchIcon, YouTubeIcon } from '../common';
 
 export function Header () {
   const { t } = useLanguage();
-  const { tiktok, twitch, isAnyConnected, setShowConnectionModal } = useConnectionContext();
+  const { tiktok, twitch, youtube, isAnyConnected, setShowConnectionModal } = useConnectionContext();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -57,6 +57,7 @@ export function Header () {
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   {tiktok.isConnected && <TikTokIcon className="w-4 h-4 text-tiktok-cyan" />}
                   {twitch.isConnected && <TwitchIcon className="w-4 h-4 text-purple-400" />}
+                  {youtube.isConnected && <YouTubeIcon className="w-4 h-4 text-red-500" />}
                 </span>
               ) : (
                 <span className="w-2 h-2 bg-red-500 rounded-full" />

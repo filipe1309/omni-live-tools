@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { ProfilePicture, TikTokIcon, TwitchIcon } from '../common';
+import { ProfilePicture, TikTokIcon, TwitchIcon, YouTubeIcon } from '../common';
 import { useLanguage } from '@/i18n';
 import type { VoteEntry } from '@/types';
 
@@ -12,11 +12,18 @@ interface VoteLogProps {
 /**
  * Platform badge component for vote entries
  */
-function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' }) {
+function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
   if (platform === 'twitch') {
     return (
       <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-purple-500/20 text-purple-400" title="Twitch">
         <TwitchIcon className="w-3 h-3" />
+      </span>
+    );
+  }
+  if (platform === 'youtube') {
+    return (
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-red-500/20 text-red-500" title="YouTube">
+        <YouTubeIcon className="w-3 h-3" />
       </span>
     );
   }

@@ -11,12 +11,27 @@ interface ObsChatMessageProps {
  */
 export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
   const isTwitch = item.platform === 'twitch';
-  const profileUrl = isTwitch
-    ? `https://www.twitch.tv/${item.user.uniqueId}`
-    : `https://www.tiktok.com/@${item.user.uniqueId}`;
+  const isYouTube = item.platform === 'youtube';
+  
+  let profileUrl: string;
+  if (isTwitch) {
+    profileUrl = `https://www.twitch.tv/${item.user.uniqueId}`;
+  } else if (isYouTube) {
+    profileUrl = `https://www.youtube.com/channel/${item.user.userId}`;
+  } else {
+    profileUrl = `https://www.tiktok.com/@${item.user.uniqueId}`;
+  }
 
   const hasProfilePicture = item.user.profilePictureUrl && item.user.profilePictureUrl.trim() !== '';
   const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0).toUpperCase();
+
+  // Platform colors
+  let platformColor = '#00f2ea'; // TikTok cyan
+  if (isTwitch) {
+    platformColor = '#9146ff'; // Twitch purple
+  } else if (isYouTube) {
+    platformColor = '#ff0000'; // YouTube red
+  }
 
   return (
     <div className="flex items-start gap-2">
@@ -30,7 +45,7 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
         <div
           className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold"
           style={{
-            backgroundColor: isTwitch ? '#9146ff' : '#00f2ea',
+            backgroundColor: platformColor,
             color: '#fff'
           }}
         >
@@ -43,7 +58,7 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold hover:underline"
-          style={{ color: isTwitch ? '#9146ff' : 'rgb(102,143,217)' }}
+          style={{ color: isTwitch ? '#9146ff' : isYouTube ? '#ff0000' : 'rgb(102,143,217)' }}
         >
           {item.user.uniqueId}
         </a>

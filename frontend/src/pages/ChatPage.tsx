@@ -33,6 +33,7 @@ export function ChatPage () {
     registerMemberHandler,
     registerSocialHandler,
     registerTwitchChatHandler,
+    registerYouTubeChatHandler,
   } = useConnectionContext();
 
   // Add chat item helper
@@ -42,7 +43,7 @@ export function ChatPage () {
     content: string,
     color?: string,
     isTemporary = false,
-    platform: 'tiktok' | 'twitch' = 'tiktok'
+    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok'
   ) => {
     setChatItems(prev => {
       // Remove temporary items when adding new messages
@@ -128,6 +129,24 @@ export function ChatPage () {
       addChatItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, 'twitch');
     });
 
+    const unsubscribeYouTubeChat = registerYouTubeChatHandler((msg: UnifiedChatMessage) => {
+      console.log('[ChatPage] Processing YouTube chat:', msg.username, msg.message);
+      // Convert YouTube message to ChatItem format
+      const youtubeUser = {
+        uniqueId: msg.username,
+        nickname: msg.displayName,
+        userId: msg.odlUserId,
+        profilePictureUrl: msg.profilePictureUrl || '',
+        followRole: 0,
+        userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
+        isModerator: msg.isMod || false,
+        isNewGifter: false,
+        isSubscriber: msg.isSubscriber || false,
+        topGifterRank: null,
+      };
+      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube');
+    });
+
     return () => {
       unsubscribeTikTokChat();
       unsubscribeGift();
@@ -135,8 +154,9 @@ export function ChatPage () {
       unsubscribeMember();
       unsubscribeSocial();
       unsubscribeTwitchChat();
+      unsubscribeYouTubeChat();
     };
-  }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler]);
+  }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler, registerYouTubeChatHandler]);
 
   return (
     <div className="min-h-screen w-full bg-chat-gradient">

@@ -2,6 +2,8 @@ export { useTikTokConnection } from './useTikTokConnection';
 export type { ConnectionStatus } from './useTikTokConnection';
 export { useTwitchConnection } from './useTwitchConnection';
 export type { TwitchConnectionStatus } from './useTwitchConnection';
+export { useYouTubeConnection } from './useYouTubeConnection';
+export type { YouTubeConnectionStatus } from './useYouTubeConnection';
 export { useMultiPlatformConnection } from './useMultiPlatformConnection';
 export { ConnectionProvider, useConnectionContext } from './useConnectionContext';
 export { usePoll } from './usePoll';

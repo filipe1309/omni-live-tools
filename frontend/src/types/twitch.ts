@@ -4,6 +4,7 @@
 export enum PlatformType {
   TIKTOK = 'tiktok',
   TWITCH = 'twitch',
+  YOUTUBE = 'youtube',
 }
 
 /**
@@ -71,4 +72,16 @@ export interface PlatformConnectionConfig {
   twitch?: {
     channel: string;
   };
+  youtube?: {
+    videoId: string;
+  };
+}
+
+/**
+ * YouTube Connection State
+ */
+export interface YouTubeConnectionState {
+  videoId: string;
+  channelName: string;
+  isConnected: boolean;
 }

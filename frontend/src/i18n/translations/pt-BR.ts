@@ -87,8 +87,10 @@ export const ptBR = {
     autoReconnectEnabled: 'Reconexão automática ativada',
     tiktokUser: 'Usuário do TikTok',
     twitchChannel: 'Canal da Twitch',
+    youtubeVideo: 'Vídeo do YouTube',
     userPlaceholder: '@usuario',
     channelPlaceholder: 'canal',
+    videoPlaceholder: 'ID ou URL do vídeo',
     platformsLabel: 'Plataformas',
   },
 
@@ -103,7 +105,7 @@ export const ptBR = {
   // Overlay Page
   overlay: {
     title: 'Gerar URL do Overlay',
-    description: 'Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming. O overlay conectará automaticamente e exibirá eventos do TikTok LIVE e/ou streams da Twitch.',
+    description: 'Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming. O overlay conectará automaticamente e exibirá eventos do TikTok LIVE, Twitch e/ou YouTube Live.',
     tiktokUser: 'Usuário do TikTok',
     userPlaceholder: 'Digite o @usuário',
     displayEvents: 'Exibir Eventos',
@@ -144,7 +146,7 @@ export const ptBR = {
   // Poll Page
   poll: {
     title: 'Enquete Multi-Plataforma',
-    description: 'Sistema de votação interativo para Lives do TikTok e Twitch',
+    description: 'Sistema de votação interativo para Lives do TikTok, Twitch e YouTube',
     connection: 'Conexão',
     configuration: 'Configuração da Enquete',
     results: 'Resultados da Enquete',
@@ -208,10 +210,13 @@ export const ptBR = {
   toast: {
     tiktokConnected: 'TikTok conectado a @{username}',
     twitchConnected: 'Twitch conectado a #{channel}',
+    youtubeConnected: 'YouTube conectado a {channel}',
     tiktokReconnected: 'TikTok reconectado a @{username}',
     twitchReconnected: 'Twitch reconectado a #{channel}',
+    youtubeReconnected: 'YouTube reconectado a {channel}',
     errorConnectingTikTok: 'Erro ao conectar TikTok: {error}',
     errorConnectingTwitch: 'Erro ao conectar Twitch: {error}',
+    errorConnectingYouTube: 'Erro ao conectar YouTube: {error}',
   },
 
   // Language

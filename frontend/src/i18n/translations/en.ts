@@ -89,8 +89,10 @@ export const en: TranslationKeys = {
     autoReconnectEnabled: 'Auto-reconnect enabled',
     tiktokUser: 'TikTok Username',
     twitchChannel: 'Twitch Channel',
+    youtubeVideo: 'YouTube Video',
     userPlaceholder: '@username',
     channelPlaceholder: 'channel',
+    videoPlaceholder: 'Video ID or URL',
     platformsLabel: 'Platforms',
   },
 
@@ -105,7 +107,7 @@ export const en: TranslationKeys = {
   // Overlay Page
   overlay: {
     title: 'Generate Overlay URL',
-    description: 'Create a customized overlay URL for use with OBS, Streamlabs or other streaming software. The overlay will automatically connect and display events from TikTok LIVE and/or Twitch streams.',
+    description: 'Create a customized overlay URL for use with OBS, Streamlabs or other streaming software. The overlay will automatically connect and display events from TikTok LIVE, Twitch, and/or YouTube Live streams.',
     tiktokUser: 'TikTok Username',
     userPlaceholder: 'Enter @username',
     displayEvents: 'Display Events',
@@ -146,7 +148,7 @@ export const en: TranslationKeys = {
   // Poll Page
   poll: {
     title: 'Multi-Platform Poll',
-    description: 'Interactive voting system for TikTok and Twitch Lives',
+    description: 'Interactive voting system for TikTok, Twitch, and YouTube Lives',
     connection: 'Connection',
     configuration: 'Poll Configuration',
     results: 'Poll Results',
@@ -210,10 +212,13 @@ export const en: TranslationKeys = {
   toast: {
     tiktokConnected: 'TikTok connected to @{username}',
     twitchConnected: 'Twitch connected to #{channel}',
+    youtubeConnected: 'YouTube connected to {channel}',
     tiktokReconnected: 'TikTok reconnected to @{username}',
     twitchReconnected: 'Twitch reconnected to #{channel}',
+    youtubeReconnected: 'YouTube reconnected to {channel}',
     errorConnectingTikTok: 'Error connecting TikTok: {error}',
     errorConnectingTwitch: 'Error connecting Twitch: {error}',
+    errorConnectingYouTube: 'Error connecting YouTube: {error}',
   },
 
   // Language
