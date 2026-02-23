@@ -382,7 +382,7 @@ export function PollPage () {
         </div>
 
         {/* Configuration Section */}
-        <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''}`}>
+        <div className={`card mb-3 border border-slate-700/50 transition-all duration-300 ${!isAnyConnected ? 'blur-sm opacity-50 pointer-events-none' : ''} ${pollState.isRunning || pollState.countdown !== undefined ? 'cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
           <h2 className="text-lg font-bold text-white mb-2 pb-2 border-b border-slate-700/50">
             ⚙️ {t.poll.configuration}
           </h2>

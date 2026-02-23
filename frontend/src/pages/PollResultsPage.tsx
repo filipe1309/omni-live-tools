@@ -341,7 +341,7 @@ export function PollResultsPage () {
 
         <div className="flex-1 flex flex-col gap-4">
           {/* Setup Section - Above Results */}
-          <div className="p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30">
+          <div className={`p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30 ${pollState.isRunning || isCountingDown ? 'cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
             <PollSetup
               onStart={() => { }} // Not used - we have separate control buttons
               onChange={handleSetupChange}
