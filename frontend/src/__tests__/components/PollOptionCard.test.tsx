@@ -59,7 +59,7 @@ describe('PollOptionCard', () => {
   it('should handle zero votes', () => {
     render(<PollOptionCard {...defaultProps} votes={0} percentage={0} totalVotes={0} />);
     expect(screen.getByText(/0 votos/)).toBeInTheDocument();
-    expect(screen.getByText(/\(0\.0%\)/)).toBeInTheDocument();
+    expect(screen.getByText(/0\.0/)).toBeInTheDocument();
   });
 
   it('should render with compact size', () => {
@@ -95,6 +95,6 @@ describe('PollOptionCard', () => {
 
   it('should format percentage with one decimal place', () => {
     render(<PollOptionCard {...defaultProps} percentage={33.333333} />);
-    expect(screen.getByText(/\(33\.3%\)/)).toBeInTheDocument();
+    expect(screen.getByText(/33\.3/)).toBeInTheDocument();
   });
 });

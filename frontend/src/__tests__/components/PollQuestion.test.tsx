@@ -2,6 +2,17 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PollQuestion } from '@/components/poll/PollQuestion';
 
+// Mock useLanguage
+vi.mock('@/i18n', () => ({
+  useLanguage: () => ({
+    t: {
+      poll: {
+        questionPlaceholder: 'Enter your question...',
+      },
+    },
+  }),
+}));
+
 // Mock TIMER_THRESHOLDS
 vi.mock('@/constants', () => ({
   TIMER_THRESHOLDS: {
