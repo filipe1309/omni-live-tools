@@ -66,8 +66,11 @@ export const ptBR = {
   chat: {
     chats: 'Chats',
     gifts: 'Gifts',
+    queue: 'Fila',
     noMessages: 'Nenhuma mensagem ainda...',
     noGifts: 'Nenhum presente ainda...',
+    noQueueMessages: 'Nenhuma mensagem na fila...',
+    scrollPaused: 'Scroll pausado',
     connectedTo: 'Conectado a',
     errorConnecting: 'Erro ao conectar',
     reconnected: 'reconectado a',

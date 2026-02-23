@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
-import { RoomStats, ChatContainer, GiftContainer } from '@/components';
+import { RoomStats, ChatContainer, GiftContainer, ChatQueueContainer } from '@/components';
 import type { ChatItem, GiftMessage, ChatMessage, LikeMessage, MemberMessage, SocialMessage, UnifiedChatMessage } from '@/types';
 
 // Helper to check if gift is in pending streak
@@ -23,7 +23,22 @@ interface GiftData extends GiftMessage {
 export function ChatPage () {
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
   const [gifts, setGifts] = useState<GiftData[]>([]);
+  const [queueItems, setQueueItems] = useState<ChatItem[]>([]);
   const { t } = useLanguage();
+
+  // Add to queue handler
+  const addToQueue = useCallback((item: ChatItem) => {
+    setQueueItems(prev => {
+      // Avoid duplicates
+      if (prev.some(q => q.id === item.id)) return prev;
+      return [...prev, item];
+    });
+  }, []);
+
+  // Remove from queue handler
+  const removeFromQueue = useCallback((id: string) => {
+    setQueueItems(prev => prev.filter(item => item.id !== id));
+  }, []);
 
   const {
     tiktok,
@@ -172,8 +187,9 @@ export function ChatPage () {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          <ChatContainer items={chatItems} title={`💬 ${t.chat.chats}`} />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <ChatContainer items={chatItems} title={`💬 ${t.chat.chats}`} onAddToQueue={addToQueue} />
+          <ChatQueueContainer items={queueItems} title={`📋 ${t.chat.queue}`} onRemove={removeFromQueue} />
           <GiftContainer gifts={gifts} title={`🎁 ${t.chat.gifts}`} />
         </div>
       </div>

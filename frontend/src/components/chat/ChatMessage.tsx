@@ -5,6 +5,7 @@ import type { ChatItem } from '@/types';
 
 interface ChatMessageProps {
   item: ChatItem;
+  onAddToQueue?: (item: ChatItem) => void;
 }
 
 function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
@@ -19,11 +20,11 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube
   return <TwitchIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />;
 }
 
-export function ChatMessage({ item }: ChatMessageProps) {
+export function ChatMessage({ item, onAddToQueue }: ChatMessageProps) {
   const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0);
   
   return (
-    <div className="flex items-start gap-3 py-2 px-3 hover:bg-slate-700/30 rounded-lg animate-fade-in">
+    <div className="flex items-start gap-3 py-2 px-3 hover:bg-slate-700/30 rounded-lg animate-fade-in group">
       <ProfilePicture 
         src={item.user.profilePictureUrl} 
         size="sm" 
@@ -42,6 +43,17 @@ export function ChatMessage({ item }: ChatMessageProps) {
           {item.content}
         </span>
       </div>
+      {onAddToQueue && (
+        <button
+          onClick={() => onAddToQueue(item)}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-emerald-500/20 rounded text-emerald-400 hover:text-emerald-300 flex-shrink-0"
+          title="Add to queue"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

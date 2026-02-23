@@ -68,8 +68,11 @@ export const en: TranslationKeys = {
   chat: {
     chats: 'Chats',
     gifts: 'Gifts',
+    queue: 'Queue',
     noMessages: 'No messages yet...',
     noGifts: 'No gifts yet...',
+    noQueueMessages: 'No messages in queue...',
+    scrollPaused: 'Scroll paused',
     connectedTo: 'Connected to',
     errorConnecting: 'Error connecting',
     reconnected: 'reconnected to',
