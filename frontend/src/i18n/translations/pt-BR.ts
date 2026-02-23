@@ -56,6 +56,9 @@ export const ptBR = {
     },
     footer: {
       source: 'Source:',
+      madeWith: 'Feito com',
+      by: 'por',
+      viewSource: 'Ver Código',
     },
   },
 

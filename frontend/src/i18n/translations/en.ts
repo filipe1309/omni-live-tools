@@ -58,6 +58,9 @@ export const en: TranslationKeys = {
     },
     footer: {
       source: 'Source:',
+      madeWith: 'Made with',
+      by: 'by',
+      viewSource: 'View Source',
     },
   },
 
