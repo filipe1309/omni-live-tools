@@ -6,7 +6,7 @@
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-black.svg)](https://socket.io/)
 [![Electron](https://img.shields.io/badge/Electron-25.x-purple.svg)](https://www.electronjs.org/)
 
-A multi-platform chat reader and poll application for **TikTok LIVE** and **Twitch** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
+A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
 ![Omni LIVE Tools (Demo)](docs/omni-live-tools.gif)
 
@@ -28,8 +28,8 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 
 ## ✨ Features
 
-- 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE and Twitch instantly
-- 🌐 **Multi-Platform Support** - Connect to TikTok and Twitch simultaneously
+- 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, and YouTube Live instantly
+- 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with enhanced Twitch integration
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
@@ -52,6 +52,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE** and **Twit
 |----------|-------------|-------|---------|
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
+| YouTube Live | ✅ | ✅ | [youtubei.js](https://github.com/LuanRT/YouTube.js) |
 
 ## 🌍 Language Support
 
@@ -72,10 +73,11 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 #### How It Works
 
-1. Select which platforms to use (TikTok, Twitch, or both)
+1. Select which platforms to use (TikTok, Twitch, YouTube, or any combination)
 2. Connect to the live stream(s):
    - **TikTok**: Enter the streamer's @username
    - **Twitch**: Enter the channel name
+   - **YouTube**: Enter the video ID or live stream URL
 3. Configure your poll with 2-10 options
 4. Set the timer duration (10-300 seconds)
 5. Start the poll
@@ -84,7 +86,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 #### Features
 
-- **Multi-platform voting** - Collect votes from TikTok and Twitch simultaneously
+- **Multi-platform voting** - Collect votes from TikTok, Twitch, and YouTube simultaneously
 - **One vote per user per platform** - Each viewer can only vote once per poll per platform
 - **Real-time results** - Vote counts and percentages update instantly
 - **Platform badges** - Visual indicators show which platform each vote came from
@@ -96,7 +98,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 ### 💬 Real-time Chat Reading
 
-The application reads chat messages from TikTok LIVE and Twitch in real-time, displaying them on a web page or OBS overlay.
+The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live in real-time, displaying them on a web page or OBS overlay.
 
 ![Chat Reading Demo](docs/omni-chat.gif)
 
@@ -105,12 +107,13 @@ The application reads chat messages from TikTok LIVE and Twitch in real-time, di
 1. Connect to the live stream(s):
    - **TikTok**: Enter the streamer's @username
    - **Twitch**: Enter the channel name
+   - **YouTube**: Enter the video ID or live stream URL
 2. Chat messages from the selected platforms will appear in real-time on the main page and OBS overlay
 3. Customize the display settings to show/hide usernames, badges, timestamps, etc.
 
 #### Features
 
-- **Multi-platform support** - Connect to TikTok and Twitch simultaneously
+- **Multi-platform support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
 - **OBS overlay** - Dedicated page optimized for streaming software with enhanced Twitch integration
 - **Rate limiting** - Protect against excessive requests
