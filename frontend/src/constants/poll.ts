@@ -104,7 +104,9 @@ export const POLL_SHORTCUTS: {
 // Helper function to check if a keyboard event matches a shortcut
 export function matchesShortcut (e: KeyboardEvent, shortcuts: KeyboardShortcut[]): boolean {
   return shortcuts.some(shortcut => {
-    const keyMatch = e.key === shortcut.key;
+    // Case-insensitive key matching to handle Caps Lock scenarios
+    // (Caps Lock + Shift can produce lowercase letters on some systems)
+    const keyMatch = e.key.toLowerCase() === shortcut.key.toLowerCase();
     const ctrlMatch = !!shortcut.ctrl === e.ctrlKey;
     const altMatch = !!shortcut.alt === e.altKey;
     const shiftMatch = !!shortcut.shift === e.shiftKey;
