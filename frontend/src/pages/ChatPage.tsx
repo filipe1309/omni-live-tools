@@ -59,7 +59,8 @@ export function ChatPage () {
     color?: string,
     isTemporary = false,
     platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok',
-    autoAddToQueue = false
+    autoAddToQueue = false,
+    isSuperchat = false
   ) => {
     const newItem: ChatItem = {
       id: generateId(),
@@ -70,6 +71,7 @@ export function ChatPage () {
       timestamp: new Date(),
       isTemporary,
       platform,
+      isSuperchat,
     };
 
     setChatItems(prev => {
@@ -173,7 +175,7 @@ export function ChatPage () {
       };
       // Auto-add superchats to queue
       const isSuperchat = !!msg.metadata?.superchat;
-      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube', isSuperchat);
+      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube', isSuperchat, isSuperchat);
     });
 
     return () => {

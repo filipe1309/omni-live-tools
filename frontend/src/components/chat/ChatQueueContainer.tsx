@@ -26,9 +26,15 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube
 
 function QueueMessage({ item, onRemove }: { item: ChatItem; onRemove: (id: string) => void }) {
   const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0);
+  const isSuperchat = item.isSuperchat;
   
   return (
-    <div className="flex items-start gap-3 py-2 px-3 hover:bg-slate-700/30 rounded-lg animate-fade-in group">
+    <div className={`flex items-start gap-3 py-2 px-3 rounded-lg animate-fade-in group ${isSuperchat ? 'bg-yellow-500/20 border border-yellow-500/40 hover:bg-yellow-500/30' : 'hover:bg-slate-700/30'}`}>
+      {isSuperchat && (
+        <span className="text-yellow-400 flex-shrink-0" title="Super Chat">
+          💰
+        </span>
+      )}
       <ProfilePicture 
         src={item.user.profilePictureUrl} 
         size="sm" 

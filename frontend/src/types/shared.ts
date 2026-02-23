@@ -86,4 +86,5 @@ export interface ChatItem {
   giftData?: GiftMessage;
   isPendingStreak?: boolean;
   platform?: 'tiktok' | 'twitch' | 'youtube';
+  isSuperchat?: boolean;
 }
