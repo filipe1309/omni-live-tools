@@ -31,6 +31,8 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 ### Main Features
 - Real-time chat reading from TikTok, Twitch, and YouTube
 - Message queue for organizing messages to read during streams
+- Search/filter to quickly find specific messages
+- SuperChat highlighting with auto-queue for YouTube
 - Interactive polls where viewers vote by typing numbers
 - OBS overlay support for streaming software
 - Multi-language support (PT-BR and EN)
