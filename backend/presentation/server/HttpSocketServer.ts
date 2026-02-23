@@ -203,6 +203,15 @@ export class HttpSocketServer {
         this.statisticsService,
         this.config.sessionId
       );
+
+      // Featured message relay - broadcast to all clients
+      socket.on('setFeaturedMessage', (message: unknown) => {
+        this.io.emit('featuredMessage', message);
+      });
+
+      socket.on('clearFeaturedMessage', () => {
+        this.io.emit('featuredMessageCleared');
+      });
     });
   }
 

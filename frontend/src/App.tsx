@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header, ToastContainer, ErrorBoundary, ConnectionModal } from './components';
 import { ToastProvider, ConnectionProvider, useConnectionContext } from './hooks';
 import { LanguageProvider } from './i18n';
-import { HomePage, ChatPage, PollPage, PollResultsPage, OverlayPage, ObsOverlayPage } from './pages';
+import { HomePage, ChatPage, PollPage, PollResultsPage, OverlayPage, ObsOverlayPage, ObsFeaturedMessagePage } from './pages';
 
 // Separate component to access connection context
 function ConnectionModalWrapper () {
@@ -25,6 +25,9 @@ function App () {
               <Routes>
                 {/* OBS Overlay - No header */}
                 <Route path="/obs" element={<ObsOverlayPage />} />
+
+                {/* OBS Featured Message Overlay - No header */}
+                <Route path="/obs-featured" element={<ObsFeaturedMessagePage />} />
 
                 {/* Poll Results Popup - No header */}
                 <Route path="/poll-results" element={<PollResultsPage />} />

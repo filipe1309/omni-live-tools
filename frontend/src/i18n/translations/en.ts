@@ -79,6 +79,7 @@ export const en: TranslationKeys = {
     connectedTo: 'Connected to',
     errorConnecting: 'Error connecting',
     reconnected: 'reconnected to',
+    popOutOverlay: 'Pop out overlay window',
   },
 
   // Room Stats

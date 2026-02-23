@@ -6,6 +6,8 @@ import type { ChatItem } from '@/types';
 interface ChatMessageProps {
   item: ChatItem;
   onAddToQueue?: (item: ChatItem) => void;
+  onSendToOverlay?: (item: ChatItem) => void;
+  isOnOverlay?: boolean;
 }
 
 function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
@@ -20,12 +22,12 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube
   return <TwitchIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />;
 }
 
-export function ChatMessage({ item, onAddToQueue }: ChatMessageProps) {
+export function ChatMessage({ item, onAddToQueue, onSendToOverlay, isOnOverlay }: ChatMessageProps) {
   const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0);
   const isSuperchat = item.isSuperchat;
   
   return (
-    <div className={`flex items-start gap-3 py-2 px-3 rounded-lg animate-fade-in group ${isSuperchat ? 'bg-yellow-500/20 border border-yellow-500/40 hover:bg-yellow-500/30' : 'hover:bg-slate-700/30'}`}>
+    <div className={`flex items-start gap-3 py-2 px-3 rounded-lg animate-fade-in group ${isSuperchat ? 'bg-yellow-500/20 border border-yellow-500/40 hover:bg-yellow-500/30' : 'hover:bg-slate-700/30'} ${isOnOverlay ? 'ring-2 ring-cyan-400/50' : ''}`}>
       {isSuperchat && (
         <span className="text-yellow-400 flex-shrink-0" title="Super Chat">
           💰
@@ -49,17 +51,34 @@ export function ChatMessage({ item, onAddToQueue }: ChatMessageProps) {
           {item.content}
         </span>
       </div>
-      {onAddToQueue && (
-        <button
-          onClick={() => onAddToQueue(item)}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-emerald-500/20 rounded text-emerald-400 hover:text-emerald-300 flex-shrink-0"
-          title="Add to queue"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
-          </svg>
-        </button>
-      )}
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {onSendToOverlay && (
+          <button
+            onClick={() => onSendToOverlay(item)}
+            className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded flex-shrink-0 ${
+              isOnOverlay 
+                ? 'bg-cyan-500/30 text-cyan-300' 
+                : 'hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300'
+            }`}
+            title={isOnOverlay ? 'On overlay' : 'Send to overlay'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+            </svg>
+          </button>
+        )}
+        {onAddToQueue && (
+          <button
+            onClick={() => onAddToQueue(item)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-emerald-500/20 rounded text-emerald-400 hover:text-emerald-300 flex-shrink-0"
+            title="Add to queue"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

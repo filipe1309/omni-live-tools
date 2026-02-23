@@ -17,6 +17,7 @@ export { useLeaderElection } from './useLeaderElection';
 export { useBackgroundKeepAlive } from './useBackgroundKeepAlive';
 export { useToast, ToastProvider } from './useToast';
 export type { Toast, ToastType } from './useToast';
+export { useFeaturedMessage } from './useFeaturedMessage';
 
 // Re-export poll types from @/types for backward compatibility
 export type {

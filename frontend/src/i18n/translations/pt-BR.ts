@@ -77,6 +77,7 @@ export const ptBR = {
     connectedTo: 'Conectado a',
     errorConnecting: 'Erro ao conectar',
     reconnected: 'reconectado a',
+    popOutOverlay: 'Abrir janela de overlay',
   },
 
   // Room Stats

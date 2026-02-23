@@ -4,3 +4,4 @@ export { PollPage } from './PollPage';
 export { PollResultsPage } from './PollResultsPage';
 export { OverlayPage } from './OverlayPage';
 export { ObsOverlayPage } from './ObsOverlayPage';
+export { ObsFeaturedMessagePage } from './ObsFeaturedMessagePage';

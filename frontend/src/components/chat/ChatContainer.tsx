@@ -8,9 +8,11 @@ interface ChatContainerProps {
   title: string;
   maxHeight?: string;
   onAddToQueue?: (item: ChatItem) => void;
+  onSendToOverlay?: (item: ChatItem) => void;
+  featuredMessageId?: string | null;
 }
 
-export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)', onAddToQueue }: ChatContainerProps) {
+export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)', onAddToQueue, onSendToOverlay, featuredMessageId }: ChatContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +125,13 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)',
           </div>
         ) : (
           filteredItems.map((item) => (
-            <ChatMessage key={item.id} item={item} onAddToQueue={onAddToQueue} />
+            <ChatMessage 
+              key={item.id} 
+              item={item} 
+              onAddToQueue={onAddToQueue} 
+              onSendToOverlay={onSendToOverlay}
+              isOnOverlay={featuredMessageId === item.id}
+            />
           ))
         )}
       </div>
