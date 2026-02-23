@@ -4,6 +4,7 @@
 export enum PlatformType {
   TIKTOK = 'tiktok',
   TWITCH = 'twitch',
+  YOUTUBE = 'youtube',
 }
 
 /**
@@ -49,6 +50,18 @@ export enum ConnectionStatus {
   RECONNECTING = 'reconnecting',
 }
 
+/**
+ * YouTube Event Types
+ */
+export enum YouTubeEventType {
+  CHAT = 'chat',
+  SUPERCHAT = 'superchat',
+  MEMBER = 'member',
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+  STREAM_END = 'streamEnd',
+}
+
 export enum SocketEventType {
   // TikTok events
   TIKTOK_CONNECTED = 'tiktokConnected',
@@ -58,6 +71,10 @@ export enum SocketEventType {
   TWITCH_CONNECTED = 'twitchConnected',
   TWITCH_DISCONNECTED = 'twitchDisconnected',
   SET_TWITCH_CHANNEL = 'setTwitchChannel',
+  // YouTube events
+  YOUTUBE_CONNECTED = 'youtubeConnected',
+  YOUTUBE_DISCONNECTED = 'youtubeDisconnected',
+  SET_YOUTUBE_VIDEO = 'setYouTubeVideo',
   // Shared events
   STREAM_END = 'streamEnd',
   STATISTIC = 'statistic',

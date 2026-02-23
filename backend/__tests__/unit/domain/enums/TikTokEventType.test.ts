@@ -5,11 +5,12 @@ describe('Domain Enums', () => {
     it('should have all expected platform types', () => {
       expect(PlatformType.TIKTOK).toBe('tiktok');
       expect(PlatformType.TWITCH).toBe('twitch');
+      expect(PlatformType.YOUTUBE).toBe('youtube');
     });
 
     it('should have the correct number of platform types', () => {
       const platforms = Object.values(PlatformType);
-      expect(platforms).toHaveLength(2);
+      expect(platforms).toHaveLength(3);
     });
   });
 
@@ -81,6 +82,10 @@ describe('Domain Enums', () => {
       expect(SocketEventType.TWITCH_CONNECTED).toBe('twitchConnected');
       expect(SocketEventType.TWITCH_DISCONNECTED).toBe('twitchDisconnected');
       expect(SocketEventType.SET_TWITCH_CHANNEL).toBe('setTwitchChannel');
+      // YouTube events
+      expect(SocketEventType.YOUTUBE_CONNECTED).toBe('youtubeConnected');
+      expect(SocketEventType.YOUTUBE_DISCONNECTED).toBe('youtubeDisconnected');
+      expect(SocketEventType.SET_YOUTUBE_VIDEO).toBe('setYouTubeVideo');
       // Shared events
       expect(SocketEventType.STREAM_END).toBe('streamEnd');
       expect(SocketEventType.STATISTIC).toBe('statistic');
@@ -89,7 +94,7 @@ describe('Domain Enums', () => {
 
     it('should have the correct number of socket event types', () => {
       const eventTypes = Object.values(SocketEventType);
-      expect(eventTypes).toHaveLength(9);
+      expect(eventTypes).toHaveLength(12);
     });
   });
 });

@@ -12,6 +12,10 @@ import {
   TwitchConnectionWrapper,
   createTwitchConnectionWrapper
 } from '../../infrastructure/twitch';
+import {
+  YouTubeConnectionWrapper,
+  createYouTubeConnectionWrapper
+} from '../../infrastructure/youtube';
 
 /**
  * Error patterns that indicate eulerstream/rate limit issues
@@ -33,6 +37,7 @@ export class SocketHandler {
   private connectionWrapper: TikTokConnectionWrapper | null = null;
   private tikfinityWrapper: TikFinityConnectionWrapper | null = null;
   private twitchWrapper: TwitchConnectionWrapper | null = null;
+  private youtubeWrapper: YouTubeConnectionWrapper | null = null;
   private clientIp: string;
   private useFallback = false;
 
@@ -58,6 +63,9 @@ export class SocketHandler {
     // Twitch connection handler
     this.socket.on(SocketEventType.SET_TWITCH_CHANNEL, this.handleSetTwitchChannel.bind(this));
     this.socket.on('disconnectTwitch', this.handleDisconnectTwitch.bind(this));
+    // YouTube connection handler
+    this.socket.on(SocketEventType.SET_YOUTUBE_VIDEO, this.handleSetYouTubeVideo.bind(this));
+    this.socket.on('disconnectYouTube', this.handleDisconnectYouTube.bind(this));
     this.socket.on('disconnect', this.handleDisconnect.bind(this));
   }
 
@@ -84,6 +92,17 @@ export class SocketHandler {
       console.info('Disconnecting Twitch by client request');
       this.twitchWrapper.disconnect();
       this.twitchWrapper = null;
+    }
+  }
+
+  /**
+   * Handle disconnectYouTube event
+   */
+  private handleDisconnectYouTube(): void {
+    if (this.youtubeWrapper) {
+      console.info('Disconnecting YouTube by client request');
+      this.youtubeWrapper.disconnect();
+      this.youtubeWrapper = null;
     }
   }
 
@@ -397,6 +416,98 @@ export class SocketHandler {
   }
 
   /**
+   * Handle setYouTubeVideo event
+   */
+  private handleSetYouTubeVideo(videoIdOrUrl: string): void {
+    // Check rate limiting
+    this.rateLimiterService.recordRequest(this.clientIp);
+    
+    if (this.rateLimiterService.shouldBlockClient(this.clientIp)) {
+      this.socket.emit(
+        SocketEventType.YOUTUBE_DISCONNECTED,
+        this.rateLimiterService.getRateLimitMessage()
+      );
+      return;
+    }
+
+    // Create YouTube connection
+    this.connectToYouTube(videoIdOrUrl);
+  }
+
+  /**
+   * Connect to YouTube live chat
+   */
+  private connectToYouTube(videoIdOrUrl: string): void {
+    try {
+      // Disconnect existing YouTube connection if any
+      if (this.youtubeWrapper) {
+        this.youtubeWrapper.disconnect();
+        this.youtubeWrapper = null;
+      }
+
+      const youtubeFactory = createYouTubeConnectionWrapper(
+        (delta) => {
+          if (delta > 0) {
+            this.statisticsService.incrementConnectionCount();
+          } else {
+            this.statisticsService.decrementConnectionCount();
+          }
+        }
+      );
+
+      this.youtubeWrapper = youtubeFactory(videoIdOrUrl);
+      
+      // Set up event forwarding
+      this.setupYouTubeEventForwarding();
+
+      // Handle connection events
+      this.youtubeWrapper.once('connected', (state) => {
+        this.socket.emit(SocketEventType.YOUTUBE_CONNECTED, state);
+      });
+
+      this.youtubeWrapper.once('disconnected', (reason: string) => {
+        this.socket.emit(SocketEventType.YOUTUBE_DISCONNECTED, reason);
+      });
+
+      // Connect
+      this.youtubeWrapper.connect().catch((err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.socket.emit(SocketEventType.YOUTUBE_DISCONNECTED, errorMessage);
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.socket.emit(SocketEventType.YOUTUBE_DISCONNECTED, errorMessage);
+    }
+  }
+
+  /**
+   * Set up YouTube event forwarding to the socket
+   */
+  private setupYouTubeEventForwarding(): void {
+    if (!this.youtubeWrapper) return;
+
+    // Forward chat messages
+    this.youtubeWrapper.on('chat', (msg: UnifiedChatMessage) => {
+      this.socket.emit('youtubeChat', msg);
+    });
+
+    // Forward Super Chat events
+    this.youtubeWrapper.on('superchat', (data: unknown) => {
+      this.socket.emit('youtubeSuperchat', data);
+    });
+
+    // Forward membership events
+    this.youtubeWrapper.on('member', (data: unknown) => {
+      this.socket.emit('youtubeMember', data);
+    });
+
+    // Forward stream end event
+    this.youtubeWrapper.on('streamEnd', () => {
+      this.socket.emit('youtubeStreamEnd');
+    });
+  }
+
+  /**
    * Handle socket disconnect
    */
   private handleDisconnect(): void {
@@ -413,6 +524,11 @@ export class SocketHandler {
     if (this.twitchWrapper) {
       this.twitchWrapper.disconnect();
       this.twitchWrapper = null;
+    }
+
+    if (this.youtubeWrapper) {
+      this.youtubeWrapper.disconnect();
+      this.youtubeWrapper = null;
     }
   }
 
