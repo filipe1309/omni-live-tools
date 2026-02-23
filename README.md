@@ -30,7 +30,8 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 
 - 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, and YouTube Live instantly
 - 📋 **Message Queue** - Add messages to a reading queue with one click for easy management during streams
-- 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
+- � **Featured Message Overlay** - Send messages to a dedicated overlay window for OBS with pop-out support
+- �🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with enhanced Twitch integration
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
@@ -116,6 +117,8 @@ The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live i
 
 - **Multi-platform support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - **Message queue** - Hover over any message to add it to a reading queue; easily manage which messages to read
+- **Featured message overlay** - Click the broadcast icon to send a message to a dedicated OBS overlay window
+- **Pop-out overlay window** - Click "Overlay" button to open the featured message display in a separate window
 - **Smart auto-scroll** - Auto-scroll pauses when you scroll up to review messages, resumes when you scroll back down
 - **Search/filter messages** - Quickly find messages by content, username, or nickname
 - **SuperChat highlighting** - YouTube SuperChats are highlighted with a golden background and auto-added to queue
