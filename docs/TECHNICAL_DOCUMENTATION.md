@@ -30,6 +30,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 
 ### Main Features
 - Real-time chat reading from TikTok, Twitch, and YouTube
+- Message queue for organizing messages to read during streams
 - Interactive polls where viewers vote by typing numbers
 - OBS overlay support for streaming software
 - Multi-language support (PT-BR and EN)
@@ -306,7 +307,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | Page | Route | Description |
 |------|-------|-------------|
 | `HomePage` | `/` | Landing page with feature cards |
-| `ChatPage` | `/chat` | Real-time chat display |
+| `ChatPage` | `/chat` | Real-time chat display with message queue |
 | `PollPage` | `/poll` | Create and manage polls |
 | `OverlayPage` | `/overlay` | OBS overlay configuration |
 | `ObsOverlayPage` | `/obs` | OBS Browser Source page |
@@ -339,7 +340,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `Header` - App header with navigation and controls
 
 **Feature Components**:
-- `components/chat/` - Chat message display components
+- `components/chat/` - Chat message display components (ChatContainer, ChatMessage, ChatQueueContainer, GiftContainer)
 - `components/poll/` - Poll UI components
 
 ### State Management
