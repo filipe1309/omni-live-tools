@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollOption } from '@/types';
 
@@ -10,6 +11,8 @@ interface PollOptionCardProps {
   totalVotes: number;
   isWinner: boolean;
   size?: PollOptionCardSize;
+  editable?: boolean;
+  onOptionTextChange?: (optionId: number, newText: string) => void;
 }
 
 const sizeConfig = {
@@ -43,10 +46,55 @@ export function PollOptionCard ({
   totalVotes,
   isWinner,
   size = 'normal',
+  editable = false,
+  onOptionTextChange,
 }: PollOptionCardProps) {
   const { t } = useLanguage();
   const config = sizeConfig[size];
   const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(option.text);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync editValue with option.text prop when not editing
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(option.text);
+    }
+  }, [option.text, isEditing]);
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleDoubleClick = () => {
+    if (editable) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleBlur = () => {
+    if (editValue.trim() && editValue !== option.text) {
+      onOptionTextChange?.(option.id, editValue.trim());
+    } else {
+      setEditValue(option.text);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    } else if (e.key === 'Escape') {
+      setEditValue(option.text);
+      setIsEditing(false);
+    }
+  };
 
   return (
     <div
@@ -75,10 +123,27 @@ export function PollOptionCard ({
           >
             {option.id}
           </span>
-          <span className={`font-semibold text-white ${config.text}`}>
-            {option.text}
-            {isWinner && <span className="ml-2">👑</span>}
-          </span>
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              className={`bg-transparent border-b-2 border-tiktok-cyan text-white font-semibold outline-none ${config.text}`}
+              style={{ minWidth: '100px' }}
+            />
+          ) : (
+            <span
+              className={`font-semibold text-white ${config.text} ${editable ? 'cursor-pointer hover:text-tiktok-cyan' : ''}`}
+              onDoubleClick={handleDoubleClick}
+              title={editable ? t.pollResults.doubleClickToEdit : undefined}
+            >
+              {option.text}
+              {isWinner && <span className="ml-2">👑</span>}
+            </span>
+          )}
         </div>
 
         <div className="text-right flex-shrink-0">

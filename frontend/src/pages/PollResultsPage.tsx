@@ -250,6 +250,66 @@ export function PollResultsPage () {
     [channelRef]
   );
 
+  // Inline edit handler for question (from PollQuestion double-click)
+  const handleQuestionInlineEdit = useCallback(
+    (newQuestion: string) => {
+      if (!setupConfig) return;
+      const newConfig = { ...setupConfig, question: newQuestion };
+      setSetupConfig(newConfig);
+      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
+      if (channelRef) {
+        channelRef.postMessage({
+          type: 'config-update',
+          config: newConfig,
+        });
+      }
+    },
+    [channelRef, setupConfig]
+  );
+
+  // Inline edit handler for option text (from PollOptionCard double-click)
+  const handleOptionInlineEdit = useCallback(
+    (optionId: number, newText: string) => {
+      if (!setupConfig) return;
+
+      // Update options in setupConfig
+      const newOptions = setupConfig.options.map((opt) =>
+        opt.id === optionId ? { ...opt, text: newText } : opt
+      );
+      const newConfig = { ...setupConfig, options: newOptions };
+      setSetupConfig(newConfig);
+      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
+
+      // Also update fullOptionsConfig if available
+      if (fullOptionsConfig) {
+        // Find the index in allOptions that corresponds to this option ID
+        // Option IDs are 1-based, and correspond to position in allOptions
+        const optionIndex = optionId - 1;
+        if (optionIndex >= 0 && optionIndex < fullOptionsConfig.allOptions.length) {
+          const newAllOptions = [...fullOptionsConfig.allOptions];
+          newAllOptions[optionIndex] = newText;
+          const newFullConfig = { ...fullOptionsConfig, allOptions: newAllOptions };
+          setFullOptionsConfig(newFullConfig);
+          localStorage.setItem('tiktok-poll-fullOptions', JSON.stringify(newFullConfig));
+        }
+      }
+
+      if (channelRef) {
+        channelRef.postMessage({
+          type: 'config-update',
+          config: newConfig,
+          fullOptions: fullOptionsConfig ? {
+            ...fullOptionsConfig,
+            allOptions: fullOptionsConfig.allOptions.map((text, idx) =>
+              idx === optionId - 1 ? newText : text
+            ),
+          } : undefined,
+        });
+      }
+    },
+    [channelRef, setupConfig, fullOptionsConfig]
+  );
+
   if (isWaiting && !setupConfig && pollState.options.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#e90048] flex flex-col p-5">
@@ -327,6 +387,8 @@ export function PollResultsPage () {
               timeLeft={pollState.timeLeft}
               timer={pollState.timer}
               className="[&_h3]:text-5xl"
+              editable={!pollState.isRunning && !isCountingDown}
+              onQuestionChange={handleQuestionInlineEdit}
             />
 
             {/* Results */}
@@ -343,6 +405,8 @@ export function PollResultsPage () {
                     totalVotes={totalVotes}
                     isWinner={winnerIds.includes(option.id)}
                     size="large"
+                    editable={!pollState.isRunning && !isCountingDown}
+                    onOptionTextChange={handleOptionInlineEdit}
                   />
                 );
               })}

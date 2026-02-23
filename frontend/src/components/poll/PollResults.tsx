@@ -21,6 +21,10 @@ interface PollResultsProps {
   onReset?: () => void;
   isConnected?: boolean;
   showControlButtons?: boolean;
+  // Inline editing props
+  editable?: boolean;
+  onQuestionChange?: (newQuestion: string) => void;
+  onOptionTextChange?: (optionId: number, newText: string) => void;
 }
 
 export function PollResults ({
@@ -35,6 +39,9 @@ export function PollResults ({
   onReset,
   isConnected = true,
   showControlButtons = false,
+  editable = false,
+  onQuestionChange,
+  onOptionTextChange,
 }: PollResultsProps) {
   const totalVotes = getTotalVotes();
 
@@ -106,6 +113,8 @@ export function PollResults ({
           timeLeft={pollState.timeLeft}
           timer={pollState.timer}
           className={questionClass}
+          editable={editable && !pollState.isRunning && !isCountingDown}
+          onQuestionChange={onQuestionChange}
         />
       )}
 
@@ -120,6 +129,8 @@ export function PollResults ({
             totalVotes={totalVotes}
             isWinner={winnerIds.includes(option.id)}
             size={optionSize}
+            editable={editable && !pollState.isRunning && !isCountingDown}
+            onOptionTextChange={onOptionTextChange}
           />
         ))}
       </div>

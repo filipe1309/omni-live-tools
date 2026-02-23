@@ -201,6 +201,7 @@ export const ptBR = {
     autoReconnectTip: '💡 Dica: Ative a reconexão automática na página principal',
     voteNow: 'Vote agora!',
     votesUnit: 'votos',
+    doubleClickToEdit: 'Duplo clique para editar',
   },
 
   // Toast messages

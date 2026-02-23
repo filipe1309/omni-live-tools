@@ -203,6 +203,7 @@ export const en: TranslationKeys = {
     autoReconnectTip: '💡 Tip: Enable auto-reconnect on the main page',
     voteNow: 'Vote now!',
     votesUnit: 'votes',
+    doubleClickToEdit: 'Double-click to edit',
   },
 
   // Toast messages

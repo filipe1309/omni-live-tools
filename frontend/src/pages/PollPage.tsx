@@ -140,6 +140,62 @@ export function PollPage () {
     broadcastSetupConfig(newConfig, fullOptions);
   }, [broadcastSetupConfig]);
 
+  // Inline edit handler for question (from PollResults double-click)
+  const handleQuestionInlineEdit = useCallback(
+    (newQuestion: string) => {
+      if (!setupConfig) return;
+      const newConfig = { ...setupConfig, question: newQuestion };
+      setSetupConfig(newConfig);
+      setExternalConfig(newConfig);
+      const configResult = safeSetItem('tiktok-poll-setupConfig', newConfig);
+      if (!configResult.success && configResult.error) {
+        toast.warning(configResult.error);
+      }
+      broadcastSetupConfig(newConfig);
+    },
+    [setupConfig, broadcastSetupConfig, toast]
+  );
+
+  // Inline edit handler for option text (from PollResults double-click)
+  const handleOptionInlineEdit = useCallback(
+    (optionId: number, newText: string) => {
+      if (!setupConfig) return;
+
+      // Update options in setupConfig
+      const newOptions = setupConfig.options.map((opt) =>
+        opt.id === optionId ? { ...opt, text: newText } : opt
+      );
+      const newConfig = { ...setupConfig, options: newOptions };
+      setSetupConfig(newConfig);
+      setExternalConfig(newConfig);
+      const configResult = safeSetItem('tiktok-poll-setupConfig', newConfig);
+      if (!configResult.success && configResult.error) {
+        toast.warning(configResult.error);
+      }
+
+      // Also update fullOptionsConfig in localStorage
+      const currentFullOptions = loadFullOptionsConfig();
+      if (currentFullOptions) {
+        const optionIndex = optionId - 1;
+        if (optionIndex >= 0 && optionIndex < currentFullOptions.allOptions.length) {
+          const newAllOptions = [...currentFullOptions.allOptions];
+          newAllOptions[optionIndex] = newText;
+          const newFullConfig = { ...currentFullOptions, allOptions: newAllOptions };
+          const optionsResult = safeSetItem('tiktok-poll-fullOptions', newFullConfig);
+          if (!optionsResult.success && optionsResult.error) {
+            toast.warning(optionsResult.error);
+          }
+          broadcastSetupConfig(newConfig, newFullConfig);
+        } else {
+          broadcastSetupConfig(newConfig);
+        }
+      } else {
+        broadcastSetupConfig(newConfig);
+      }
+    },
+    [setupConfig, broadcastSetupConfig, toast]
+  );
+
   // Handle unified chat from any platform
   const handleUnifiedChat = useCallback((msg: UnifiedChatMessage) => {
     if (pollStateRef.current.isRunning) {
@@ -380,6 +436,9 @@ export function PollPage () {
               getTotalVotes={getTotalVotes}
               showStatusBar={currentSetupConfig.showStatusBar ?? true}
               size="large"
+              editable={true}
+              onQuestionChange={handleQuestionInlineEdit}
+              onOptionTextChange={handleOptionInlineEdit}
             />
           ) : (
             <PollResults
@@ -394,6 +453,9 @@ export function PollPage () {
               getTotalVotes={() => 0}
               showStatusBar={currentSetupConfig.showStatusBar ?? true}
               size="large"
+              editable={true}
+              onQuestionChange={handleQuestionInlineEdit}
+              onOptionTextChange={handleOptionInlineEdit}
             />
           )}
         </div>

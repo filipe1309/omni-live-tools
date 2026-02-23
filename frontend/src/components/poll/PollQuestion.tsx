@@ -1,4 +1,6 @@
+import { useState, useRef, useEffect } from 'react';
 import { TIMER_THRESHOLDS } from '@/constants';
+import { useLanguage } from '@/i18n';
 
 interface PollQuestionProps {
   question: string;
@@ -6,9 +8,54 @@ interface PollQuestionProps {
   timeLeft: number;
   timer: number;
   className?: string;
+  editable?: boolean;
+  onQuestionChange?: (newQuestion: string) => void;
 }
 
-export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '' }: PollQuestionProps) {
+export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', editable = false, onQuestionChange }: PollQuestionProps) {
+  const { t } = useLanguage();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(question);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync editValue with question prop when not editing
+  useEffect(() => {
+    if (!isEditing) {
+      setEditValue(question);
+    }
+  }, [question, isEditing]);
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleDoubleClick = () => {
+    if (editable && !isRunning) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleBlur = () => {
+    if (editValue.trim() && editValue !== question) {
+      onQuestionChange?.(editValue.trim());
+    } else {
+      setEditValue(question);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    } else if (e.key === 'Escape') {
+      setEditValue(question);
+      setIsEditing(false);
+    }
+  };
   const getContainerClasses = () => {
     if (isRunning) {
       if (timeLeft <= TIMER_THRESHOLDS.CRITICAL) {
@@ -66,9 +113,26 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
         <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-purple-600/30 to-purple-400/30" />
       )}
       <div className={`relative z-10 text-center py-5 px-6 ${getShakeClass()}`}>
-        <h3 className={`font-bold transition-colors duration-500 ${getTextClasses()}`}>
-          {question}
-        </h3>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-transparent border-b-2 border-tiktok-cyan text-white text-center font-bold outline-none"
+            style={{ fontSize: 'inherit' }}
+          />
+        ) : (
+          <h3
+            className={`font-bold transition-colors duration-500 ${getTextClasses()} ${editable && !isRunning ? 'cursor-pointer hover:text-tiktok-cyan' : ''}`}
+            onDoubleClick={handleDoubleClick}
+            title={editable && !isRunning ? t.pollResults.doubleClickToEdit : undefined}
+          >
+            {question}
+          </h3>
+        )}
       </div>
     </div>
   );
