@@ -22,13 +22,13 @@ export const POLL_OPTIONS = {
 // Question history settings
 export const QUESTION_HISTORY = {
   MAX_ITEMS: 10,
-  STORAGE_KEY: 'tiktok-poll-questionHistory',
+  STORAGE_KEY: 'omni-live-poll-questionHistory',
 } as const;
 
 // Option history settings
 export const OPTION_HISTORY = {
   MAX_ITEMS: 10,
-  STORAGE_KEY: 'tiktok-poll-optionHistory',
+  STORAGE_KEY: 'omni-live-poll-optionHistory',
 } as const;
 
 // Default poll options (fixed 4 options)
