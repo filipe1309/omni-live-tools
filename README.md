@@ -29,6 +29,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 ## ✨ Features
 
 - 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, and YouTube Live instantly
+- 📋 **Message Queue** - Add messages to a reading queue with one click for easy management during streams
 - 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with enhanced Twitch integration
@@ -114,6 +115,8 @@ The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live i
 #### Features
 
 - **Multi-platform support** - Connect to TikTok, Twitch, and YouTube simultaneously
+- **Message queue** - Hover over any message to add it to a reading queue; easily manage which messages to read
+- **Smart auto-scroll** - Auto-scroll pauses when you scroll up to review messages, resumes when you scroll back down
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
 - **OBS overlay** - Dedicated page optimized for streaming software with enhanced Twitch integration
 - **Rate limiting** - Protect against excessive requests
