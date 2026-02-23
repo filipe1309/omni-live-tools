@@ -23,13 +23,13 @@
 
 ## 1. Overview
 
-Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE** and **Twitch** streams. It can run as:
+Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. It can run as:
 
 - **Web Server Mode:** Backend serves the frontend, accessible via browser
 - **Desktop App Mode:** Electron wraps everything into a standalone desktop application
 
 ### Main Features
-- Real-time chat reading from TikTok and Twitch
+- Real-time chat reading from TikTok, Twitch, and YouTube
 - Interactive polls where viewers vote by typing numbers
 - OBS overlay support for streaming software
 - Multi-language support (PT-BR and EN)
@@ -46,8 +46,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 | Express | 4.x | HTTP server framework |
 | Socket.IO | 4.x | Real-time WebSocket communication |
 | tiktok-live-connector | 2.x | TikTok LIVE API connection |
-| @twurple/chat | 8.x | Twitch chat API |
-| Jest | 29.x | Unit testing |
+| @twurple/chat | 8.x | Twitch chat API || youtubei.js | 16.x | YouTube Live chat API (InnerTube) || Jest | 29.x | Unit testing |
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -132,7 +131,8 @@ omni-live-tools/
 │   ├── infrastructure/         # INFRASTRUCTURE LAYER
 │   │   ├── rate-limiter/       # In-memory rate limiter
 │   │   ├── tiktok/             # TikTok connection wrappers
-│   │   └── twitch/             # Twitch connection wrapper
+│   │   ├── twitch/             # Twitch connection wrapper
+│   │   └── youtube/            # YouTube Live connection wrapper
 │   ├── presentation/           # PRESENTATION LAYER
 │   │   ├── handlers/           # Socket event handlers
 │   │   └── server/             # HTTP/WebSocket server
@@ -166,6 +166,7 @@ omni-live-tools/
 │       ├── hooks/              # Custom React hooks
 │       │   ├── useTikTokConnection.ts
 │       │   ├── useTwitchConnection.ts
+│       │   ├── useYouTubeConnection.ts
 │       │   ├── useMultiPlatformConnection.ts
 │       │   ├── usePoll.ts
 │       │   └── useToast.tsx
@@ -222,12 +223,13 @@ server.start();
 **Entities** (`domain/entities/`):
 - `ConnectionState` - Represents a connection's state (roomId, isConnected, etc.)
 - `ConnectionOptions` - Options for connecting (sessionId, etc.)
-- `TikTokUser`, `TwitchUser` - User data structures
+- `TikTokUser`, `TwitchUser`, `YouTubeUser` - User data structures
 
 **Enums** (`domain/enums/`):
-- `PlatformType` - TIKTOK, TWITCH
+- `PlatformType` - TIKTOK, TWITCH, YOUTUBE
 - `TikTokEventType` - CHAT, GIFT, LIKE, MEMBER, etc.
 - `TwitchEventType` - CHAT, SUB, CHEER, etc.
+- `YouTubeEventType` - CHAT, SUPERCHAT, MEMBER, STREAM_END
 - `SocketEventType` - Events emitted to frontend
 
 **Repository Interfaces** (`domain/repositories/`):
@@ -242,6 +244,9 @@ server.start();
 
 **Twitch** (`infrastructure/twitch/`):
 - `TwitchConnectionWrapper` - Wraps `@twurple/chat` library
+
+**YouTube** (`infrastructure/youtube/`):
+- `YouTubeConnectionWrapper` - Wraps `youtubei.js` library for YouTube Live chat
 
 **Rate Limiter** (`infrastructure/rate-limiter/`):
 - `InMemoryRateLimiterRepository` - In-memory rate limiting storage
@@ -313,7 +318,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 |------|---------|
 | `useTikTokConnection` | Manages TikTok socket connection and events |
 | `useTwitchConnection` | Manages Twitch socket connection and events |
-| `useMultiPlatformConnection` | Combines TikTok + Twitch connections |
+| `useYouTubeConnection` | Manages YouTube socket connection and events |
+| `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections |
 | `useConnectionContext` | Global connection state (React Context) |
 | `usePoll` | Poll creation, voting, timer logic |
 | `usePollSync` | Syncs poll state across browser tabs |
