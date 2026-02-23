@@ -33,9 +33,9 @@ function App () {
                 <Route
                   path="*"
                   element={
-                    <div className="h-screen flex flex-col">
+                    <div className="min-h-screen flex flex-col">
                       <Header />
-                      <main className="flex-1 flex flex-col min-h-0">
+                      <main className="flex-1 flex flex-col">
                         <Routes>
                           <Route path="/" element={<HomePage />} />
                           <Route path="/chat" element={<ChatPage />} />

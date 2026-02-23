@@ -58,7 +58,7 @@ export function HomePage () {
     <>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       {!showSplash && <ConnectionModal />}
-      <div className={`h-full flex flex-col transition-all duration-300 ${!isAnyConnected && !showSplash ? 'blur-sm pointer-events-none select-none' : ''}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${!isAnyConnected && !showSplash ? 'blur-sm pointer-events-none select-none' : ''}`}>
         <div className="container mx-auto px-4 py-4 flex-1 flex flex-col justify-center">
           <div className="text-center mb-6">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-tiktok-red to-tiktok-cyan bg-clip-text text-transparent mb-2">
