@@ -185,8 +185,8 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                     onChange={(e) => setTikTokUsername(e.target.value)}
                     onKeyUp={handleTikTokKeyUp}
                     placeholder={t.connection.userPlaceholder}
-                    className="input-field flex-1 min-w-0"
-                    disabled={tiktok.status === 'connecting'}
+                    className="input-field flex-1 min-w-0 disabled:cursor-not-allowed"
+                    disabled={tiktok.status === 'connecting' || tiktok.status === 'connected'}
                     autoFocus
                   />
                   <button
@@ -231,8 +231,8 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                     onChange={(e) => setTwitchChannel(e.target.value)}
                     onKeyUp={handleTwitchKeyUp}
                     placeholder={t.connection.channelPlaceholder}
-                    className="input-field flex-1 min-w-0"
-                    disabled={twitch.status === 'connecting'}
+                    className="input-field flex-1 min-w-0 disabled:cursor-not-allowed"
+                    disabled={twitch.status === 'connecting' || twitch.status === 'connected'}
                   />
                   <button
                     type="submit"

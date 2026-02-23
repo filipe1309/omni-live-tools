@@ -83,11 +83,11 @@ export function PollOptionCard ({
 
         <div className="text-right flex-shrink-0">
           <span
-            className={`font-bold ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'} ${config.votes}`}
+            className={`font-bold ${isWinner ? 'text-yellow-400' : 'text-tiktok-cyan'} ${config.percentText}`}
           >
-            {votes} {t.poll.votes}
+            {percentageFixed}%
           </span>
-          <span className={`text-slate-400 ${config.percentText} ml-2`}>({percentageFixed}%)</span>
+          <span className={`text-slate-400 ${config.votes} ml-2`}>({votes} {t.poll.votes})</span>
         </div>
       </div>
 
