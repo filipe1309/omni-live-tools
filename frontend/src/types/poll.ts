@@ -3,7 +3,7 @@
  * Centralized types for poll state synchronization and configuration
  */
 
-import type { PollOption } from './tiktok';
+import type { PollOption } from './shared';
 
 /**
  * Serializable version of PollState for BroadcastChannel communication.
