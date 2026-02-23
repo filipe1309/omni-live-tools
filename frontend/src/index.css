@@ -4,7 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-slate-900 text-gray-100 min-h-screen;
+    @apply bg-slate-900 text-gray-100 min-h-screen select-none;
+  }
+
+  /* Allow text selection in input fields and textareas */
+  input,
+  textarea {
+    @apply select-text;
   }
 }
 
