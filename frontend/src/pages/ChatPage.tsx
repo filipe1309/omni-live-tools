@@ -58,8 +58,20 @@ export function ChatPage () {
     content: string,
     color?: string,
     isTemporary = false,
-    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok'
+    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok',
+    autoAddToQueue = false
   ) => {
+    const newItem: ChatItem = {
+      id: generateId(),
+      type,
+      user,
+      content,
+      color,
+      timestamp: new Date(),
+      isTemporary,
+      platform,
+    };
+
     setChatItems(prev => {
       // Remove temporary items when adding new messages
       const filtered = prev.filter(item => !item.isTemporary);
@@ -67,17 +79,17 @@ export function ChatPage () {
       // Keep max 500 items
       const trimmed = filtered.length > 500 ? filtered.slice(-300) : filtered;
 
-      return [...trimmed, {
-        id: generateId(),
-        type,
-        user,
-        content,
-        color,
-        timestamp: new Date(),
-        isTemporary,
-        platform,
-      }];
+      return [...trimmed, newItem];
     });
+
+    // Auto-add to queue if requested (e.g., for superchats)
+    if (autoAddToQueue) {
+      setQueueItems(prev => {
+        // Avoid duplicates
+        if (prev.some(q => q.id === newItem.id)) return prev;
+        return [...prev, newItem];
+      });
+    }
   }, []);
 
   // Handle gift with streak tracking
@@ -159,7 +171,9 @@ export function ChatPage () {
         isSubscriber: msg.isSubscriber || false,
         topGifterRank: null,
       };
-      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube');
+      // Auto-add superchats to queue
+      const isSuperchat = !!msg.metadata?.superchat;
+      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube', isSuperchat);
     });
 
     return () => {
