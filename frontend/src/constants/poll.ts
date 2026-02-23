@@ -15,7 +15,7 @@ export const POLL_TIMER = {
 
 // Options settings
 export const POLL_OPTIONS = {
-  TOTAL: 4,
+  TOTAL: 6,
   MIN_SELECTED: 2,
 } as const;
 
@@ -31,17 +31,19 @@ export const OPTION_HISTORY = {
   STORAGE_KEY: 'omni-live-poll-optionHistory',
 } as const;
 
-// Default poll options (fixed 4 options)
+// Default poll options (fixed 6 options)
 export const DEFAULT_OPTIONS = [
   'Sim',
   'Não',
   'Correr',
   'Pular',
+  'Atacar',
+  'Defender',
 ] as const;
 
 // Default selected options (indices 0 and 1 - "Sim" and "Não")
 export const DEFAULT_SELECTED_OPTIONS = [
-  true, true, false, false,
+  true, true, false, false, false, false,
 ] as const;
 
 // Default poll options as typed PollOption array (for components)
