@@ -6,6 +6,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.13.0] - 2026-02-23
+
+### Added
+
+- Implement featured message overlay with socket communication and UI updates
+- Add search functionality to chat container with filtering and localization support
+- Add support for superchats in chat components and update ChatItem type
+- Enhance chat item addition with auto-queue functionality for superchats
+- Implement chat queue functionality with auto-scroll and queue management
+- Add YouTube platform support across the application
+- Add YouTube integration with connection handling and event forwarding
+- Enhance Username component to support platform-specific profile URLs and styles
+- Disable interaction on poll configuration and results sections when poll is running or countdown is active
+- Add Footer component and integrate it into HomePage
+- Implement inline editing for poll questions and options with double-click support
+- Add a footer on Home Page
+- Added select-none to the body to disable text selection app-wide
+- Enhance poll setup button logic to include countdown state for disabling
+- Display application version in header and define __APP_VERSION__ in Vite config
+- Add auto-commit option for version and changelog updates in update-version script
+
+### Changed
+
+- Update PollOptionCard and PollQuestion tests for improved vote and percentage formatting
+- Add shared types and enums for multi-platform support, including YouTube integration
+- Remove ConnectionForm component and update exports accordingly
+- Update STORAGE_KEY values for question and option history to use 'omni-live' prefix
+- Update version to 1.12.0 and enhance changelog with new features and fixes
+
+### Fixed
+
+- Improve keyboard shortcut handling with case-insensitive matching and ref callbacks
+- Adjust layout classes for responsive design in App and HomePage components
+- Update input field disabled state logic and adjust vote display in PollOptionCard
+
+### Documentation
+
+- Update technical documentation to include featured message overlay and related features
+- Update features section to include featured message overlay and pop-out window support
+- Update main features section to include search/filter and SuperChat highlighting
+- Add search/filter functionality and SuperChat highlighting to features list in README
+- Update technical documentation to include message queue details in main features and chat page description
+- Add message queue feature and smart auto-scroll functionality to README
+- Update README to include YouTube Live support and features
+- Update technical documentation to include YouTube Live support and related components
+- Add comprehensive technical documentation for Omni LIVE Tools
+
 ## [1.12.0] - 2026-02-20
 
 ### Added
@@ -204,6 +251,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.13.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.9.0...v1.10.0
