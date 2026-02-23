@@ -31,6 +31,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 ### Main Features
 - Real-time chat reading from TikTok, Twitch, and YouTube
 - Message queue for organizing messages to read during streams
+- Featured message overlay for displaying messages on OBS with pop-out window support
 - Search/filter to quickly find specific messages
 - SuperChat highlighting with auto-queue for YouTube
 - Interactive polls where viewers vote by typing numbers
@@ -313,6 +314,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `PollPage` | `/poll` | Create and manage polls |
 | `OverlayPage` | `/overlay` | OBS overlay configuration |
 | `ObsOverlayPage` | `/obs` | OBS Browser Source page |
+| `ObsFeaturedMessagePage` | `/obs-featured` | Featured message overlay for OBS |
 | `PollResultsPage` | `/poll-results` | Poll results popup window |
 
 ### Key Hooks
@@ -323,8 +325,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `useTwitchConnection` | Manages Twitch socket connection and events |
 | `useYouTubeConnection` | Manages YouTube socket connection and events |
 | `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections |
-| `useConnectionContext` | Global connection state (React Context) |
-| `usePoll` | Poll creation, voting, timer logic |
+| `useConnectionContext` | Global connection state (React Context) || `useFeaturedMessage` | Manages featured message overlay via Socket.IO || `usePoll` | Poll creation, voting, timer logic |
 | `usePollSync` | Syncs poll state across browser tabs |
 | `useToast` | Toast notification system |
 | `useLanguage` | i18n translation hook |
@@ -437,17 +438,25 @@ make electron-dist
 |-------|---------|-------------|
 | `setUniqueId` | `(uniqueId, options)` | Connect to TikTok |
 | `setTwitchChannel` | `(channel)` | Connect to Twitch |
+| `setYouTubeVideo` | `(videoId)` | Connect to YouTube Live |
 | `disconnectTikTok` | - | Disconnect TikTok |
 | `disconnectTwitch` | - | Disconnect Twitch |
+| `disconnectYouTube` | - | Disconnect YouTube |
+| `setFeaturedMessage` | `ChatItem` | Send message to overlay |
+| `clearFeaturedMessage` | - | Clear overlay message |
 
 **Server → Client:**
 | Event | Payload | Description |
 |-------|---------|-------------|
 | `tiktokConnected` | `roomState` | TikTok connection success |
 | `twitchConnected` | `channelInfo` | Twitch connection success |
+| `youtubeConnected` | `videoInfo` | YouTube connection success |
 | `tiktokDisconnected` | `reason` | TikTok disconnected |
 | `twitchDisconnected` | `reason` | Twitch disconnected |
+| `youtubeDisconnected` | `reason` | YouTube disconnected |
 | `chat` | `ChatMessage` | Chat message received |
+| `featuredMessage` | `ChatItem` | Featured message to display |
+| `featuredMessageCleared` | - | Clear featured message |
 | `gift` | `GiftMessage` | Gift received (TikTok) |
 | `like` | `LikeMessage` | Like received (TikTok) |
 | `member` | `MemberMessage` | Member joined (TikTok) |
@@ -457,16 +466,37 @@ make electron-dist
 
 ### Unified Chat Format
 
-Messages from both platforms are normalized:
+Messages from all platforms are normalized:
 ```typescript
 interface UnifiedChatMessage {
-  platform: 'tiktok' | 'twitch';
+  platform: 'tiktok' | 'twitch' | 'youtube';
   uniqueId: string;
   nickname: string;
   comment: string;
   profilePictureUrl?: string;
   badges?: Badge[];
   timestamp: number;
+  metadata?: {
+    superchat?: { amount: string; currency: string };
+    color?: string;
+  };
+}
+```
+
+### Chat Item Format
+
+Used internally for the message queue and featured overlay:
+```typescript
+interface ChatItem {
+  id: string;
+  type: 'chat' | 'gift' | 'like' | 'member' | 'social';
+  user: ChatMessage;
+  content: string;
+  color?: string;
+  timestamp: Date;
+  isTemporary?: boolean;
+  platform?: 'tiktok' | 'twitch' | 'youtube';
+  isSuperchat?: boolean;
 }
 ```
 
