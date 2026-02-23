@@ -285,7 +285,7 @@ export function PollResultsPage () {
             <PollSetup
               onStart={() => { }} // Not used - we have separate control buttons
               onChange={handleSetupChange}
-              disabled={pollState.isRunning}
+              disabled={pollState.isRunning || isCountingDown}
               showStartButton={false}
               hideStatusBarToggle={true}
               externalConfig={setupConfig}

@@ -333,7 +333,7 @@ export function PollPage () {
           <PollSetup
             onStart={handleStartPoll}
             onChange={handleSetupChange}
-            disabled={!isAnyConnected || pollState.isRunning}
+            disabled={!isAnyConnected || pollState.isRunning || pollState.countdown !== undefined}
             showStartButton={false}
             externalConfig={externalConfig}
             initialQuestion={loadSavedSetupConfig()?.question}
