@@ -252,6 +252,7 @@ export const en: TranslationKeys = {
     connecting: 'Connecting...',
     connectedToRoom: 'Connected to roomId {roomId}',
     connectedToChannel: 'Connected to {channel}',
+    connectedToVideo: 'Connected to video {videoId}',
     streamEndedReconnecting: 'Stream ended. Reconnecting in 30s...',
     reconnecting: 'Reconnecting...',
     noUsernameOrChannel: 'No username or channel provided in URL',

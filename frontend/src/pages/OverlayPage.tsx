@@ -17,7 +17,7 @@ function hexToRgb (hex: string): { r: number; g: number; b: number } {
 
 export function OverlayPage () {
   const { t } = useLanguage();
-  const { tiktok, twitch, selectedPlatforms: connectedPlatforms } = useConnectionContext();
+  const { tiktok, twitch, youtube, selectedPlatforms: connectedPlatforms } = useConnectionContext();
 
   // Pre-fill with connected values, but allow user to modify
   const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>(() =>
@@ -25,6 +25,7 @@ export function OverlayPage () {
   );
   const [tiktokUsername, setTiktokUsername] = useState(() => tiktok.username || 'jamesbonfim');
   const [twitchChannel, setTwitchChannel] = useState(() => twitch.channelName || '');
+  const [youtubeVideo, setYoutubeVideo] = useState(() => youtube.videoInput || '');
   const [settings, setSettings] = useState({
     showChats: true,
     showGifts: true,
@@ -40,6 +41,7 @@ export function OverlayPage () {
 
   const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
   const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
+  const showYouTube = selectedPlatforms.includes(PlatformType.YOUTUBE);
 
   const FONT_SIZE_OPTIONS = [
     { value: '1em', label: `${t.overlay.fontSizes.small} (1em)` },
@@ -54,8 +56,9 @@ export function OverlayPage () {
     // Require at least one platform with a valid identifier
     const hasTikTok = showTikTok && tiktokUsername.trim();
     const hasTwitch = showTwitch && twitchChannel.trim();
+    const hasYouTube = showYouTube && youtubeVideo.trim();
 
-    if (!hasTikTok && !hasTwitch) return '';
+    if (!hasTikTok && !hasTwitch && !hasYouTube) return '';
 
     const params = new URLSearchParams();
 
@@ -67,6 +70,9 @@ export function OverlayPage () {
     }
     if (hasTwitch) {
       params.set('channel', twitchChannel);
+    }
+    if (hasYouTube) {
+      params.set('videoId', youtubeVideo);
     }
 
     params.set('showChats', settings.showChats ? '1' : '0');
@@ -87,7 +93,7 @@ export function OverlayPage () {
   };
 
   const overlayUrl = generateUrl();
-  const hasValidInput = (showTikTok && tiktokUsername.trim()) || (showTwitch && twitchChannel.trim());
+  const hasValidInput = (showTikTok && tiktokUsername.trim()) || (showTwitch && twitchChannel.trim()) || (showYouTube && youtubeVideo.trim());
 
   const copyToClipboard = () => {
     if (overlayUrl) {
@@ -143,6 +149,22 @@ export function OverlayPage () {
                   value={twitchChannel}
                   onChange={(e) => setTwitchChannel(e.target.value)}
                   placeholder={t.connection.channelPlaceholder}
+                  className="input-field w-full"
+                />
+              </div>
+            )}
+
+            {/* YouTube Video Input */}
+            {showYouTube && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  {t.connection.youtubeVideo}
+                </label>
+                <input
+                  type="text"
+                  value={youtubeVideo}
+                  onChange={(e) => setYoutubeVideo(e.target.value)}
+                  placeholder={t.connection.videoPlaceholder}
                   className="input-field w-full"
                 />
               </div>

@@ -20,6 +20,7 @@ interface Settings {
   platforms: string[];
   username: string;
   channel: string;
+  videoId: string;
   showChats: boolean;
   showGifts: boolean;
   showLikes: boolean;
@@ -57,6 +58,7 @@ export function ObsOverlayPage () {
     platforms: platformsParam ? platformsParam.split(',') : ['tiktok'],
     username: searchParams.get('username') || '',
     channel: searchParams.get('channel') || '',
+    videoId: searchParams.get('videoId') || '',
     showChats: searchParams.get('showChats') !== '0',
     showGifts: searchParams.get('showGifts') !== '0',
     showLikes: searchParams.get('showLikes') !== '0',
@@ -70,6 +72,7 @@ export function ObsOverlayPage () {
 
   const showTikTok = settings.platforms.includes('tiktok') && settings.username;
   const showTwitch = settings.platforms.includes('twitch') && settings.channel;
+  const showYouTube = settings.platforms.includes('youtube') && settings.videoId;
 
   // Add chat item with optional summarize behavior (for join messages)
   const addItem = useCallback((
@@ -78,7 +81,7 @@ export function ObsOverlayPage () {
     content: string,
     color?: string,
     isTemporary = false,
-    platform: 'tiktok' | 'twitch' = 'tiktok'
+    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok'
   ) => {
     setItems(prev => {
       // Remove temporary items when adding new non-temporary messages
@@ -167,6 +170,26 @@ export function ObsOverlayPage () {
           topGifterRank: null,
         };
         addItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, 'twitch');
+      }
+    },
+
+    // YouTube Chat messages
+    onYouTubeChat: (msg: UnifiedChatMessage) => {
+      if (settings.showChats) {
+        // Convert YouTube message to ChatItem format
+        const youtubeUser = {
+          uniqueId: msg.username,
+          nickname: msg.displayName,
+          userId: msg.odlUserId,
+          profilePictureUrl: '',
+          followRole: 0,
+          userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
+          isModerator: msg.isMod || false,
+          isNewGifter: false,
+          isSubscriber: msg.isSubscriber || false,
+          topGifterRank: null,
+        };
+        addItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube');
       }
     },
 
@@ -316,6 +339,40 @@ export function ObsOverlayPage () {
     }
   }, [settings.channel, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-connect to YouTube when videoId is provided
+  useEffect(() => {
+    if (showYouTube) {
+      setConnectionState(prev => prev ? `${prev}\nYouTube: ${t.obsOverlay.connecting}` : `YouTube: ${t.obsOverlay.connecting}`);
+      connection.youtube.connect(settings.videoId)
+        .then((state) => {
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('YouTube:'));
+            lines.push(`YouTube: ${t.obsOverlay.connectedToVideo.replace('{videoId}', state.videoId || settings.videoId)}`);
+            return lines.join('\n');
+          });
+        })
+        .catch((error) => {
+          setConnectionState(prev => {
+            const lines = prev.split('\n').filter(l => !l.startsWith('YouTube:'));
+            lines.push(`YouTube: ${String(error)}`);
+            return lines.join('\n');
+          });
+          // Schedule reconnect after 30s
+          if (settings.videoId) {
+            setTimeout(() => {
+              setConnectionState(prev => {
+                const lines = prev.split('\n').filter(l => !l.startsWith('YouTube:'));
+                lines.push(`YouTube: ${t.obsOverlay.reconnecting}`);
+                return lines.join('\n');
+              });
+              connection.youtube.connect(settings.videoId)
+                .catch(console.error);
+            }, 30000);
+          }
+        });
+    }
+  }, [settings.videoId, t]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Handle TikTok stream end reconnection
   useEffect(() => {
     if (showTikTok && connection.tiktok.status === 'disconnected' && connectionState.includes('TikTok:')) {
@@ -351,7 +408,7 @@ export function ObsOverlayPage () {
     }
   }, [connection.tiktok.status, settings.username, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!showTikTok && !showTwitch) {
+  if (!showTikTok && !showTwitch && !showYouTube) {
     return (
       <div
         className="flex items-center justify-center h-screen"

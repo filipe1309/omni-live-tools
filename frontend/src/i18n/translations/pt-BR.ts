@@ -250,6 +250,7 @@ export const ptBR = {
     connecting: 'Conectando...',
     connectedToRoom: 'Conectado ao roomId {roomId}',
     connectedToChannel: 'Conectado a {channel}',
+    connectedToVideo: 'Conectado ao vídeo {videoId}',
     streamEndedReconnecting: 'Transmissão encerrada. Reconectando em 30s...',
     reconnecting: 'Reconectando...',
     noUsernameOrChannel: 'Nenhum usuário ou canal fornecido na URL',
