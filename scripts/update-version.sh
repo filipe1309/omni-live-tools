@@ -248,4 +248,13 @@ if $AUTO_COMMIT; then
   fi
   git commit -m "chore(release): v$NEW_VERSION"
   echo -e "${GREEN}✓ Committed changes with message: chore(release): v$NEW_VERSION${NC}"
+  
+  # Push commit and tag
+  echo -e "\n${BLUE}Pushing changes to remote...${NC}"
+  git push
+  echo -e "${GREEN}✓ Pushed commit to remote${NC}"
+  if $CREATE_TAG; then
+    git push origin "v$NEW_VERSION"
+    echo -e "${GREEN}✓ Pushed tag v$NEW_VERSION to remote${NC}"
+  fi
 fi
