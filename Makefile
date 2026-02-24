@@ -60,7 +60,11 @@ NC := \033[0m
 ## help: Display this help message [alias: h]
 help h:
 	@printf "$(BLUE)╔══════════════════════════════════════════════════════════════╗$(NC)\n"
-	@printf "$(BLUE)║         OmniLIVE Tools - Available Commands                  ║$(NC)\n"
+	@printf "$(BLUE)║             ▞▀▖▙▗▌▙ ▌▜▘ ▌  ▗       ▀▛▘     ▜                 ║$(NC)\n"
+	@printf "$(BLUE)║             ▌ ▌▌▘▌▌▌▌▐  ▌  ▄▌ ▌▞▀▖  ▌▞▀▖▞▀▖▐ ▞▀▘             ║$(NC)\n"
+	@printf "$(BLUE)║             ▌ ▌▌ ▌▌▝▌▐  ▌  ▐▐▐ ▛▀   ▌▌ ▌▌ ▌▐ ▝▀▖             ║$(NC)\n"
+	@printf "$(BLUE)║             ▝▀ ▘ ▘▘ ▘▀▘ ▀▀▘▀▘▘ ▝▀▘  ▘▝▀ ▝▀  ▘▀▀              ║$(NC)\n"
+	@printf "$(BLUE)║                      Available Commands                      ║$(NC)\n"
 	@printf "$(BLUE)╚══════════════════════════════════════════════════════════════╝$(NC)\n"
 	@printf "\n"
 	@printf "$(BOLD)Usage:$(NC) make $(GREEN)<target>$(NC)\n"
