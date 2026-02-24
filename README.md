@@ -35,6 +35,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports all platforms)
 - 📊 **Poll Profiles** - Save and load poll configurations with auto-save functionality
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with pop-out windows for chat, gifts, and queue
+- 🔗 **Shared Connection Mode** - Overlays can reuse the main app's platform connections without reconnecting
 - 🎁 **Gift Tracking** - Real-time gift display with streak tracking and timeout handling
 - 👁️ **Customizable Visibility** - Toggle queue and gift panels on/off with persistent settings
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
@@ -129,6 +130,7 @@ The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live i
 - **Smart auto-scroll** - Auto-scroll pauses when you scroll up to review messages, resumes when you scroll back down
 - **Search/filter messages** - Quickly find messages by content, username, or nickname
 - **SuperChat highlighting** - YouTube SuperChats are highlighted with a golden background and auto-added to queue
+- **Member highlighting** - Channel members are highlighted with an emerald green background and star icon
 - **Gift tracking with streaks** - Real-time gift display with streak tracking and timeout handling
 - **Toggle visibility** - Show/hide queue and gift panels with persistent localStorage settings
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
