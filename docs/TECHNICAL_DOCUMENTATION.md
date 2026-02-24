@@ -35,6 +35,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Pop-out OBS windows for chat, gifts, and queue
 - Search/filter to quickly find specific messages
 - SuperChat highlighting with auto-queue for YouTube
+- Member highlighting for channel subscribers across all platforms
 - Gift tracking with streak detection and timeout handling
 - Interactive polls where viewers vote by typing numbers
 - Poll profiles for saving and loading poll configurations
@@ -315,8 +316,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `HomePage` | `/` | Landing page with feature cards |
 | `ChatPage` | `/chat` | Real-time chat display with message queue |
 | `PollPage` | `/poll` | Create and manage polls |
-| `OverlayPage` | `/overlay` | OBS overlay configuration |
-| `ObsOverlayPage` | `/obs` | OBS Browser Source page |
+| `OverlayPage` | `/overlay` | OBS overlay configuration with platform toggles |
+| `ObsOverlayPage` | `/obs` | OBS Browser Source page (supports shared connection mode) |
 | `ObsFeaturedMessagePage` | `/obs-featured` | Featured message overlay for OBS |
 | `ObsChatPage` | `/obs-chat` | OBS pop-out window for chat messages |
 | `ObsGiftsPage` | `/obs-gifts` | OBS pop-out window for gifts |
@@ -330,7 +331,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `useTikTokConnection` | Manages TikTok socket connection and events |
 | `useTwitchConnection` | Manages Twitch socket connection and events |
 | `useYouTubeConnection` | Manages YouTube socket connection and events |
-| `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections |
+| `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections, platform events room |
 | `useConnectionContext` | Global connection state (React Context) |
 | `useFeaturedMessage` | Manages featured message overlay via Socket.IO |
 | `usePoll` | Poll creation, voting, timer logic |
@@ -453,6 +454,8 @@ make electron-dist
 | `disconnectYouTube` | - | Disconnect YouTube |
 | `setFeaturedMessage` | `ChatItem` | Send message to overlay |
 | `clearFeaturedMessage` | - | Clear overlay message |
+| `join-platform-events` | - | Join platform events room (for shared connections) |
+| `leave-platform-events` | - | Leave platform events room |
 
 **Server → Client:**
 | Event | Payload | Description |
@@ -472,6 +475,32 @@ make electron-dist
 | `roomUser` | `RoomUserMessage` | Viewer count update |
 | `streamEnd` | - | Stream ended |
 | `statistic` | `{ connections }` | Server statistics |
+
+### Shared Connection Mode (Platform Events Room)
+
+The overlay can reuse platform connections from the main app instead of creating new connections. This is useful when:
+- You want to avoid duplicate API connections
+- The main app is already connected to TikTok/Twitch/YouTube
+- Opening the overlay in an external browser (common with Electron)
+
+**How it works:**
+1. When a client connects to a platform (TikTok, Twitch, or YouTube), all events are broadcast to both:
+   - The originating socket
+   - All clients in the `platform-events` room
+2. OBS overlays join the `platform-events` room using the `useAppConnection=1` URL parameter
+3. The overlay receives live events from the main app's connections without making its own API calls
+
+```
+Main App                    Backend                      Overlay
+    │                          │                            │
+    │──setUniqueId────────────▶│                            │
+    │◀─tiktokConnected─────────│                            │
+    │                          │                            │
+    │                          │◀──join-platform-events─────│
+    │                          │                            │
+    │ (receives chat event)    │                            │
+    │◀────chat─────────────────│──────chat─────────────────▶│
+```
 
 ### Unified Chat Format
 
