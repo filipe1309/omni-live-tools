@@ -32,9 +32,12 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Real-time chat reading from TikTok, Twitch, and YouTube
 - Message queue for organizing messages to read during streams
 - Featured message overlay for displaying messages on OBS with pop-out window support
+- Pop-out OBS windows for chat, gifts, and queue
 - Search/filter to quickly find specific messages
 - SuperChat highlighting with auto-queue for YouTube
+- Gift tracking with streak detection and timeout handling
 - Interactive polls where viewers vote by typing numbers
+- Poll profiles for saving and loading poll configurations
 - OBS overlay support for streaming software
 - Multi-language support (PT-BR and EN)
 
@@ -315,6 +318,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `OverlayPage` | `/overlay` | OBS overlay configuration |
 | `ObsOverlayPage` | `/obs` | OBS Browser Source page |
 | `ObsFeaturedMessagePage` | `/obs-featured` | Featured message overlay for OBS |
+| `ObsChatPage` | `/obs-chat` | OBS pop-out window for chat messages |
+| `ObsGiftsPage` | `/obs-gifts` | OBS pop-out window for gifts |
+| `ObsQueuePage` | `/obs-queue` | OBS pop-out window for message queue |
 | `PollResultsPage` | `/poll-results` | Poll results popup window |
 
 ### Key Hooks
@@ -325,7 +331,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `useTwitchConnection` | Manages Twitch socket connection and events |
 | `useYouTubeConnection` | Manages YouTube socket connection and events |
 | `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections |
-| `useConnectionContext` | Global connection state (React Context) || `useFeaturedMessage` | Manages featured message overlay via Socket.IO || `usePoll` | Poll creation, voting, timer logic |
+| `useConnectionContext` | Global connection state (React Context) |
+| `useFeaturedMessage` | Manages featured message overlay via Socket.IO |
+| `usePoll` | Poll creation, voting, timer logic |
+| `usePollProfile` | Manages poll profiles (save/load/auto-save) |
 | `usePollSync` | Syncs poll state across browser tabs |
 | `useToast` | Toast notification system |
 | `useLanguage` | i18n translation hook |
@@ -647,6 +656,69 @@ Run `make help` for all available commands. Key ones:
 | `make test` | Run all tests |
 | `make lint` | Run linters |
 | `make electron-dist` | Build desktop app |
+
+### Versioning & Changelog Scripts
+
+The project includes helper scripts for semantic versioning based on Conventional Commits.
+
+#### Version Update Script (`scripts/update-version.sh`)
+
+Automatically bumps the version in `package.json` based on commit history:
+
+```bash
+# Basic usage (analyzes commits since last tag)
+./scripts/update-version.sh
+
+# Analyze commits from a specific date
+./scripts/update-version.sh --since "2026-02-20"
+
+# Preview changes without making them
+./scripts/update-version.sh --dry-run
+
+# Update version and changelog, then auto-commit and push
+./scripts/update-version.sh --changelog --commit
+
+# Skip confirmation prompt
+./scripts/update-version.sh --yes
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--since DATE` | Analyze commits since DATE (e.g., '2026-02-16' or 'yesterday') |
+| `--dry-run` | Show what would be done without making changes |
+| `--no-tag` | Skip creating a git tag for the new version |
+| `--changelog` | Update CHANGELOG.md after creating the tag |
+| `--commit` | Auto-commit changes and push to remote (including tags) |
+| `--yes, -y` | Skip confirmation prompt |
+
+**Version Bump Rules:**
+- **BREAKING CHANGE** or `feat!:` → Major version bump (X.0.0)
+- `feat:` → Minor version bump (0.X.0)
+- `fix:`, `refactor:`, `perf:`, etc. → Patch version bump (0.0.X)
+
+#### Changelog Update Script (`scripts/update-changelog.sh`)
+
+Generates changelog entries based on git tags and commits following [Keep a Changelog](https://keepachangelog.com) format:
+
+```bash
+# Update changelog for latest tag
+./scripts/update-changelog.sh
+
+# Preview changes without writing
+./scripts/update-changelog.sh --dry-run
+
+# Regenerate entire changelog from all tags
+./scripts/update-changelog.sh --all
+```
+
+#### Makefile Shortcuts
+
+| Command | Description |
+|---------|-------------|
+| `make bump-version` (bv) | Update version based on commits |
+| `make bump-version-changelog` (bvc) | Update version and changelog |
+| `make bump-version-changelog-commit` (bvcc) | Update version, changelog, commit and push |
 
 ---
 
