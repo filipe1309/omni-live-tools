@@ -232,18 +232,23 @@ export function PollResultsPage () {
       selectedOptions?: boolean[]
     ) => {
       if (!channelRef) return;
+      const newFullOptions = allOptions && selectedOptions 
+        ? { allOptions, selectedOptions } 
+        : undefined;
       channelRef.postMessage({
         type: 'config-update',
         config: { question, options, timer },
+        fullOptions: newFullOptions,
       });
       // Also update local setupConfig
       setSetupConfig({ question, options, timer });
       // Save to localStorage for persistence
       localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify({ question, options, timer }));
-      if (allOptions && selectedOptions) {
+      if (newFullOptions) {
+        setFullOptionsConfig(newFullOptions);
         localStorage.setItem(
           'tiktok-poll-fullOptions',
-          JSON.stringify({ allOptions, selectedOptions })
+          JSON.stringify(newFullOptions)
         );
       }
     },
@@ -261,10 +266,11 @@ export function PollResultsPage () {
         channelRef.postMessage({
           type: 'config-update',
           config: newConfig,
+          fullOptions: fullOptionsConfig || undefined,
         });
       }
     },
-    [channelRef, setupConfig]
+    [channelRef, setupConfig, fullOptionsConfig]
   );
 
   // Inline edit handler for option text (from PollOptionCard double-click)

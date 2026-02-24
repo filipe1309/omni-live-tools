@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePoll, useToast, useBackgroundKeepAlive } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
-import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType } from '@/types';
+import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType, FullOptionsConfig } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
 import { safeSetItem } from '@/utils';
@@ -95,10 +95,15 @@ export function PollPage () {
 
   // Register callback to receive config updates from popup
   useEffect(() => {
-    onConfigUpdate((config: SetupConfig) => {
-      console.log('[PollPage] Received config update from popup:', config);
+    onConfigUpdate((config: SetupConfig, fullOptions?: FullOptionsConfig) => {
+      console.log('[PollPage] Received config update from popup:', config, 'fullOptions:', fullOptions);
       setExternalConfig(config);
       setSetupConfig(config);
+      // Also save to localStorage so the data persists
+      safeSetItem('tiktok-poll-setupConfig', config);
+      if (fullOptions) {
+        safeSetItem('tiktok-poll-fullOptions', fullOptions);
+      }
     });
   }, [onConfigUpdate]);
 

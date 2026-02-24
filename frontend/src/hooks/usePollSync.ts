@@ -32,7 +32,7 @@ interface UsePollSyncReturn {
   /** Register command handlers (start/stop/reset) */
   setCommandHandlers: (handlers: SyncCommandHandlers) => void;
   /** Register callback for config updates from popup */
-  onConfigUpdate: (callback: (config: SetupConfig) => void) => void;
+  onConfigUpdate: (callback: (config: SetupConfig, fullOptions?: FullOptionsConfig) => void) => void;
   /** Register callback for reconnect requests */
   onReconnect: (callback: () => void) => void;
   /** Check if channel is active */
@@ -66,7 +66,7 @@ export function toSerializableState (
 export function usePollSync (options: UsePollSyncOptions): UsePollSyncReturn {
   const channelRef = useRef<BroadcastChannel | null>(null);
   const commandHandlersRef = useRef<SyncCommandHandlers | null>(null);
-  const configUpdateCallbackRef = useRef<((config: SetupConfig) => void) | null>(null);
+  const configUpdateCallbackRef = useRef<((config: SetupConfig, fullOptions?: FullOptionsConfig) => void) | null>(null);
   const reconnectCallbackRef = useRef<(() => void) | null>(null);
   const optionsRef = useRef(options);
 
@@ -119,9 +119,10 @@ export function usePollSync (options: UsePollSyncOptions): UsePollSyncReturn {
           }
         } else if (event.data.type === 'config-update') {
           const config = event.data.config as SetupConfig;
-          console.log('[usePollSync] Received config-update from popup:', config);
+          const fullOptions = event.data.fullOptions as FullOptionsConfig | undefined;
+          console.log('[usePollSync] Received config-update from popup:', config, fullOptions);
           if (configUpdateCallbackRef.current) {
-            configUpdateCallbackRef.current(config);
+            configUpdateCallbackRef.current(config, fullOptions);
           }
         } else if (event.data.type === 'reconnect') {
           console.log('[usePollSync] Received reconnect request from popup');
@@ -183,7 +184,7 @@ export function usePollSync (options: UsePollSyncOptions): UsePollSyncReturn {
     commandHandlersRef.current = handlers;
   }, []);
 
-  const onConfigUpdate = useCallback((callback: (config: SetupConfig) => void) => {
+  const onConfigUpdate = useCallback((callback: (config: SetupConfig, fullOptions?: FullOptionsConfig) => void) => {
     configUpdateCallbackRef.current = callback;
   }, []);
 

@@ -6,6 +6,7 @@ import type {
   ChatMessage,
   PlatformType,
   SetupConfig,
+  FullOptionsConfig,
 } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
 import { usePollTimer } from './usePollTimer';
@@ -31,7 +32,7 @@ interface UsePollReturn {
     fullOptions?: { allOptions: string[]; selectedOptions: boolean[] }
   ) => void;
   setConnectionStatus: (isConnected: boolean) => void;
-  onConfigUpdate: (callback: (config: SetupConfig) => void) => void;
+  onConfigUpdate: (callback: (config: SetupConfig, fullOptions?: FullOptionsConfig) => void) => void;
   onReconnect: (callback: () => void) => void;
 }
 
@@ -123,18 +124,22 @@ export function usePoll (): UsePollReturn {
   } = usePollSync(syncOptions);
 
   // Consumer callback refs for config update and reconnect
-  const configUpdateCallbackRef = useRef<((config: SetupConfig) => void) | null>(null);
+  const configUpdateCallbackRef = useRef<((config: SetupConfig, fullOptions?: FullOptionsConfig) => void) | null>(null);
   const reconnectCallbackRef = useRef<(() => void) | null>(null);
 
   // Register internal handlers with usePollSync that update our refs AND call consumer callbacks
   useEffect(() => {
-    registerSyncConfigUpdate((config: SetupConfig) => {
+    registerSyncConfigUpdate((config: SetupConfig, fullOptions?: FullOptionsConfig) => {
       // Update our internal setupConfigRef - this was missing in the refactor!
-      console.log('[usePoll] Config update received, updating setupConfigRef:', config);
+      console.log('[usePoll] Config update received, updating setupConfigRef:', config, 'fullOptions:', fullOptions);
       setupConfigRef.current = config;
+      // Also update fullOptionsConfigRef if provided
+      if (fullOptions) {
+        fullOptionsConfigRef.current = fullOptions;
+      }
       // Then notify the consumer (e.g., PollPage)
       if (configUpdateCallbackRef.current) {
-        configUpdateCallbackRef.current(config);
+        configUpdateCallbackRef.current(config, fullOptions);
       }
     });
 
@@ -146,7 +151,7 @@ export function usePoll (): UsePollReturn {
   }, [registerSyncConfigUpdate, registerSyncReconnect]);
 
   // Public callback registration for consumers
-  const onConfigUpdate = useCallback((callback: (config: SetupConfig) => void) => {
+  const onConfigUpdate = useCallback((callback: (config: SetupConfig, fullOptions?: FullOptionsConfig) => void) => {
     configUpdateCallbackRef.current = callback;
   }, []);
 
