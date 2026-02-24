@@ -5,3 +5,6 @@ export { PollResultsPage } from './PollResultsPage';
 export { OverlayPage } from './OverlayPage';
 export { ObsOverlayPage } from './ObsOverlayPage';
 export { ObsFeaturedMessagePage } from './ObsFeaturedMessagePage';
+export { ObsChatPage } from './ObsChatPage';
+export { ObsGiftPage } from './ObsGiftPage';
+export { ObsQueuePage } from './ObsQueuePage';

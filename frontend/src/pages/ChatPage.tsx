@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useConnectionContext } from '@/hooks';
+import { useConnectionContext, useChatBroadcaster } from '@/hooks';
 import { useFeaturedMessage } from '@/hooks/useFeaturedMessage';
 import { useLanguage } from '@/i18n';
 import { RoomStats, ChatContainer, GiftContainer, ChatQueueContainer } from '@/components';
@@ -40,6 +40,24 @@ export function ChatPage () {
   const [queueItems, setQueueItems] = useState<ChatItem[]>([]);
   const { t } = useLanguage();
   const { featuredMessageId, setFeaturedMessage, clearFeaturedMessage } = useFeaturedMessage();
+  const { broadcastChatItems, broadcastGifts, broadcastQueueItems, broadcastFeaturedMessageId, setActionHandlers } = useChatBroadcaster();
+
+  // Broadcast data to pop-out windows
+  useEffect(() => {
+    broadcastChatItems(chatItems);
+  }, [chatItems, broadcastChatItems]);
+
+  useEffect(() => {
+    broadcastGifts(gifts);
+  }, [gifts, broadcastGifts]);
+
+  useEffect(() => {
+    broadcastQueueItems(queueItems);
+  }, [queueItems, broadcastQueueItems]);
+
+  useEffect(() => {
+    broadcastFeaturedMessageId(featuredMessageId);
+  }, [featuredMessageId, broadcastFeaturedMessageId]);
 
   // Add to queue handler
   const addToQueue = useCallback((item: ChatItem) => {
@@ -76,6 +94,15 @@ export function ChatPage () {
   const sendToOverlayFromQueue = useCallback((item: ChatItem) => {
     sendToOverlay(item, false);
   }, [sendToOverlay]);
+
+  // Register action handlers for pop-out windows
+  useEffect(() => {
+    setActionHandlers({
+      onAddToQueue: addToQueue,
+      onSendToOverlay: sendToOverlayFromChat,
+      onRemoveFromQueue: removeFromQueue,
+    });
+  }, [setActionHandlers, addToQueue, sendToOverlayFromChat, removeFromQueue]);
 
   const {
     tiktok,
@@ -238,6 +265,17 @@ export function ChatPage () {
     };
   }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler, registerYouTubeChatHandler]);
 
+  // Helper to open pop-out windows
+  const openPopOut = (path: string, name: string, width = 600, height = 800) => {
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    window.open(
+      path,
+      name,
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes`
+    );
+  };
+
   return (
     <div className="min-h-screen w-full bg-chat-gradient">
       <div className="container mx-auto px-4 py-6">
@@ -253,34 +291,47 @@ export function ChatPage () {
         )}
 
         <div className="grid lg:grid-cols-3 gap-6">
-          <ChatContainer 
-            items={chatItems} 
-            title={`💬 ${t.chat.chats}`} 
-            onAddToQueue={addToQueue} 
-            onSendToOverlay={sendToOverlayFromChat}
-            featuredMessageId={featuredMessageId}
-          />
+          {/* Chat Container with Pop-out */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="font-semibold text-lg text-slate-200">💬 {t.chat.chats}</h2>
+              <button
+                onClick={() => openPopOut('/obs-chat', 'chat-window')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                title={t.chat.popOutChat}
+              >
+                <PopOutIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <ChatContainer 
+              items={chatItems} 
+              title="" 
+              onAddToQueue={addToQueue} 
+              onSendToOverlay={sendToOverlayFromChat}
+              featuredMessageId={featuredMessageId}
+            />
+          </div>
+
+          {/* Queue Container with Pop-outs */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold text-lg text-slate-200">📋 {t.chat.queue}</h2>
-              <button
-                onClick={() => {
-                  const width = 800;
-                  const height = 600;
-                  const left = (window.screen.width - width) / 2;
-                  const top = (window.screen.height - height) / 2;
-                  window.open(
-                    '/obs-featured',
-                    'overlay-window',
-                    `width=${width},height=${height},left=${left},top=${top},resizable=yes`
-                  );
-                }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
-                title={t.chat.popOutOverlay}
-              >
-                <PopOutIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Overlay</span>
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => openPopOut('/obs-queue', 'queue-window')}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                  title={t.chat.popOutQueue}
+                >
+                  <PopOutIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => openPopOut('/obs-featured', 'overlay-window', 800, 600)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors text-sm"
+                  title={t.chat.popOutOverlay}
+                >
+                  <span className="hidden sm:inline">Overlay</span>
+                </button>
+              </div>
             </div>
             <ChatQueueContainer 
               items={queueItems} 
@@ -290,7 +341,21 @@ export function ChatPage () {
               featuredMessageId={featuredMessageId}
             />
           </div>
-          <GiftContainer gifts={gifts} title={`🎁 ${t.chat.gifts}`} />
+
+          {/* Gift Container with Pop-out */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="font-semibold text-lg text-slate-200">🎁 {t.chat.gifts}</h2>
+              <button
+                onClick={() => openPopOut('/obs-gift', 'gift-window')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                title={t.chat.popOutGift}
+              >
+                <PopOutIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <GiftContainer gifts={gifts} title="" />
+          </div>
         </div>
       </div>
     </div>

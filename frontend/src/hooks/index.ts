@@ -18,6 +18,8 @@ export { useBackgroundKeepAlive } from './useBackgroundKeepAlive';
 export { useToast, ToastProvider } from './useToast';
 export type { Toast, ToastType } from './useToast';
 export { useFeaturedMessage } from './useFeaturedMessage';
+export { useChatBroadcaster, useChatReceiver } from './useChatBroadcast';
+export type { GiftData } from './useChatBroadcast';
 
 // Re-export poll types from @/types for backward compatibility
 export type {

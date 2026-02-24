@@ -8,7 +8,7 @@ import type { ChatItem } from '@/types';
 interface ChatQueueContainerProps {
   items: ChatItem[];
   title: string;
-  onRemove: (id: string) => void;
+  onRemove?: (id: string) => void;
   onSendToOverlay?: (item: ChatItem) => void;
   featuredMessageId?: string | null;
   maxHeight?: string;
@@ -28,7 +28,7 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube
 
 interface QueueMessageProps {
   item: ChatItem;
-  onRemove: (id: string) => void;
+  onRemove?: (id: string) => void;
   onSendToOverlay?: (item: ChatItem) => void;
   isOnOverlay?: boolean;
 }
@@ -78,15 +78,17 @@ function QueueMessage({ item, onRemove, onSendToOverlay, isOnOverlay }: QueueMes
             </svg>
           </button>
         )}
-        <button
-          onClick={() => onRemove(item.id)}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-500/20 rounded text-red-400 hover:text-red-300 flex-shrink-0"
-          title="Remove from queue"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </button>
+        {onRemove && (
+          <button
+            onClick={() => onRemove(item.id)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-500/20 rounded text-red-400 hover:text-red-300 flex-shrink-0"
+            title="Remove from queue"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
