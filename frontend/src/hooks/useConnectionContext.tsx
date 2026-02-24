@@ -122,6 +122,11 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     autoReconnectRef.current = autoReconnect;
   }, [autoReconnect]);
 
+  // Refs to track connection status for stream end handlers
+  const tiktokConnectedRef = useRef(false);
+  const twitchConnectedRef = useRef(false);
+  const youtubeConnectedRef = useRef(false);
+
   const [selectedPlatforms, setSelectedPlatformsState] = useState<PlatformType[]>(() => {
     const saved = localStorage.getItem('shared-selected-platforms');
     if (saved) {
@@ -246,9 +251,23 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     },
     onTikTokStreamEnd: () => {
       streamEndHandlers.forEach(handler => handler());
+      toast.warning(t.toast.tiktokStreamEnded);
+      // Check if no other platforms are connected and open modal after small delay
+      setTimeout(() => {
+        if (!twitchConnectedRef.current && !youtubeConnectedRef.current) {
+          setShowConnectionModal(true);
+        }
+      }, 500);
     },
     onYouTubeStreamEnd: () => {
       streamEndHandlers.forEach(handler => handler());
+      toast.warning(t.toast.youtubeStreamEnded);
+      // Check if no other platforms are connected and open modal after small delay
+      setTimeout(() => {
+        if (!tiktokConnectedRef.current && !twitchConnectedRef.current) {
+          setShowConnectionModal(true);
+        }
+      }, 500);
     },
     onTikTokReconnect: (_state) => {
       toast.success(interpolate(t.toast.tiktokReconnected, { username: tiktokUsername }));
@@ -260,6 +279,13 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       toast.success(interpolate(t.toast.youtubeReconnected, { channel: state.channelName || state.videoId }));
     },
   });
+
+  // Sync connection refs for stream end handlers
+  useEffect(() => {
+    tiktokConnectedRef.current = connection.tiktok.isConnected;
+    twitchConnectedRef.current = connection.twitch.isConnected;
+    youtubeConnectedRef.current = connection.youtube.isConnected;
+  }, [connection.tiktok.isConnected, connection.twitch.isConnected, connection.youtube.isConnected]);
 
   // Persist settings
   const setSelectedPlatforms = useCallback((platforms: PlatformType[]) => {

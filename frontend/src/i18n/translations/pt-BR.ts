@@ -252,6 +252,8 @@ export const ptBR = {
     tiktokReconnected: 'TikTok reconectado a @{username}',
     twitchReconnected: 'Twitch reconectado a #{channel}',
     youtubeReconnected: 'YouTube reconectado a {channel}',
+    tiktokStreamEnded: 'A live do TikTok encerrou',
+    youtubeStreamEnded: 'A live do YouTube encerrou',
     errorConnectingTikTok: 'Erro ao conectar TikTok: {error}',
     errorConnectingTwitch: 'Erro ao conectar Twitch: {error}',
     errorConnectingYouTube: 'Erro ao conectar YouTube: {error}',

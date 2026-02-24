@@ -254,6 +254,8 @@ export const en: TranslationKeys = {
     tiktokReconnected: 'TikTok reconnected to @{username}',
     twitchReconnected: 'Twitch reconnected to #{channel}',
     youtubeReconnected: 'YouTube reconnected to {channel}',
+    tiktokStreamEnded: 'TikTok live has ended',
+    youtubeStreamEnded: 'YouTube live has ended',
     errorConnectingTikTok: 'Error connecting TikTok: {error}',
     errorConnectingTwitch: 'Error connecting Twitch: {error}',
     errorConnectingYouTube: 'Error connecting YouTube: {error}',
