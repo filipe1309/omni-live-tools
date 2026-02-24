@@ -115,16 +115,17 @@ interface OptionWithId {
 
 interface PollSetupProps {
   onStart: (question: string, options: OptionWithId[], timer: number) => void;
-  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean) => void;
+  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean) => void;
   disabled?: boolean;
   initialQuestion?: string;
   initialOptions?: string[];
   initialSelectedOptions?: boolean[];
   initialTimer?: number;
   initialShowStatusBar?: boolean;
+  initialShowBorder?: boolean;
   showStartButton?: boolean;
   hideStatusBarToggle?: boolean;
-  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean } | null;
+  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
 
@@ -137,6 +138,7 @@ export function PollSetup ({
   initialSelectedOptions = [...DEFAULT_SELECTED_OPTIONS],
   initialTimer = POLL_TIMER.DEFAULT,
   initialShowStatusBar = true,
+  initialShowBorder = false,
   showStartButton = true,
   hideStatusBarToggle = false,
   externalConfig = null,
@@ -147,6 +149,7 @@ export function PollSetup ({
   const [selectedOptions, setSelectedOptions] = useState<boolean[]>(initialSelectedOptions);
   const [timer, setTimer] = useState(initialTimer);
   const [showStatusBar, setShowStatusBar] = useState(initialShowStatusBar);
+  const [showBorder, setShowBorder] = useState(initialShowBorder);
   const hasSentInitialChange = useRef(false);
   const { t } = useLanguage();
 
@@ -315,6 +318,9 @@ export function PollSetup ({
       if (externalConfig.showStatusBar !== undefined) {
         setShowStatusBar(externalConfig.showStatusBar);
       }
+      if (externalConfig.showBorder !== undefined) {
+        setShowBorder(externalConfig.showBorder);
+      }
 
       // Only rebuild options from externalConfig if we don't have externalFullOptions
       // (externalFullOptions is more complete and should take precedence for options)
@@ -367,7 +373,7 @@ export function PollSetup ({
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
       console.log('[PollSetup] Sending initial onChange with options:', selectedPollOptionsWithIds);
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
       hasSentInitialChange.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -397,7 +403,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar);
+      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder);
     }
   };
 
@@ -454,7 +460,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(options, newSelected);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder);
     }
   };
 
@@ -466,7 +472,19 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder);
+    }
+  };
+
+  // Handle showBorder toggle
+  const handleShowBorderChange = (value: boolean) => {
+    setShowBorder(value);
+
+    // Notify parent of change
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value);
     }
   };
 
@@ -492,7 +510,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = value.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
     }
   };
 
@@ -504,7 +522,7 @@ export function PollSetup ({
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
-      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar);
+      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
     }
   };
 
@@ -539,7 +557,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar);
+      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder);
     }
   };
 
@@ -598,7 +616,7 @@ export function PollSetup ({
         .filter(opt => opt.selected && opt.text)
         .map(opt => ({ id: opt.id, text: opt.text }));
 
-      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar);
+      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, showBorder);
     }
   };
 
@@ -879,6 +897,29 @@ export function PollSetup ({
             </div>
           </div>
         )}
+
+        {/* Show Border Toggle - Always visible for streaming capture setup */}
+        <div className="flex items-end">
+          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
+            ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
+            : 'bg-slate-900/50 border-slate-700/50'
+            }`}>
+            <button
+              type="button"
+              onClick={() => handleShowBorderChange(!showBorder)}
+              disabled={disabled}
+              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
+                ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
+                : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {showBorder && '✓'}
+            </button>
+            <span className="text-sm text-slate-300 whitespace-nowrap">
+              🔲 {t.poll.showBorder}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Options Grid with Checkboxes */}

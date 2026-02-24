@@ -597,4 +597,21 @@
       radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
       linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
   }
+
+  /* Animated Border for Streaming Capture */
+  @keyframes border-rotate {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-border-rotate {
+    animation: border-rotate 3s linear infinite;
+  }
 }

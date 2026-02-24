@@ -7,6 +7,7 @@ import { PollQuestion } from '@/components/poll/PollQuestion';
 import { PollOptionCard } from '@/components/poll/PollOptionCard';
 import { PollControlButtons } from '@/components/poll/PollControlButtons';
 import { DisconnectedModal } from '@/components/poll/DisconnectedModal';
+import { AnimatedBorder } from '@/components/poll/AnimatedBorder';
 import { LoadScreen } from '@/components';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
@@ -229,21 +230,24 @@ export function PollResultsPage () {
       options: PollOption[],
       timer: number,
       allOptions?: string[],
-      selectedOptions?: boolean[]
+      selectedOptions?: boolean[],
+      showStatusBar?: boolean,
+      showBorder?: boolean
     ) => {
       if (!channelRef) return;
       const newFullOptions = allOptions && selectedOptions 
         ? { allOptions, selectedOptions } 
         : undefined;
+      const newConfig = { question, options, timer, showStatusBar, showBorder };
       channelRef.postMessage({
         type: 'config-update',
-        config: { question, options, timer },
+        config: newConfig,
         fullOptions: newFullOptions,
       });
       // Also update local setupConfig
-      setSetupConfig({ question, options, timer });
+      setSetupConfig(newConfig);
       // Save to localStorage for persistence
-      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify({ question, options, timer }));
+      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
       if (newFullOptions) {
         setFullOptionsConfig(newFullOptions);
         localStorage.setItem(
@@ -360,6 +364,7 @@ export function PollResultsPage () {
               initialOptions={fullOptionsConfig?.allOptions}
               initialSelectedOptions={fullOptionsConfig?.selectedOptions}
               initialTimer={setupConfig?.timer}
+              initialShowBorder={setupConfig?.showBorder}
             />
           </div>
 
@@ -373,51 +378,53 @@ export function PollResultsPage () {
             isCountingDown={isCountingDown}
           />
 
-          {/* Results Section */}
-          <div className="flex-1 space-y-3 relative">
-            {/* Spotlight + Trophy Celebration */}
-            {showCelebration && (
-              <SpotlightTrophyCelebration
-                onComplete={handleCelebrationComplete}
-                winnerText={winnerText}
+          {/* Results Section with Animated Border */}
+          <AnimatedBorder visible={setupConfig?.showBorder ?? false} borderWidth={6} className="flex-1">
+            <div className="flex-1 space-y-3 relative p-4 bg-slate-900 rounded-xl">
+              {/* Spotlight + Trophy Celebration */}
+              {showCelebration && (
+                <SpotlightTrophyCelebration
+                  onComplete={handleCelebrationComplete}
+                  winnerText={winnerText}
+                />
+              )}
+
+              {/* Countdown Overlay */}
+              {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
+
+              {/* Question */}
+              <PollQuestion
+                question={displayQuestion || t.pollResults.voteNow}
+                isRunning={pollState.isRunning}
+                timeLeft={pollState.timeLeft}
+                timer={pollState.timer}
+                className="[&_h3]:text-5xl"
+                editable={!pollState.isRunning && !isCountingDown}
+                onQuestionChange={handleQuestionInlineEdit}
               />
-            )}
 
-            {/* Countdown Overlay */}
-            {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
+              {/* Results */}
+              <div className="space-y-3 flex-1 min-h-[440px]">
+                {displayOptions.map((option) => {
+                  const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
 
-            {/* Question */}
-            <PollQuestion
-              question={displayQuestion || t.pollResults.voteNow}
-              isRunning={pollState.isRunning}
-              timeLeft={pollState.timeLeft}
-              timer={pollState.timer}
-              className="[&_h3]:text-5xl"
-              editable={!pollState.isRunning && !isCountingDown}
-              onQuestionChange={handleQuestionInlineEdit}
-            />
-
-            {/* Results */}
-            <div className="space-y-3 flex-1 min-h-[440px]">
-              {displayOptions.map((option) => {
-                const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
-
-                return (
-                  <PollOptionCard
-                    key={option.id}
-                    option={option}
-                    votes={pollState.votes[option.id] || 0}
-                    percentage={percentage}
-                    totalVotes={totalVotes}
-                    isWinner={winnerIds.includes(option.id)}
-                    size="large"
-                    editable={!pollState.isRunning && !isCountingDown}
-                    onOptionTextChange={handleOptionInlineEdit}
-                  />
-                );
-              })}
+                  return (
+                    <PollOptionCard
+                      key={option.id}
+                      option={option}
+                      votes={pollState.votes[option.id] || 0}
+                      percentage={percentage}
+                      totalVotes={totalVotes}
+                      isWinner={winnerIds.includes(option.id)}
+                      size="large"
+                      editable={!pollState.isRunning && !isCountingDown}
+                      onOptionTextChange={handleOptionInlineEdit}
+                    />
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </AnimatedBorder>
         </div>
       </div>
     </>

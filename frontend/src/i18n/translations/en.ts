@@ -180,6 +180,7 @@ export const en: TranslationKeys = {
     historyAvailable: 'history available',
     timer: 'Time (seconds)',
     showStatusBar: 'Show Status Bar',
+    showBorder: 'Show Border',
     options: 'Options',
     optionsHint: 'check the options you want to include in the poll',
     optionPlaceholder: 'Option',
@@ -241,6 +242,8 @@ export const en: TranslationKeys = {
     voteNow: 'Vote now!',
     votesUnit: 'votes',
     doubleClickToEdit: 'Double-click to edit',
+    showBorder: 'Show Border',
+    hideBorder: 'Hide Border',
   },
 
   // Toast messages

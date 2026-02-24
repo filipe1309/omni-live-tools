@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePoll, useToast, useBackgroundKeepAlive } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
-import { PollSetup, PollResults, VoteLog, PollControlButtons } from '@/components';
+import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType, FullOptionsConfig } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
@@ -71,20 +71,10 @@ export function PollPage () {
 
   // Track current setup configuration for preview
   // Start with saved config or null to let PollSetup component initialize via onChange
-  const [setupConfig, setSetupConfig] = useState<{
-    question: string;
-    options: PollOption[];
-    timer: number;
-    showStatusBar?: boolean;
-  } | null>(loadSavedSetupConfig);
+  const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
 
   // Track external config updates from popup
-  const [externalConfig, setExternalConfig] = useState<{
-    question: string;
-    options: PollOption[];
-    timer: number;
-    showStatusBar?: boolean;
-  } | null>(loadSavedSetupConfig);
+  const [externalConfig, setExternalConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
 
   // Full options config for persistence (all 4 options + selection state)
   const savedFullOptions = loadFullOptionsConfig();
@@ -107,7 +97,7 @@ export function PollPage () {
     });
   }, [onConfigUpdate]);
 
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean) => {
+  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean) => {
     // Skip the first onChange if we have saved config (PollSetup sends default values on mount)
     if (hasSavedConfig.current && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
@@ -120,6 +110,7 @@ export function PollPage () {
       options, // Options already have their original IDs preserved
       timer,
       showStatusBar: showStatusBar ?? true,
+      showBorder: showBorder ?? false,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
@@ -329,6 +320,7 @@ export function PollPage () {
     ],
     timer: POLL_TIMER.DEFAULT,
     showStatusBar: true,
+    showBorder: false,
   };
 
   // Keyboard shortcuts for poll control
@@ -402,6 +394,7 @@ export function PollPage () {
             initialSelectedOptions={savedFullOptions?.selectedOptions}
             initialTimer={loadSavedSetupConfig()?.timer}
             initialShowStatusBar={loadSavedSetupConfig()?.showStatusBar}
+            initialShowBorder={loadSavedSetupConfig()?.showBorder}
           />
         </div>
 
@@ -434,35 +427,39 @@ export function PollPage () {
             </button>
           </div>
 
-          {isPollActive ? (
-            <PollResults
-              pollState={pollState}
-              getPercentage={getPercentage}
-              getTotalVotes={getTotalVotes}
-              showStatusBar={currentSetupConfig.showStatusBar ?? true}
-              size="large"
-              editable={true}
-              onQuestionChange={handleQuestionInlineEdit}
-              onOptionTextChange={handleOptionInlineEdit}
-            />
-          ) : (
-            <PollResults
-              pollState={{
-                ...pollState,
-                question: currentSetupConfig.question,
-                options: currentSetupConfig.options,
-                votes: currentSetupConfig.options.reduce((acc, opt) => ({ ...acc, [opt.id]: 0 }), {}),
-                timer: currentSetupConfig.timer
-              }}
-              getPercentage={() => 0}
-              getTotalVotes={() => 0}
-              showStatusBar={currentSetupConfig.showStatusBar ?? true}
-              size="large"
-              editable={true}
-              onQuestionChange={handleQuestionInlineEdit}
-              onOptionTextChange={handleOptionInlineEdit}
-            />
-          )}
+          <AnimatedBorder visible={currentSetupConfig.showBorder ?? false} borderWidth={4}>
+            <div className={currentSetupConfig.showBorder ? 'p-3 bg-slate-900 rounded-xl' : ''}>
+              {isPollActive ? (
+                <PollResults
+                  pollState={pollState}
+                  getPercentage={getPercentage}
+                  getTotalVotes={getTotalVotes}
+                  showStatusBar={currentSetupConfig.showStatusBar ?? true}
+                  size="large"
+                  editable={true}
+                  onQuestionChange={handleQuestionInlineEdit}
+                  onOptionTextChange={handleOptionInlineEdit}
+                />
+              ) : (
+                <PollResults
+                  pollState={{
+                    ...pollState,
+                    question: currentSetupConfig.question,
+                    options: currentSetupConfig.options,
+                    votes: currentSetupConfig.options.reduce((acc, opt) => ({ ...acc, [opt.id]: 0 }), {}),
+                    timer: currentSetupConfig.timer
+                  }}
+                  getPercentage={() => 0}
+                  getTotalVotes={() => 0}
+                  showStatusBar={currentSetupConfig.showStatusBar ?? true}
+                  size="large"
+                  editable={true}
+                  onQuestionChange={handleQuestionInlineEdit}
+                  onOptionTextChange={handleOptionInlineEdit}
+                />
+              )}
+            </div>
+          </AnimatedBorder>
         </div>
 
         {/* Vote Log Section */}

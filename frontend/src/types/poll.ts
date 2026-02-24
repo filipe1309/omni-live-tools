@@ -29,6 +29,7 @@ export interface SetupConfig {
   options: PollOption[];
   timer: number;
   showStatusBar?: boolean;
+  showBorder?: boolean;
 }
 
 /**

@@ -178,6 +178,7 @@ export const ptBR = {
     historyAvailable: 'histórico disponível',
     timer: 'Tempo (segundos)',
     showStatusBar: 'Mostrar Barra de Status',
+    showBorder: 'Mostrar Borda',
     options: 'Opções',
     optionsHint: 'marque as opções que deseja incluir na enquete',
     optionPlaceholder: 'Opção',
@@ -239,6 +240,8 @@ export const ptBR = {
     voteNow: 'Vote agora!',
     votesUnit: 'votos',
     doubleClickToEdit: 'Duplo clique para editar',
+    showBorder: 'Mostrar Borda',
+    hideBorder: 'Ocultar Borda',
   },
 
   // Toast messages
