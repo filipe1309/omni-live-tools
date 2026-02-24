@@ -31,6 +31,13 @@ export const OPTION_HISTORY = {
   STORAGE_KEY: 'omni-live-poll-optionHistory',
 } as const;
 
+// Poll profiles settings
+export const POLL_PROFILES = {
+  STORAGE_KEY: 'omni-live-poll-profiles',
+  SELECTED_KEY: 'omni-live-poll-selectedProfile',
+  MAX_PROFILES: 20,
+} as const;
+
 // Default poll options (fixed 6 options)
 export const DEFAULT_OPTIONS = [
   'Sim',

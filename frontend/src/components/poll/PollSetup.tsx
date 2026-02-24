@@ -5,6 +5,7 @@ import {
   POLL_OPTIONS,
   QUESTION_HISTORY,
   OPTION_HISTORY,
+  POLL_PROFILES,
   DEFAULT_OPTIONS,
   DEFAULT_SELECTED_OPTIONS,
   DEFAULT_QUESTION
@@ -62,6 +63,49 @@ const saveOptionToHistory = (option: string) => {
   localStorage.setItem(OPTION_HISTORY.STORAGE_KEY, JSON.stringify(trimmed));
 };
 
+// Poll profile interface
+interface PollProfile {
+  id: string;
+  name: string;
+  question: string;
+  options: string[];
+  selectedOptions: boolean[];
+}
+
+// Load profiles from localStorage
+const loadProfiles = (): PollProfile[] => {
+  const saved = localStorage.getItem(POLL_PROFILES.STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+// Save profiles to localStorage
+const saveProfiles = (profiles: PollProfile[]) => {
+  localStorage.setItem(POLL_PROFILES.STORAGE_KEY, JSON.stringify(profiles));
+  // Dispatch custom event for same-tab sync (storage event doesn't fire in same tab)
+  window.dispatchEvent(new CustomEvent('poll-profiles-updated', { detail: profiles }));
+};
+
+// Load selected profile ID from localStorage
+const loadSelectedProfileId = (): string | null => {
+  return localStorage.getItem(POLL_PROFILES.SELECTED_KEY);
+};
+
+// Save selected profile ID to localStorage
+const saveSelectedProfileId = (id: string | null) => {
+  if (id) {
+    localStorage.setItem(POLL_PROFILES.SELECTED_KEY, id);
+  } else {
+    localStorage.removeItem(POLL_PROFILES.SELECTED_KEY);
+  }
+};
+
 // Option with preserved original ID
 interface OptionWithId {
   id: number;
@@ -116,6 +160,59 @@ export function PollSetup ({
   const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null);
   const [optionSuggestions, setOptionSuggestions] = useState<string[]>([]);
   const optionSuggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Profile state
+  const [profiles, setProfiles] = useState<PollProfile[]>(() => loadProfiles());
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(() => loadSelectedProfileId());
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showNewProfileInput, setShowNewProfileInput] = useState(false);
+  const [newProfileName, setNewProfileName] = useState('');
+  const [profileSaved, setProfileSaved] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync profiles across tabs/windows and same-tab components
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === POLL_PROFILES.STORAGE_KEY) {
+        setProfiles(loadProfiles());
+      }
+      if (e.key === POLL_PROFILES.SELECTED_KEY) {
+        setSelectedProfileId(loadSelectedProfileId());
+      }
+    };
+
+    const handleProfilesUpdated = (e: CustomEvent<PollProfile[]>) => {
+      setProfiles(e.detail);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('poll-profiles-updated', handleProfilesUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('poll-profiles-updated', handleProfilesUpdated as EventListener);
+    };
+  }, []);
+
+  // Click outside handler for profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showProfileDropdown &&
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileDropdown(false);
+        setShowNewProfileInput(false);
+        setNewProfileName('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileDropdown]);
 
   // Click outside handler for question dropdown
   useEffect(() => {
@@ -426,6 +523,116 @@ export function PollSetup ({
     }
   };
 
+  // Profile handlers
+  const handleSelectProfile = (profileId: string | null) => {
+    setSelectedProfileId(profileId);
+    saveSelectedProfileId(profileId);
+    setShowProfileDropdown(false);
+    setShowNewProfileInput(false);
+    setNewProfileName('');
+
+    let newQuestion: string;
+    let newOptions: string[];
+    let newSelectedOptions: boolean[];
+
+    if (profileId === null) {
+      // Load defaults
+      newQuestion = DEFAULT_QUESTION;
+      newOptions = [...DEFAULT_OPTIONS];
+      newSelectedOptions = [...DEFAULT_SELECTED_OPTIONS];
+    } else {
+      const profile = profiles.find(p => p.id === profileId);
+      if (profile) {
+        newQuestion = profile.question;
+        newOptions = [...profile.options];
+        newSelectedOptions = [...profile.selectedOptions];
+      } else {
+        return;
+      }
+    }
+
+    setQuestion(newQuestion);
+    setOptions(newOptions);
+    setSelectedOptions(newSelectedOptions);
+
+    // Notify parent of change so it can broadcast to other pages
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = newOptions
+        .map((opt, idx) => ({
+          text: opt.trim(),
+          id: idx + 1,
+          selected: newSelectedOptions[idx]
+        }))
+        .filter(opt => opt.selected && opt.text)
+        .map(opt => ({ id: opt.id, text: opt.text }));
+
+      onChange(newQuestion, selectedPollOptionsWithIds, timer, newOptions, newSelectedOptions, showStatusBar);
+    }
+  };
+
+  const handleSaveProfile = () => {
+    if (!newProfileName.trim()) return;
+
+    const newProfile: PollProfile = {
+      id: Date.now().toString(),
+      name: newProfileName.trim(),
+      question,
+      options: [...options],
+      selectedOptions: [...selectedOptions],
+    };
+
+    const updatedProfiles = [...profiles, newProfile].slice(-POLL_PROFILES.MAX_PROFILES);
+    setProfiles(updatedProfiles);
+    saveProfiles(updatedProfiles);
+    setSelectedProfileId(newProfile.id);
+    saveSelectedProfileId(newProfile.id);
+    setShowNewProfileInput(false);
+    setNewProfileName('');
+    setShowProfileDropdown(false);
+  };
+
+  const handleUpdateProfile = () => {
+    if (!selectedProfileId) return;
+
+    const updatedProfiles = profiles.map(p =>
+      p.id === selectedProfileId
+        ? { ...p, question, options: [...options], selectedOptions: [...selectedOptions] }
+        : p
+    );
+    setProfiles(updatedProfiles);
+    saveProfiles(updatedProfiles);
+    
+    // Show feedback
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 2000);
+  };
+
+  const handleDeleteProfile = (profileId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return;
+
+    if (confirm(interpolate(t.poll.confirmDeleteProfile, { name: profile.name }))) {
+      const updatedProfiles = profiles.filter(p => p.id !== profileId);
+      setProfiles(updatedProfiles);
+      saveProfiles(updatedProfiles);
+
+      if (selectedProfileId === profileId) {
+        setSelectedProfileId(null);
+        saveSelectedProfileId(null);
+        setQuestion(DEFAULT_QUESTION);
+        setOptions([...DEFAULT_OPTIONS]);
+        setSelectedOptions([...DEFAULT_SELECTED_OPTIONS]);
+      }
+    }
+  };
+
+  const getSelectedProfileName = () => {
+    if (!selectedProfileId) return t.poll.defaultProfile;
+    const profile = profiles.find(p => p.id === selectedProfileId);
+    return profile?.name || t.poll.defaultProfile;
+  };
+
   const handleStart = () => {
     const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
     const questionText = question.trim() || DEFAULT_QUESTION;
@@ -438,6 +645,142 @@ export function PollSetup ({
 
   return (
     <div className="space-y-6">
+      {/* Profile Selector */}
+      <div className="flex items-center gap-3">
+        <div ref={profileDropdownRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            disabled={disabled}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="text-sm text-slate-300">{t.poll.profile}:</span>
+            <span className="text-sm font-medium text-white max-w-[150px] truncate">{getSelectedProfileName()}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 text-slate-400 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+
+          {/* Profile Dropdown */}
+          {showProfileDropdown && (
+            <div className="absolute z-50 top-full left-0 mt-1 w-64 bg-slate-800 border border-slate-600 rounded-lg shadow-xl overflow-hidden">
+              {/* Default option */}
+              <button
+                type="button"
+                onClick={() => handleSelectProfile(null)}
+                className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between ${
+                  !selectedProfileId ? 'bg-purple-900/30 text-purple-300' : 'text-slate-200 hover:bg-slate-700'
+                }`}
+              >
+                <span>{t.poll.defaultProfile}</span>
+                {!selectedProfileId && <span className="text-purple-400">✓</span>}
+              </button>
+
+              {/* Saved profiles */}
+              {profiles.map(profile => (
+                <button
+                  key={profile.id}
+                  type="button"
+                  onClick={() => handleSelectProfile(profile.id)}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between group ${
+                    selectedProfileId === profile.id ? 'bg-purple-900/30 text-purple-300' : 'text-slate-200 hover:bg-slate-700'
+                  }`}
+                >
+                  <span className="truncate flex-1">{profile.name}</span>
+                  <div className="flex items-center gap-2">
+                    {selectedProfileId === profile.id && <span className="text-purple-400">✓</span>}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteProfile(profile.id, e)}
+                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity p-1"
+                      title={t.poll.deleteProfile}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </button>
+              ))}
+
+              {/* Divider */}
+              <div className="border-t border-slate-600 my-1"></div>
+
+              {/* New profile input */}
+              {showNewProfileInput ? (
+                <div className="p-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={newProfileName}
+                    onChange={(e) => setNewProfileName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveProfile();
+                      if (e.key === 'Escape') {
+                        setShowNewProfileInput(false);
+                        setNewProfileName('');
+                      }
+                    }}
+                    placeholder={t.poll.profileNamePlaceholder}
+                    className="flex-1 px-2 py-1 text-sm bg-slate-900 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={!newProfileName.trim()}
+                    className="px-2 py-1 text-sm bg-purple-600 hover:bg-purple-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t.poll.saveProfile}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowNewProfileInput(true)}
+                  className="w-full px-4 py-2 text-left text-sm text-green-400 hover:bg-slate-700 transition-colors flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  {t.poll.newProfile}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Update current profile button (only show if a profile is selected) */}
+        {selectedProfileId && (
+          <button
+            type="button"
+            onClick={handleUpdateProfile}
+            disabled={disabled || profileSaved}
+            className={`px-3 py-2 text-sm rounded-lg transition-all disabled:cursor-not-allowed flex items-center gap-1 ${
+              profileSaved
+                ? 'bg-green-600 text-white'
+                : 'bg-slate-700 hover:bg-slate-600 text-slate-300 disabled:opacity-50'
+            }`}
+            title={t.poll.saveProfile}
+          >
+            {profileSaved ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                {t.poll.profileSaved}
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                </svg>
+                {t.poll.saveProfile}
+              </>
+            )}
+          </button>
+        )}
+      </div>
+
       {/* Question and Timer Row */}
       <div className="flex flex-wrap gap-4 items-end">
         {/* Question Input */}
