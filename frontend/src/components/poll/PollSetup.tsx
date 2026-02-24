@@ -71,6 +71,7 @@ interface PollProfile {
   options: string[];
   selectedOptions: boolean[];
   timer: number;
+  showBorder?: boolean;
 }
 
 // Load profiles from localStorage
@@ -200,7 +201,7 @@ export function PollSetup ({
     };
   }, []);
 
-  // Auto-save profile when question, options, selectedOptions, or timer change
+  // Auto-save profile when question, options, selectedOptions, timer, or showBorder change
   useEffect(() => {
     // Skip if no profile selected or if we're loading a profile
     if (!selectedProfileId || isLoadingProfileRef.current) return;
@@ -209,7 +210,7 @@ export function PollSetup ({
     const timeoutId = setTimeout(() => {
       const updatedProfiles = profiles.map(p =>
         p.id === selectedProfileId
-          ? { ...p, question, options: [...options], selectedOptions: [...selectedOptions], timer }
+          ? { ...p, question, options: [...options], selectedOptions: [...selectedOptions], timer, showBorder }
           : p
       );
       setProfiles(updatedProfiles);
@@ -217,7 +218,7 @@ export function PollSetup ({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [question, options, selectedOptions, selectedProfileId, timer]);
+  }, [question, options, selectedOptions, selectedProfileId, timer, showBorder]);
 
   // Click outside handler for profile dropdown
   useEffect(() => {
@@ -578,6 +579,7 @@ export function PollSetup ({
     let newOptions: string[];
     let newSelectedOptions: boolean[];
     let newTimer: number;
+    let newShowBorder: boolean;
 
     if (profileId === null) {
       // Load defaults
@@ -585,6 +587,7 @@ export function PollSetup ({
       newOptions = [...DEFAULT_OPTIONS];
       newSelectedOptions = [...DEFAULT_SELECTED_OPTIONS];
       newTimer = POLL_TIMER.DEFAULT;
+      newShowBorder = false;
     } else {
       const profile = profiles.find(p => p.id === profileId);
       if (profile) {
@@ -592,6 +595,7 @@ export function PollSetup ({
         newOptions = [...profile.options];
         newSelectedOptions = [...profile.selectedOptions];
         newTimer = profile.timer ?? POLL_TIMER.DEFAULT;
+        newShowBorder = profile.showBorder ?? false;
       } else {
         return;
       }
@@ -601,6 +605,7 @@ export function PollSetup ({
     setOptions(newOptions);
     setSelectedOptions(newSelectedOptions);
     setTimer(newTimer);
+    setShowBorder(newShowBorder);
 
     // Clear the loading flag after state updates are applied
     setTimeout(() => {
@@ -618,7 +623,7 @@ export function PollSetup ({
         .filter(opt => opt.selected && opt.text)
         .map(opt => ({ id: opt.id, text: opt.text }));
 
-      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, showBorder);
+      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder);
     }
   };
 
@@ -632,6 +637,7 @@ export function PollSetup ({
       options: [...options],
       selectedOptions: [...selectedOptions],
       timer,
+      showBorder,
     };
 
     const updatedProfiles = [...profiles, newProfile].slice(-POLL_PROFILES.MAX_PROFILES);

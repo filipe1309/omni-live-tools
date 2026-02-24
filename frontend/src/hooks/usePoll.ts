@@ -280,8 +280,10 @@ export function usePoll (): UsePollReturn {
       const optionsChanged = JSON.stringify(currentConfig.options) !== JSON.stringify(config.options);
       const questionChanged = currentConfig.question !== config.question;
       const timerChanged = currentConfig.timer !== config.timer;
+      const showStatusBarChanged = currentConfig.showStatusBar !== config.showStatusBar;
+      const showBorderChanged = currentConfig.showBorder !== config.showBorder;
 
-      if (optionsChanged || questionChanged || timerChanged) {
+      if (optionsChanged || questionChanged || timerChanged || showStatusBarChanged || showBorderChanged) {
         console.log('[usePoll] Config changed, updating setupConfigRef');
         setupConfigRef.current = config;
       }
