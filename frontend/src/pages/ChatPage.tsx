@@ -28,7 +28,11 @@ function generateId (): string {
 interface GiftData extends GiftMessage {
   isPending: boolean;
   streakId: string;
+  lastUpdated: number; // Timestamp for streak timeout detection
 }
+
+// Streak timeout in milliseconds (60 seconds)
+const STREAK_TIMEOUT_MS = 60 * 1000;
 
 export function ChatPage () {
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
@@ -129,23 +133,35 @@ export function ChatPage () {
 
   // Handle gift with streak tracking
   const handleGift = useCallback((gift: GiftMessage) => {
-    const streakId = `${gift.userId}_${gift.giftId}`;
+    const baseStreakId = `${gift.userId}_${gift.giftId}`;
     const pending = isPendingStreak(gift);
+    const now = Date.now();
 
     setGifts(prev => {
       // Check if this streak already exists
-      const existingIndex = prev.findIndex(g => g.streakId === streakId);
+      const existingIndex = prev.findIndex(g => g.streakId.startsWith(baseStreakId));
 
       if (existingIndex >= 0) {
-        // Update existing streak
+        const existing = prev[existingIndex];
+        const timeSinceLastUpdate = now - existing.lastUpdated;
+
+        // If streak timed out, create a new gift entry
+        if (timeSinceLastUpdate > STREAK_TIMEOUT_MS) {
+          // Add new gift with unique streakId (append timestamp)
+          const newStreakId = `${baseStreakId}_${now}`;
+          const trimmed = prev.length > 200 ? prev.slice(-100) : prev;
+          return [...trimmed, { ...gift, isPending: pending, streakId: newStreakId, lastUpdated: now }];
+        }
+
+        // Update existing streak (within timeout window)
         const updated = [...prev];
-        updated[existingIndex] = { ...gift, isPending: pending, streakId };
+        updated[existingIndex] = { ...gift, isPending: pending, streakId: existing.streakId, lastUpdated: now };
         return updated;
       }
 
       // Add new gift, keeping max 200
       const trimmed = prev.length > 200 ? prev.slice(-100) : prev;
-      return [...trimmed, { ...gift, isPending: pending, streakId }];
+      return [...trimmed, { ...gift, isPending: pending, streakId: baseStreakId, lastUpdated: now }];
     });
   }, []);
 
