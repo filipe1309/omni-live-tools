@@ -2,7 +2,7 @@
 
 # Script to update package version based on commit history
 # Follows Conventional Commits specification for semantic versioning
-# Usage: ./scripts/update-version.sh [--since DATE] [--dry-run] [--no-tag] [--changelog] [--yes]
+# Usage: ./scripts/update-version.sh [--since DATE] [--dry-run] [--no-tag] [--changelog] [--commit] [--yes]
 
 set -e
 
@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: $0 [--since DATE] [--dry-run] [--no-tag] [--changelog] [--yes]"
+      echo "Usage: $0 [--since DATE] [--dry-run] [--no-tag] [--changelog] [--commit] [--yes]"
       echo ""
       echo "Options:"
       echo "  --since DATE   Analyze commits since DATE (e.g., '2026-02-16' or 'yesterday')"
@@ -57,7 +57,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --dry-run      Show what would be done without making changes"
       echo "  --no-tag       Skip creating a git tag for the new version"
       echo "  --changelog    Update CHANGELOG.md after creating the tag"
-      echo "  --commit       Auto-commit package.json and CHANGELOG.md after updates"
+      echo "  --commit       Auto-commit package.json and CHANGELOG.md, then push to remote"
       echo "  --yes, -y      Skip confirmation prompt"
       echo "  -h, --help     Show this help message"
       exit 0
