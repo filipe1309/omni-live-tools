@@ -13,27 +13,26 @@ export function GiftCard({ gift, isPending = false }: GiftCardProps) {
   const { t } = useLanguage();
 
   return (
-    <div className="flex items-start gap-3 py-3 px-4 bg-slate-700/50 rounded-lg animate-slide-up">
-      <ProfilePicture src={gift.profilePictureUrl} size="md" />
+    <div className="flex items-start gap-2 py-2 px-3 bg-slate-700/50 rounded-lg animate-slide-up">
+      <ProfilePicture src={gift.profilePictureUrl} size="sm" />
       
       <div className="flex-1 min-w-0">
-        <div className="font-medium mb-1">
+        <div className="font-medium text-sm mb-0.5">
           <Username uniqueId={gift.uniqueId} />
         </div>
-        <p className="text-slate-300 text-sm mb-2">{gift.describe}</p>
+        <p className="text-slate-300 text-xs mb-1 truncate">{gift.describe}</p>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <img 
             src={gift.giftPictureUrl} 
             alt={gift.giftName}
-            className="w-12 h-12 object-contain"
+            className="w-8 h-8 object-contain"
           />
           
-          <div className="text-sm">
-            <div className="text-white">
+          <div className="text-xs">
+            <div className="text-white truncate">
               <span className="text-slate-400">{t.chat.giftName}</span>{' '}
               <span className="font-bold">{gift.giftName}</span>
-              <span className="text-slate-500 ml-1">(ID:{gift.giftId})</span>
             </div>
             <div>
               <span className="text-slate-400">{t.chat.giftRepeat}</span>{' '}

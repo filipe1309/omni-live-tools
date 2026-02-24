@@ -244,4 +244,19 @@ export const en: TranslationKeys = {
     portuguese: 'Português',
     english: 'English',
   },
+
+  // OBS Overlay
+  obsOverlay: {
+    sent: 'sent',
+    joined: 'joined',
+    connecting: 'Connecting...',
+    connectedToRoom: 'Connected to roomId {roomId}',
+    connectedToChannel: 'Connected to {channel}',
+    streamEndedReconnecting: 'Stream ended. Reconnecting in 30s...',
+    reconnecting: 'Reconnecting...',
+    noUsernameOrChannel: 'No username or channel provided in URL',
+    viewers: 'Viewers:',
+    likes: 'Likes:',
+    earnedDiamonds: 'Earned Diamonds:',
+  },
 };

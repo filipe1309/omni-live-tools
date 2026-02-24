@@ -242,6 +242,21 @@ export const ptBR = {
     portuguese: 'Português',
     english: 'English',
   },
+
+  // OBS Overlay
+  obsOverlay: {
+    sent: 'enviou',
+    joined: 'entrou',
+    connecting: 'Conectando...',
+    connectedToRoom: 'Conectado ao roomId {roomId}',
+    connectedToChannel: 'Conectado a {channel}',
+    streamEndedReconnecting: 'Transmissão encerrada. Reconectando em 30s...',
+    reconnecting: 'Reconectando...',
+    noUsernameOrChannel: 'Nenhum usuário ou canal fornecido na URL',
+    viewers: 'Espectadores:',
+    likes: 'Curtidas:',
+    earnedDiamonds: 'Diamantes Ganhos:',
+  },
 };
 
 // Define type without literal strings to allow different translations

@@ -323,9 +323,14 @@ export function ChatPage () {
     );
   };
 
-  // Calculate grid columns based on visible panels
-  const visiblePanels = 1 + (queueVisible ? 1 : 0) + (giftVisible ? 1 : 0);
-  const gridClass = visiblePanels === 3 ? 'lg:grid-cols-3' : visiblePanels === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-1';
+  // Calculate grid columns based on visible panels (chat & queue wider, gift thinner)
+  const getGridClass = () => {
+    if (queueVisible && giftVisible) return 'lg:grid-cols-[2fr_2fr_1fr]'; // Chat 40%, Queue 40%, Gift 20%
+    if (queueVisible) return 'lg:grid-cols-2'; // Chat 50%, Queue 50%
+    if (giftVisible) return 'lg:grid-cols-[2fr_1fr]'; // Chat 67%, Gift 33%
+    return 'lg:grid-cols-1'; // Chat only
+  };
+  const gridClass = getGridClass();
 
   return (
     <div className="min-h-screen w-full bg-chat-gradient">
