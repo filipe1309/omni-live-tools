@@ -87,6 +87,14 @@ interface UseMultiPlatformConnectionReturn {
   // Combined state
   isAnyConnected: boolean;
   connectedPlatforms: PlatformType[];
+  // Chat relay methods for overlay communication
+  joinChatRelay: () => void;
+  leaveChatRelay: () => void;
+  emitChatRelay: (data: unknown) => void;
+  onChatRelayUpdate: (callback: (data: unknown) => void) => () => void;
+  // Platform events room - allows overlay to receive events from any connected platform
+  joinPlatformEvents: () => void;
+  leavePlatformEvents: () => void;
 }
 
 /**
@@ -520,6 +528,38 @@ export function useMultiPlatformConnection (
   if (twitchConnected) connectedPlatforms.push('twitch' as PlatformType);
   if (youtubeConnected) connectedPlatforms.push('youtube' as PlatformType);
 
+  // Chat relay methods for overlay communication
+  const joinChatRelay = useCallback(() => {
+    socketRef.current?.emit('join-chat-relay');
+  }, []);
+
+  const leaveChatRelay = useCallback(() => {
+    socketRef.current?.emit('leave-chat-relay');
+  }, []);
+
+  const emitChatRelay = useCallback((data: unknown) => {
+    socketRef.current?.emit('relay-chat-update', data);
+  }, []);
+
+  const onChatRelayUpdate = useCallback((callback: (data: unknown) => void) => {
+    const socket = socketRef.current;
+    if (!socket) return () => {};
+    
+    socket.on('chat-relay-update', callback);
+    return () => {
+      socket.off('chat-relay-update', callback);
+    };
+  }, []);
+
+  // Platform events room methods - allows overlay to receive events from any connected platform
+  const joinPlatformEvents = useCallback(() => {
+    socketRef.current?.emit('join-platform-events');
+  }, []);
+
+  const leavePlatformEvents = useCallback(() => {
+    socketRef.current?.emit('leave-platform-events');
+  }, []);
+
   return {
     tiktok: {
       ...tiktokState,
@@ -541,5 +581,11 @@ export function useMultiPlatformConnection (
     },
     isAnyConnected: tiktokConnected || twitchConnected || youtubeConnected,
     connectedPlatforms,
+    joinChatRelay,
+    leaveChatRelay,
+    emitChatRelay,
+    onChatRelayUpdate,
+    joinPlatformEvents,
+    leavePlatformEvents,
   };
 }

@@ -123,6 +123,9 @@ export const ptBR = {
   overlay: {
     title: 'Gerar URL do Overlay',
     description: 'Crie uma URL de overlay personalizada para usar no OBS, Streamlabs ou outros softwares de streaming. O overlay conectará automaticamente e exibirá eventos do TikTok LIVE, Twitch e/ou YouTube Live.',
+    connectionMode: 'Modo de Conexão',
+    useAppConnection: 'Usar Conexão do App',
+    useAppConnectionDesc: 'Reutiliza conexões existentes do app principal (sem reconectar)',
     includePlatforms: 'Incluir Plataformas',
     noPlatformsConnected: 'Nenhuma plataforma conectada. Conecte-se a uma plataforma primeiro para gerar a URL do overlay.',
     tiktokUser: 'Usuário do TikTok',
@@ -268,6 +271,7 @@ export const ptBR = {
     connectedToVideo: 'Conectado ao vídeo {videoId}',
     streamEndedReconnecting: 'Transmissão encerrada. Reconectando em 30s...',
     reconnecting: 'Reconectando...',
+    receivingFromApp: 'Recebendo do app...',
     noUsernameOrChannel: 'Nenhum usuário ou canal fornecido na URL',
     viewers: 'Espectadores:',
     likes: 'Curtidas:',

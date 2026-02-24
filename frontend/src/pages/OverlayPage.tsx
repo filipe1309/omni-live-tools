@@ -27,6 +27,7 @@ export function OverlayPage () {
   const [includeTikTok, setIncludeTikTok] = useState(true);
   const [includeTwitch, setIncludeTwitch] = useState(true);
   const [includeYouTube, setIncludeYouTube] = useState(true);
+  const [useAppConnection, setUseAppConnection] = useState(true); // Reuse app connections by default
 
   const [settings, setSettings] = useState({
     showChats: true,
@@ -58,7 +59,29 @@ export function OverlayPage () {
   const baseUrl = window.location.origin;
 
   const generateUrl = () => {
-    // Require at least one platform enabled
+    // When using app connection, we don't need platform credentials
+    if (useAppConnection) {
+      const params = new URLSearchParams();
+      params.set('useAppConnection', '1');
+      
+      params.set('showChats', settings.showChats ? '1' : '0');
+      params.set('showGifts', settings.showGifts ? '1' : '0');
+      params.set('showLikes', settings.showLikes ? '1' : '0');
+      params.set('showJoins', settings.showJoins ? '1' : '0');
+      params.set('showFollows', settings.showFollows ? '1' : '0');
+      params.set('showShares', settings.showShares ? '1' : '0');
+
+      // Convert hex colors to rgb format for OBS compatibility
+      const bgRgb = hexToRgb(bgColor);
+      const fontRgb = hexToRgb(fontColor);
+      params.set('bgColor', `rgb(${bgRgb.r},${bgRgb.g},${bgRgb.b})`);
+      params.set('fontColor', `rgb(${fontRgb.r},${fontRgb.g},${fontRgb.b})`);
+      params.set('fontSize', fontSize);
+
+      return `${baseUrl}/obs?${params.toString()}`;
+    }
+
+    // Direct connection mode - require at least one platform enabled
     if (!useTikTok && !useTwitch && !useYouTube) return '';
 
     const params = new URLSearchParams();
@@ -99,7 +122,7 @@ export function OverlayPage () {
   };
 
   const overlayUrl = generateUrl();
-  const hasValidInput = useTikTok || useTwitch || useYouTube;
+  const hasValidInput = useAppConnection || useTikTok || useTwitch || useYouTube;
 
   const copyToClipboard = () => {
     if (overlayUrl) {
@@ -120,8 +143,30 @@ export function OverlayPage () {
           </p>
 
           <div className="space-y-6">
-            {/* Connected Platforms Toggles */}
-            {hasAnyConnected ? (
+            {/* Connection Mode Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-3">
+                {t.overlay.connectionMode || 'Connection Mode'}
+              </label>
+              <label className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors">
+                <div className="flex flex-col">
+                  <span className="text-white">{t.overlay.useAppConnection || 'Use App Connection'}</span>
+                  <span className="text-slate-400 text-xs">{t.overlay.useAppConnectionDesc || 'Reuses existing connections from main app (no reconnecting)'}</span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={useAppConnection}
+                  onClick={() => setUseAppConnection(!useAppConnection)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ml-3 ${useAppConnection ? 'bg-tiktok-cyan' : 'bg-slate-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${useAppConnection ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </label>
+            </div>
+
+            {/* Connected Platforms Toggles - only show when not using app connection */}
+            {!useAppConnection && hasAnyConnected ? (
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-3">
                   {t.overlay.includePlatforms || 'Include Platforms'}
@@ -180,13 +225,13 @@ export function OverlayPage () {
                   )}
                 </div>
               </div>
-            ) : (
+            ) : !useAppConnection ? (
               <div className="p-4 bg-slate-700/50 rounded-lg text-center">
                 <p className="text-slate-400">
                   {t.overlay.noPlatformsConnected || 'No platforms connected. Connect to a platform first to generate an overlay URL.'}
                 </p>
               </div>
-            )}
+            ) : null}
 
             {/* Settings Toggles */}
             <div>

@@ -72,7 +72,19 @@ export function ChatPage () {
   const { featuredMessageId, setFeaturedMessage, clearFeaturedMessage } = useFeaturedMessage();
   const { broadcastChatItems, broadcastGifts, broadcastQueueItems, broadcastFeaturedMessageId, setActionHandlers } = useChatBroadcaster();
 
-  // Broadcast data to pop-out windows
+  // Get connection context
+  const {
+    tiktok,
+    registerTikTokChatHandler,
+    registerGiftHandler,
+    registerLikeHandler,
+    registerMemberHandler,
+    registerSocialHandler,
+    registerTwitchChatHandler,
+    registerYouTubeChatHandler,
+  } = useConnectionContext();
+
+  // Broadcast data to pop-out windows via BroadcastChannel
   useEffect(() => {
     broadcastChatItems(chatItems);
   }, [chatItems, broadcastChatItems]);
@@ -150,17 +162,6 @@ export function ChatPage () {
       onRemoveFromQueue: removeFromQueue,
     });
   }, [setActionHandlers, addToQueue, sendToOverlayFromChat, removeFromQueue]);
-
-  const {
-    tiktok,
-    registerTikTokChatHandler,
-    registerGiftHandler,
-    registerLikeHandler,
-    registerMemberHandler,
-    registerSocialHandler,
-    registerTwitchChatHandler,
-    registerYouTubeChatHandler,
-  } = useConnectionContext();
 
   // Add chat item helper
   const addChatItem = useCallback((

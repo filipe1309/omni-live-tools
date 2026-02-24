@@ -54,6 +54,7 @@ export function ObsOverlayPage () {
 
   // Parse settings from URL
   const platformsParam = searchParams.get('platforms');
+  const useAppConnection = searchParams.get('useAppConnection') === '1';
   const settings: Settings = {
     platforms: platformsParam ? platformsParam.split(',') : ['tiktok'],
     username: searchParams.get('username') || '',
@@ -269,8 +270,24 @@ export function ObsOverlayPage () {
     },
   });
 
-  // Auto-connect to TikTok when username is provided
+  // Join platform-events room when using app connection mode
+  // This allows receiving events from platform connections made by the main app
   useEffect(() => {
+    if (!useAppConnection) return;
+
+    setConnectionState(t.obsOverlay.receivingFromApp || 'Receiving from app...');
+
+    // Join the platform events room to receive events from main app's connections
+    connection.joinPlatformEvents();
+
+    return () => {
+      connection.leavePlatformEvents();
+    };
+  }, [useAppConnection, connection, t]);
+
+  // Auto-connect to TikTok when username is provided (only in direct connection mode)
+  useEffect(() => {
+    if (useAppConnection) return; // Skip when using app connection
     if (showTikTok) {
       setConnectionState(prev => prev ? `${prev}\nTikTok: ${t.obsOverlay.connecting}` : `TikTok: ${t.obsOverlay.connecting}`);
       connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
@@ -307,6 +324,7 @@ export function ObsOverlayPage () {
 
   // Auto-connect to Twitch when channel is provided
   useEffect(() => {
+    if (useAppConnection) return; // Skip when using app connection
     if (showTwitch) {
       setConnectionState(prev => prev ? `${prev}\nTwitch: ${t.obsOverlay.connecting}` : `Twitch: ${t.obsOverlay.connecting}`);
       connection.twitch.connect(settings.channel)
@@ -341,6 +359,7 @@ export function ObsOverlayPage () {
 
   // Auto-connect to YouTube when videoId is provided
   useEffect(() => {
+    if (useAppConnection) return; // Skip when using app connection
     if (showYouTube) {
       setConnectionState(prev => prev ? `${prev}\nYouTube: ${t.obsOverlay.connecting}` : `YouTube: ${t.obsOverlay.connecting}`);
       connection.youtube.connect(settings.videoId)
@@ -375,6 +394,7 @@ export function ObsOverlayPage () {
 
   // Handle TikTok stream end reconnection
   useEffect(() => {
+    if (useAppConnection) return; // Skip when using app connection
     if (showTikTok && connection.tiktok.status === 'disconnected' && connectionState.includes('TikTok:')) {
       setConnectionState(prev => {
         const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
@@ -408,7 +428,8 @@ export function ObsOverlayPage () {
     }
   }, [connection.tiktok.status, settings.username, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!showTikTok && !showTwitch && !showYouTube) {
+  // Show error only in direct connection mode without any platform configured
+  if (!useAppConnection && !showTikTok && !showTwitch && !showYouTube) {
     return (
       <div
         className="flex items-center justify-center h-screen"

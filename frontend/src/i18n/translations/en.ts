@@ -125,6 +125,9 @@ export const en: TranslationKeys = {
   overlay: {
     title: 'Generate Overlay URL',
     description: 'Create a customized overlay URL for use with OBS, Streamlabs or other streaming software. The overlay will automatically connect and display events from TikTok LIVE, Twitch, and/or YouTube Live streams.',
+    connectionMode: 'Connection Mode',
+    useAppConnection: 'Use App Connection',
+    useAppConnectionDesc: 'Reuses existing connections from main app (no reconnecting)',
     includePlatforms: 'Include Platforms',
     noPlatformsConnected: 'No platforms connected. Connect to a platform first to generate an overlay URL.',
     tiktokUser: 'TikTok Username',
@@ -270,6 +273,7 @@ export const en: TranslationKeys = {
     connectedToVideo: 'Connected to video {videoId}',
     streamEndedReconnecting: 'Stream ended. Reconnecting in 30s...',
     reconnecting: 'Reconnecting...',
+    receivingFromApp: 'Receiving from app...',
     noUsernameOrChannel: 'No username or channel provided in URL',
     viewers: 'Viewers:',
     likes: 'Likes:',

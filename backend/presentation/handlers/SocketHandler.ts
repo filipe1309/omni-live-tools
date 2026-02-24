@@ -67,6 +67,15 @@ export class SocketHandler {
     this.socket.on(SocketEventType.SET_YOUTUBE_VIDEO, this.handleSetYouTubeVideo.bind(this));
     this.socket.on('disconnectYouTube', this.handleDisconnectYouTube.bind(this));
     this.socket.on('disconnect', this.handleDisconnect.bind(this));
+
+    // Chat relay handlers for overlay communication
+    this.socket.on('join-chat-relay', this.handleJoinChatRelay.bind(this));
+    this.socket.on('leave-chat-relay', this.handleLeaveChatRelay.bind(this));
+    this.socket.on('relay-chat-update', this.handleRelayChatUpdate.bind(this));
+    
+    // Platform events room - allows overlay to receive events from any connected platform
+    this.socket.on('join-platform-events', this.handleJoinPlatformEvents.bind(this));
+    this.socket.on('leave-platform-events', this.handleLeavePlatformEvents.bind(this));
   }
 
   /**
@@ -104,6 +113,47 @@ export class SocketHandler {
       this.youtubeWrapper.disconnect();
       this.youtubeWrapper = null;
     }
+  }
+
+  /**
+   * Handle join-chat-relay event - overlay joins the relay room
+   */
+  private handleJoinChatRelay(): void {
+    console.info('Client joining chat-relay room');
+    this.socket.join('chat-relay');
+  }
+
+  /**
+   * Handle leave-chat-relay event - overlay leaves the relay room
+   */
+  private handleLeaveChatRelay(): void {
+    console.info('Client leaving chat-relay room');
+    this.socket.leave('chat-relay');
+  }
+
+  /**
+   * Handle relay-chat-update event - main app broadcasts chat items to overlays
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleRelayChatUpdate(data: any): void {
+    // Broadcast to all clients in the chat-relay room except sender
+    this.socket.to('chat-relay').emit('chat-relay-update', data);
+  }
+
+  /**
+   * Handle join-platform-events event - overlay joins room to receive platform events
+   */
+  private handleJoinPlatformEvents(): void {
+    console.info('Client joining platform-events room');
+    this.socket.join('platform-events');
+  }
+
+  /**
+   * Handle leave-platform-events event - overlay leaves the platform events room
+   */
+  private handleLeavePlatformEvents(): void {
+    console.info('Client leaving platform-events room');
+    this.socket.leave('platform-events');
   }
 
   /**
@@ -243,6 +293,8 @@ export class SocketHandler {
     // Control events (once)
     this.connectionWrapper.once('connected', (state) => {
       this.socket.emit(SocketEventType.TIKTOK_CONNECTED, state);
+      // Also broadcast to platform-events room
+      this.socket.to('platform-events').emit(SocketEventType.TIKTOK_CONNECTED, state);
     });
 
     // Get underlying connection for message events
@@ -251,6 +303,7 @@ export class SocketHandler {
     // Stream end event
     connection.on(TikTokEventType.STREAM_END, () => {
       this.socket.emit(SocketEventType.STREAM_END);
+      this.socket.to('platform-events').emit(SocketEventType.STREAM_END);
     });
 
     // Forward all TikTok message events
@@ -273,6 +326,8 @@ export class SocketHandler {
     for (const event of messageEvents) {
       connection.on(event, (msg: unknown) => {
         this.socket.emit(event, msg);
+        // Also broadcast to platform-events room
+        this.socket.to('platform-events').emit(event, msg);
       });
     }
   }
@@ -286,19 +341,20 @@ export class SocketHandler {
     // Control events (once)
     this.tikfinityWrapper.once('connected', (state) => {
       console.info('Connected via TikFinity fallback');
-      this.socket.emit(SocketEventType.TIKTOK_CONNECTED, {
-        ...state,
-        fallback: 'tikfinity',
-      });
+      const stateWithFallback = { ...state, fallback: 'tikfinity' };
+      this.socket.emit(SocketEventType.TIKTOK_CONNECTED, stateWithFallback);
+      this.socket.to('platform-events').emit(SocketEventType.TIKTOK_CONNECTED, stateWithFallback);
     });
 
     this.tikfinityWrapper.once('disconnected', (reason) => {
       this.socket.emit(SocketEventType.TIKTOK_DISCONNECTED, reason);
+      this.socket.to('platform-events').emit(SocketEventType.TIKTOK_DISCONNECTED, reason);
     });
 
     // Stream end event
     this.tikfinityWrapper.on(TikTokEventType.STREAM_END, () => {
       this.socket.emit(SocketEventType.STREAM_END);
+      this.socket.to('platform-events').emit(SocketEventType.STREAM_END);
     });
 
     // Forward all TikTok message events
@@ -321,6 +377,7 @@ export class SocketHandler {
     for (const event of messageEvents) {
       this.tikfinityWrapper.on(event, (msg: unknown) => {
         this.socket.emit(event, msg);
+        this.socket.to('platform-events').emit(event, msg);
       });
     }
   }
@@ -373,10 +430,12 @@ export class SocketHandler {
       // Handle connection events
       this.twitchWrapper.once('connected', (state) => {
         this.socket.emit(SocketEventType.TWITCH_CONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.TWITCH_CONNECTED, state);
       });
 
       this.twitchWrapper.once('disconnected', (reason: string) => {
         this.socket.emit(SocketEventType.TWITCH_DISCONNECTED, reason);
+        this.socket.to('platform-events').emit(SocketEventType.TWITCH_DISCONNECTED, reason);
       });
 
       // Connect
@@ -399,19 +458,23 @@ export class SocketHandler {
     // Forward chat messages as twitch-specific event (not unified 'chat' to avoid collision with TikTok)
     this.twitchWrapper.on('chat', (msg: UnifiedChatMessage) => {
       this.socket.emit('twitchChat', msg);
+      this.socket.to('platform-events').emit('twitchChat', msg);
     });
 
     // Forward subscription events (optional)
     this.twitchWrapper.on('sub', (data: unknown) => {
       this.socket.emit('twitchSub', data);
+      this.socket.to('platform-events').emit('twitchSub', data);
     });
 
     this.twitchWrapper.on('resub', (data: unknown) => {
       this.socket.emit('twitchResub', data);
+      this.socket.to('platform-events').emit('twitchResub', data);
     });
 
     this.twitchWrapper.on('raid', (data: unknown) => {
       this.socket.emit('twitchRaid', data);
+      this.socket.to('platform-events').emit('twitchRaid', data);
     });
   }
 
@@ -463,10 +526,12 @@ export class SocketHandler {
       // Handle connection events
       this.youtubeWrapper.once('connected', (state) => {
         this.socket.emit(SocketEventType.YOUTUBE_CONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.YOUTUBE_CONNECTED, state);
       });
 
       this.youtubeWrapper.once('disconnected', (reason: string) => {
         this.socket.emit(SocketEventType.YOUTUBE_DISCONNECTED, reason);
+        this.socket.to('platform-events').emit(SocketEventType.YOUTUBE_DISCONNECTED, reason);
       });
 
       // Connect
@@ -489,21 +554,25 @@ export class SocketHandler {
     // Forward chat messages
     this.youtubeWrapper.on('chat', (msg: UnifiedChatMessage) => {
       this.socket.emit('youtubeChat', msg);
+      this.socket.to('platform-events').emit('youtubeChat', msg);
     });
 
     // Forward Super Chat events
     this.youtubeWrapper.on('superchat', (data: unknown) => {
       this.socket.emit('youtubeSuperchat', data);
+      this.socket.to('platform-events').emit('youtubeSuperchat', data);
     });
 
     // Forward membership events
     this.youtubeWrapper.on('member', (data: unknown) => {
       this.socket.emit('youtubeMember', data);
+      this.socket.to('platform-events').emit('youtubeMember', data);
     });
 
     // Forward stream end event
     this.youtubeWrapper.on('streamEnd', () => {
       this.socket.emit('youtubeStreamEnd');
+      this.socket.to('platform-events').emit('youtubeStreamEnd');
     });
   }
 

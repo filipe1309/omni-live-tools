@@ -76,6 +76,11 @@ interface ConnectionContextType {
   registerDisconnectHandler: (handler: (platform: PlatformType) => void) => () => void;
   registerSocketReconnectHandler: (handler: () => void) => () => void;
   registerStreamEndHandler: (handler: () => void) => () => void;
+  // Chat relay for overlay communication
+  joinChatRelay: () => void;
+  leaveChatRelay: () => void;
+  emitChatRelay: (data: unknown) => void;
+  onChatRelayUpdate: (callback: (data: unknown) => void) => () => void;
 }
 
 const ConnectionContext = createContext<ConnectionContextType | undefined>(undefined);
@@ -423,6 +428,10 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     registerDisconnectHandler,
     registerSocketReconnectHandler,
     registerStreamEndHandler,
+    joinChatRelay: connection.joinChatRelay,
+    leaveChatRelay: connection.leaveChatRelay,
+    emitChatRelay: connection.emitChatRelay,
+    onChatRelayUpdate: connection.onChatRelayUpdate,
   };
 
   return (

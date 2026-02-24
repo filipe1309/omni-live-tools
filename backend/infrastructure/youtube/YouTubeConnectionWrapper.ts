@@ -377,18 +377,8 @@ export class YouTubeConnectionWrapper extends EventEmitter {
     const author = item.author;
     const message = item.message?.toString() || '';
 
-    // Debug: log author object to understand structure
-    if (this.enableLog) {
-      this.log(`[DEBUG] Author object keys: ${author ? Object.keys(author).join(', ') : 'null'}`);
-      this.log(`[DEBUG] Author: is_member=${author?.is_member}, membership=${author?.membership}, badges=${JSON.stringify(author?.badges)}`);
-    }
-
     // Check membership from multiple sources
     const isMember = this.checkMemberStatus(author);
-    
-    if (this.enableLog) {
-      this.log(`[DEBUG] isMember result: ${isMember}`);
-    }
 
     const youtubeUser = createYouTubeUser({
       odlUserId: author?.id || '',
