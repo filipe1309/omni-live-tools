@@ -30,10 +30,13 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 
 - 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, and YouTube Live instantly
 - 📋 **Message Queue** - Add messages to a reading queue with one click for easy management during streams
-- � **Featured Message Overlay** - Send messages to a dedicated overlay window for OBS with pop-out support
-- �🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
-- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports both platforms)
-- 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with enhanced Twitch integration
+- ⭐ **Featured Message Overlay** - Send messages to a dedicated overlay window for OBS with pop-out support
+- 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
+- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports all platforms)
+- 📊 **Poll Profiles** - Save and load poll configurations with auto-save functionality
+- 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with pop-out windows for chat, gifts, and queue
+- 🎁 **Gift Tracking** - Real-time gift display with streak tracking and timeout handling
+- 👁️ **Customizable Visibility** - Toggle queue and gift panels on/off with persistent settings
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
 - 🌍 **Multi-language Support** - Available in Portuguese (PT-BR) and English (EN) with in-app language selector
 - 🏗️ **Clean Architecture** - Well-structured TypeScript codebase
@@ -92,6 +95,10 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 - **One vote per user per platform** - Each viewer can only vote once per poll per platform
 - **Real-time results** - Vote counts and percentages update instantly
 - **Platform badges** - Visual indicators show which platform each vote came from
+- **Poll profiles** - Save and load poll configurations with auto-save and localStorage support
+- **Autocomplete options** - Recent poll options are suggested as you type
+- **Inline editing** - Double-click to edit poll questions and options directly
+- **Configurable options** - Support for 2-6 poll options (default: 4)
 - **Vote logging** - Optional detailed log of each vote with platform info
 - **Timer display** - Countdown shows remaining time with glitch animation effects
 - **Notification sounds** - Audio feedback when votes are received
@@ -118,10 +125,12 @@ The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live i
 - **Multi-platform support** - Connect to TikTok, Twitch, and YouTube simultaneously
 - **Message queue** - Hover over any message to add it to a reading queue; easily manage which messages to read
 - **Featured message overlay** - Click the broadcast icon to send a message to a dedicated OBS overlay window
-- **Pop-out overlay window** - Click "Overlay" button to open the featured message display in a separate window
+- **Pop-out overlay windows** - Separate pop-out windows for chat, gifts, and queue for flexible OBS integration
 - **Smart auto-scroll** - Auto-scroll pauses when you scroll up to review messages, resumes when you scroll back down
 - **Search/filter messages** - Quickly find messages by content, username, or nickname
 - **SuperChat highlighting** - YouTube SuperChats are highlighted with a golden background and auto-added to queue
+- **Gift tracking with streaks** - Real-time gift display with streak tracking and timeout handling
+- **Toggle visibility** - Show/hide queue and gift panels with persistent localStorage settings
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
 - **OBS overlay** - Dedicated page optimized for streaming software with enhanced Twitch integration
 - **Rate limiting** - Protect against excessive requests
