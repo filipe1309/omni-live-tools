@@ -219,7 +219,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                     disabled={tiktok.status === 'connecting' || (!tiktok.username.trim() && tiktok.status !== 'connected')}
                     className={`px-4 py-2 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${tiktok.status === 'connected'
                       ? 'bg-red-600 text-white hover:bg-red-500'
-                      : 'bg-tiktok-cyan text-black hover:bg-tiktok-cyan/80'
+                      : 'bg-[#69d2e7] text-slate-900 hover:bg-[#5bc0d5]'
                       }`}
                   >
                     {tiktok.status === 'connecting' ? '...' : tiktok.status === 'connected' ? t.common.disconnect : t.common.connect}
@@ -264,7 +264,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                     disabled={twitch.status === 'connecting' || (!twitch.channelName.trim() && twitch.status !== 'connected')}
                     className={`px-4 py-2 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${twitch.status === 'connected'
                       ? 'bg-red-600 text-white hover:bg-red-500'
-                      : 'bg-purple-600 text-white hover:bg-purple-500'
+                      : 'bg-[#b19cd9] text-slate-900 hover:bg-[#a388ee]'
                       }`}
                   >
                     {twitch.status === 'connecting' ? '...' : twitch.status === 'connected' ? t.common.disconnect : t.common.connect}
@@ -309,7 +309,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                     disabled={youtube.status === 'connecting' || (!youtube.videoInput.trim() && youtube.status !== 'connected')}
                     className={`px-4 py-2 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${youtube.status === 'connected'
                       ? 'bg-red-600 text-white hover:bg-red-500'
-                      : 'bg-red-600 text-white hover:bg-red-500'
+                      : 'bg-[#ee6055] text-white hover:bg-[#e04d42]'
                       }`}
                   >
                     {youtube.status === 'connecting' ? '...' : youtube.status === 'connected' ? t.common.disconnect : t.common.connect}
