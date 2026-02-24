@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLanguage } from '@/i18n';
-import { PlatformSelector } from '@/components';
 import { useConnectionContext } from '@/hooks';
 import { PlatformType } from '@/types';
 
@@ -17,15 +16,18 @@ function hexToRgb (hex: string): { r: number; g: number; b: number } {
 
 export function OverlayPage () {
   const { t } = useLanguage();
-  const { tiktok, twitch, youtube, selectedPlatforms: connectedPlatforms } = useConnectionContext();
+  const { tiktok, twitch, youtube } = useConnectionContext();
 
-  // Pre-fill with connected values, but allow user to modify
-  const [selectedPlatforms, setSelectedPlatforms] = useState<PlatformType[]>(() =>
-    connectedPlatforms.length > 0 ? connectedPlatforms : [PlatformType.TIKTOK]
-  );
-  const [tiktokUsername, setTiktokUsername] = useState(() => tiktok.username || 'jamesbonfim');
-  const [twitchChannel, setTwitchChannel] = useState(() => twitch.channelName || '');
-  const [youtubeVideo, setYoutubeVideo] = useState(() => youtube.videoInput || '');
+  // Check which platforms are connected
+  const isTikTokConnected = tiktok.isConnected && tiktok.username;
+  const isTwitchConnected = twitch.isConnected && twitch.channelName;
+  const isYouTubeConnected = youtube.isConnected && youtube.videoInput;
+
+  // Toggles for each connected platform
+  const [includeTikTok, setIncludeTikTok] = useState(true);
+  const [includeTwitch, setIncludeTwitch] = useState(true);
+  const [includeYouTube, setIncludeYouTube] = useState(true);
+
   const [settings, setSettings] = useState({
     showChats: true,
     showGifts: true,
@@ -39,9 +41,12 @@ export function OverlayPage () {
   const [fontSize, setFontSize] = useState('1.3em');
   const [copied, setCopied] = useState(false);
 
-  const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
-  const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
-  const showYouTube = selectedPlatforms.includes(PlatformType.YOUTUBE);
+  // Determine which platforms to include based on connection and toggle state
+  const useTikTok = isTikTokConnected && includeTikTok;
+  const useTwitch = isTwitchConnected && includeTwitch;
+  const useYouTube = isYouTubeConnected && includeYouTube;
+
+  const hasAnyConnected = isTikTokConnected || isTwitchConnected || isYouTubeConnected;
 
   const FONT_SIZE_OPTIONS = [
     { value: '1em', label: `${t.overlay.fontSizes.small} (1em)` },
@@ -53,26 +58,27 @@ export function OverlayPage () {
   const baseUrl = window.location.origin;
 
   const generateUrl = () => {
-    // Require at least one platform with a valid identifier
-    const hasTikTok = showTikTok && tiktokUsername.trim();
-    const hasTwitch = showTwitch && twitchChannel.trim();
-    const hasYouTube = showYouTube && youtubeVideo.trim();
-
-    if (!hasTikTok && !hasTwitch && !hasYouTube) return '';
+    // Require at least one platform enabled
+    if (!useTikTok && !useTwitch && !useYouTube) return '';
 
     const params = new URLSearchParams();
 
-    // Platform selection
-    params.set('platforms', selectedPlatforms.join(','));
+    // Build platform selection from toggles
+    const platforms: PlatformType[] = [];
+    if (useTikTok) platforms.push(PlatformType.TIKTOK);
+    if (useTwitch) platforms.push(PlatformType.TWITCH);
+    if (useYouTube) platforms.push(PlatformType.YOUTUBE);
 
-    if (hasTikTok) {
-      params.set('username', tiktokUsername);
+    params.set('platforms', platforms.join(','));
+
+    if (useTikTok) {
+      params.set('username', tiktok.username!);
     }
-    if (hasTwitch) {
-      params.set('channel', twitchChannel);
+    if (useTwitch) {
+      params.set('channel', twitch.channelName!);
     }
-    if (hasYouTube) {
-      params.set('videoId', youtubeVideo);
+    if (useYouTube) {
+      params.set('videoId', youtube.videoInput!);
     }
 
     params.set('showChats', settings.showChats ? '1' : '0');
@@ -93,7 +99,7 @@ export function OverlayPage () {
   };
 
   const overlayUrl = generateUrl();
-  const hasValidInput = (showTikTok && tiktokUsername.trim()) || (showTwitch && twitchChannel.trim()) || (showYouTube && youtubeVideo.trim());
+  const hasValidInput = useTikTok || useTwitch || useYouTube;
 
   const copyToClipboard = () => {
     if (overlayUrl) {
@@ -114,59 +120,71 @@ export function OverlayPage () {
           </p>
 
           <div className="space-y-6">
-            {/* Platform Selector */}
-            <div>
-              <PlatformSelector
-                selectedPlatforms={selectedPlatforms}
-                onChange={setSelectedPlatforms}
-              />
-            </div>
-
-            {/* TikTok Username Input */}
-            {showTikTok && (
+            {/* Connected Platforms Toggles */}
+            {hasAnyConnected ? (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t.connection.tiktokUser}
+                <label className="block text-sm font-medium text-slate-300 mb-3">
+                  {t.overlay.includePlatforms || 'Include Platforms'}
                 </label>
-                <input
-                  type="text"
-                  value={tiktokUsername}
-                  onChange={(e) => setTiktokUsername(e.target.value)}
-                  placeholder={t.connection.userPlaceholder}
-                  className="input-field w-full"
-                />
+                <div className="space-y-2">
+                  {isTikTokConnected && (
+                    <label className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-cyan-400">TikTok</span>
+                        <span className="text-slate-400 text-sm">@{tiktok.username}</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={includeTikTok}
+                        onClick={() => setIncludeTikTok(!includeTikTok)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${includeTikTok ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${includeTikTok ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </label>
+                  )}
+                  {isTwitchConnected && (
+                    <label className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-purple-400">Twitch</span>
+                        <span className="text-slate-400 text-sm">{twitch.channelName}</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={includeTwitch}
+                        onClick={() => setIncludeTwitch(!includeTwitch)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${includeTwitch ? 'bg-purple-500' : 'bg-slate-600'}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${includeTwitch ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </label>
+                  )}
+                  {isYouTubeConnected && (
+                    <label className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg cursor-pointer hover:bg-slate-700 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-red-400">YouTube</span>
+                        <span className="text-slate-400 text-sm">{youtube.videoInput}</span>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={includeYouTube}
+                        onClick={() => setIncludeYouTube(!includeYouTube)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${includeYouTube ? 'bg-red-500' : 'bg-slate-600'}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${includeYouTube ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </label>
+                  )}
+                </div>
               </div>
-            )}
-
-            {/* Twitch Channel Input */}
-            {showTwitch && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t.connection.twitchChannel}
-                </label>
-                <input
-                  type="text"
-                  value={twitchChannel}
-                  onChange={(e) => setTwitchChannel(e.target.value)}
-                  placeholder={t.connection.channelPlaceholder}
-                  className="input-field w-full"
-                />
-              </div>
-            )}
-
-            {/* YouTube Video Input */}
-            {showYouTube && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  {t.connection.youtubeVideo}
-                </label>
-                <input
-                  type="text"
-                  value={youtubeVideo}
-                  onChange={(e) => setYoutubeVideo(e.target.value)}
-                  placeholder={t.connection.videoPlaceholder}
-                  className="input-field w-full"
-                />
+            ) : (
+              <div className="p-4 bg-slate-700/50 rounded-lg text-center">
+                <p className="text-slate-400">
+                  {t.overlay.noPlatformsConnected || 'No platforms connected. Connect to a platform first to generate an overlay URL.'}
+                </p>
               </div>
             )}
 
