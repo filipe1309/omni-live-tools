@@ -20,21 +20,21 @@ const sizeConfig = {
     padding: 'p-2',
     badge: 'w-10 h-10 text-lg',
     text: 'text-lg',
-    votes: 'text-lg',
+    votes: 'text-xs',
     percentText: 'text-lg',
   },
   normal: {
     padding: 'p-3',
     badge: 'w-12 h-12 text-2xl',
     text: 'text-2xl',
-    votes: 'text-2xl',
+    votes: 'text-sm',
     percentText: 'text-xl',
   },
   large: {
     padding: 'p-3',
     badge: 'w-14 h-14 text-3xl',
     text: 'text-3xl',
-    votes: 'text-3xl',
+    votes: 'text-base',
     percentText: 'text-2xl',
   },
 };
@@ -152,7 +152,7 @@ export function PollOptionCard ({
           >
             {percentageFixed}%
           </span>
-          <span className={`text-slate-400 ${config.votes} ml-2`}>({votes} {t.poll.votes})</span>
+          <span className={`text-slate-600 ${config.votes} ml-2`}>({votes} {t.poll.votes})</span>
         </div>
       </div>
 
