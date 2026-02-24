@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMultiPlatformConnection } from '@/hooks';
+import { useLanguage } from '@/i18n';
 import { ObsEventContainer } from '@/components/chat';
 import type { ChatItem, ChatMessage, GiftMessage, LikeMessage, MemberMessage, SocialMessage, RoomUserMessage, UnifiedChatMessage } from '@/types';
 
@@ -45,6 +46,7 @@ export function ObsOverlayPage () {
     diamondsCount: 0,
   });
   const [connectionState, setConnectionState] = useState<string>('');
+  const { t } = useLanguage();
 
   // Join message delay handling (matches public/app.js)
   const joinMsgDelayRef = useRef(0);
@@ -118,7 +120,7 @@ export function ObsOverlayPage () {
           ...updated[existingIndex],
           giftData: gift,
           isPendingStreak: pending,
-          content: `sent ${gift.giftName} x${gift.repeatCount}`,
+          content: `${t.obsOverlay.sent} ${gift.giftName} x${gift.repeatCount}`,
         };
         return updated;
       }
@@ -131,14 +133,14 @@ export function ObsOverlayPage () {
         id: generateId(),
         type: 'gift' as const,
         user: gift,
-        content: `sent ${gift.giftName} x${gift.repeatCount}`,
+        content: `${t.obsOverlay.sent} ${gift.giftName} x${gift.repeatCount}`,
         color: '#ffd700',
         timestamp: new Date(),
         giftData: gift,
         isPendingStreak: pending,
       }];
     });
-  }, []);
+  }, [t]);
 
   const connection = useMultiPlatformConnection({
     // TikTok Chat messages
@@ -215,7 +217,7 @@ export function ObsOverlayPage () {
 
       setTimeout(() => {
         joinMsgDelayRef.current -= addDelay;
-        addItem('member', msg, 'joined', '#21b2c2', true, 'tiktok');
+        addItem('member', msg, t.obsOverlay.joined, '#21b2c2', true, 'tiktok');
       }, addDelay > 0 ? joinMsgDelayRef.current - addDelay : 0);
     },
 
@@ -247,12 +249,12 @@ export function ObsOverlayPage () {
   // Auto-connect to TikTok when username is provided
   useEffect(() => {
     if (showTikTok) {
-      setConnectionState(prev => prev ? `${prev}\nTikTok: Connecting...` : 'TikTok: Connecting...');
+      setConnectionState(prev => prev ? `${prev}\nTikTok: ${t.obsOverlay.connecting}` : `TikTok: ${t.obsOverlay.connecting}`);
       connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
         .then((state) => {
           setConnectionState(prev => {
             const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
-            lines.push(`TikTok: Connected to roomId ${state.roomId}`);
+            lines.push(`TikTok: ${t.obsOverlay.connectedToRoom.replace('{roomId}', state.roomId)}`);
             return lines.join('\n');
           });
           // Reset stats on new connection
@@ -269,7 +271,7 @@ export function ObsOverlayPage () {
             setTimeout(() => {
               setConnectionState(prev => {
                 const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
-                lines.push('TikTok: Reconnecting...');
+                lines.push(`TikTok: ${t.obsOverlay.reconnecting}`);
                 return lines.join('\n');
               });
               connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
@@ -278,17 +280,17 @@ export function ObsOverlayPage () {
           }
         });
     }
-  }, [settings.username]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings.username, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-connect to Twitch when channel is provided
   useEffect(() => {
     if (showTwitch) {
-      setConnectionState(prev => prev ? `${prev}\nTwitch: Connecting...` : 'Twitch: Connecting...');
+      setConnectionState(prev => prev ? `${prev}\nTwitch: ${t.obsOverlay.connecting}` : `Twitch: ${t.obsOverlay.connecting}`);
       connection.twitch.connect(settings.channel)
         .then((state) => {
           setConnectionState(prev => {
             const lines = prev.split('\n').filter(l => !l.startsWith('Twitch:'));
-            lines.push(`Twitch: Connected to ${state.channel}`);
+            lines.push(`Twitch: ${t.obsOverlay.connectedToChannel.replace('{channel}', state.channel)}`);
             return lines.join('\n');
           });
         })
@@ -303,7 +305,7 @@ export function ObsOverlayPage () {
             setTimeout(() => {
               setConnectionState(prev => {
                 const lines = prev.split('\n').filter(l => !l.startsWith('Twitch:'));
-                lines.push('Twitch: Reconnecting...');
+                lines.push(`Twitch: ${t.obsOverlay.reconnecting}`);
                 return lines.join('\n');
               });
               connection.twitch.connect(settings.channel)
@@ -312,27 +314,27 @@ export function ObsOverlayPage () {
           }
         });
     }
-  }, [settings.channel]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings.channel, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle TikTok stream end reconnection
   useEffect(() => {
-    if (showTikTok && connection.tiktok.status === 'disconnected' && connectionState.includes('TikTok: Connected')) {
+    if (showTikTok && connection.tiktok.status === 'disconnected' && connectionState.includes('TikTok:')) {
       setConnectionState(prev => {
         const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
-        lines.push('TikTok: Stream ended. Reconnecting in 30s...');
+        lines.push(`TikTok: ${t.obsOverlay.streamEndedReconnecting}`);
         return lines.join('\n');
       });
       const timeout = setTimeout(() => {
         setConnectionState(prev => {
           const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
-          lines.push('TikTok: Connecting...');
+          lines.push(`TikTok: ${t.obsOverlay.connecting}`);
           return lines.join('\n');
         });
         connection.tiktok.connect(settings.username, { enableExtendedGiftInfo: true })
           .then((state) => {
             setConnectionState(prev => {
               const lines = prev.split('\n').filter(l => !l.startsWith('TikTok:'));
-              lines.push(`TikTok: Connected to roomId ${state.roomId}`);
+              lines.push(`TikTok: ${t.obsOverlay.connectedToRoom.replace('{roomId}', state.roomId)}`);
               return lines.join('\n');
             });
             setRoomStats({ viewerCount: 0, likeCount: 0, diamondsCount: 0 });
@@ -347,7 +349,7 @@ export function ObsOverlayPage () {
       }, 30000);
       return () => clearTimeout(timeout);
     }
-  }, [connection.tiktok.status, settings.username]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connection.tiktok.status, settings.username, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!showTikTok && !showTwitch) {
     return (
@@ -358,7 +360,7 @@ export function ObsOverlayPage () {
           color: settings.fontColor,
         }}
       >
-        No username or channel provided in URL
+        {t.obsOverlay.noUsernameOrChannel}
       </div>
     );
   }
@@ -383,9 +385,9 @@ export function ObsOverlayPage () {
             {showTikTok && (
               <td className="text-right align-top">
                 <div className="text-sm">
-                  Viewers: <strong className="mr-5">{roomStats.viewerCount.toLocaleString()}</strong>
-                  Likes: <strong className="mr-5">{roomStats.likeCount.toLocaleString()}</strong>
-                  Earned Diamonds: <strong>{roomStats.diamondsCount.toLocaleString()}</strong>
+                  {t.obsOverlay.viewers} <strong className="mr-5">{roomStats.viewerCount.toLocaleString()}</strong>
+                  {t.obsOverlay.likes} <strong className="mr-5">{roomStats.likeCount.toLocaleString()}</strong>
+                  {t.obsOverlay.earnedDiamonds} <strong>{roomStats.diamondsCount.toLocaleString()}</strong>
                 </div>
               </td>
             )}
