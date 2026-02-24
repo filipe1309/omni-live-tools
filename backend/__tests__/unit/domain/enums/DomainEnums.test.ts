@@ -77,14 +77,17 @@ describe('Domain Enums', () => {
       // TikTok events
       expect(SocketEventType.TIKTOK_CONNECTED).toBe('tiktokConnected');
       expect(SocketEventType.TIKTOK_DISCONNECTED).toBe('tiktokDisconnected');
+      expect(SocketEventType.TIKTOK_RECONNECTED).toBe('tiktokReconnected');
       expect(SocketEventType.SET_UNIQUE_ID).toBe('setUniqueId');
       // Twitch events
       expect(SocketEventType.TWITCH_CONNECTED).toBe('twitchConnected');
       expect(SocketEventType.TWITCH_DISCONNECTED).toBe('twitchDisconnected');
+      expect(SocketEventType.TWITCH_RECONNECTED).toBe('twitchReconnected');
       expect(SocketEventType.SET_TWITCH_CHANNEL).toBe('setTwitchChannel');
       // YouTube events
       expect(SocketEventType.YOUTUBE_CONNECTED).toBe('youtubeConnected');
       expect(SocketEventType.YOUTUBE_DISCONNECTED).toBe('youtubeDisconnected');
+      expect(SocketEventType.YOUTUBE_RECONNECTED).toBe('youtubeReconnected');
       expect(SocketEventType.SET_YOUTUBE_VIDEO).toBe('setYouTubeVideo');
       // Shared events
       expect(SocketEventType.STREAM_END).toBe('streamEnd');
@@ -94,7 +97,7 @@ describe('Domain Enums', () => {
 
     it('should have the correct number of socket event types', () => {
       const eventTypes = Object.values(SocketEventType);
-      expect(eventTypes).toHaveLength(12);
+      expect(eventTypes).toHaveLength(15);
     });
   });
 });

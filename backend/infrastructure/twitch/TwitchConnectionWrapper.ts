@@ -217,6 +217,8 @@ export class TwitchConnectionWrapper extends EventEmitter {
         });
 
         this.emit('connected', connectionState);
+      } else {
+        this.emit('reconnected', connectionState);
       }
 
       return connectionState;

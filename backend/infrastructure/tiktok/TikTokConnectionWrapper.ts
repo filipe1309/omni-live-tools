@@ -196,7 +196,9 @@ export class TikTokConnectionWrapper extends EventEmitter implements ITikTokConn
         isConnected: true,
       };
 
-      if (!isReconnect) {
+      if (isReconnect) {
+        this.emit('reconnected', connectionState);
+      } else {
         this.emit('connected', connectionState);
       }
 

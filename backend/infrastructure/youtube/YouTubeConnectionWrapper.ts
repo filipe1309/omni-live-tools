@@ -206,7 +206,9 @@ export class YouTubeConnectionWrapper extends EventEmitter {
         isConnected: true,
       };
 
-      if (!isReconnect) {
+      if (isReconnect) {
+        this.emit('reconnected', connectionState);
+      } else {
         this.emit('connected', connectionState);
       }
 

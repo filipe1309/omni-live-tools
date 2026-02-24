@@ -250,6 +250,15 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     onYouTubeStreamEnd: () => {
       streamEndHandlers.forEach(handler => handler());
     },
+    onTikTokReconnect: (_state) => {
+      toast.success(interpolate(t.toast.tiktokReconnected, { username: tiktokUsername }));
+    },
+    onTwitchReconnect: (state) => {
+      toast.success(interpolate(t.toast.twitchReconnected, { channel: state.channel }));
+    },
+    onYouTubeReconnect: (state) => {
+      toast.success(interpolate(t.toast.youtubeReconnected, { channel: state.channelName || state.videoId }));
+    },
   });
 
   // Persist settings

@@ -66,14 +66,17 @@ export enum SocketEventType {
   // TikTok events
   TIKTOK_CONNECTED = 'tiktokConnected',
   TIKTOK_DISCONNECTED = 'tiktokDisconnected',
+  TIKTOK_RECONNECTED = 'tiktokReconnected',
   SET_UNIQUE_ID = 'setUniqueId',
   // Twitch events
   TWITCH_CONNECTED = 'twitchConnected',
   TWITCH_DISCONNECTED = 'twitchDisconnected',
+  TWITCH_RECONNECTED = 'twitchReconnected',
   SET_TWITCH_CHANNEL = 'setTwitchChannel',
   // YouTube events
   YOUTUBE_CONNECTED = 'youtubeConnected',
   YOUTUBE_DISCONNECTED = 'youtubeDisconnected',
+  YOUTUBE_RECONNECTED = 'youtubeReconnected',
   SET_YOUTUBE_VIDEO = 'setYouTubeVideo',
   // Shared events
   STREAM_END = 'streamEnd',

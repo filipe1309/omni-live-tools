@@ -297,6 +297,12 @@ export class SocketHandler {
       this.socket.to('platform-events').emit(SocketEventType.TIKTOK_CONNECTED, state);
     });
 
+    // Handle reconnection events (can happen multiple times during auto-reconnect)
+    this.connectionWrapper.on('reconnected', (state) => {
+      this.socket.emit(SocketEventType.TIKTOK_RECONNECTED, state);
+      this.socket.to('platform-events').emit(SocketEventType.TIKTOK_RECONNECTED, state);
+    });
+
     // Get underlying connection for message events
     const connection = this.connectionWrapper.getConnection();
 
@@ -433,6 +439,12 @@ export class SocketHandler {
         this.socket.to('platform-events').emit(SocketEventType.TWITCH_CONNECTED, state);
       });
 
+      // Handle reconnection events (can happen multiple times during auto-reconnect)
+      this.twitchWrapper.on('reconnected', (state) => {
+        this.socket.emit(SocketEventType.TWITCH_RECONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.TWITCH_RECONNECTED, state);
+      });
+
       this.twitchWrapper.once('disconnected', (reason: string) => {
         this.socket.emit(SocketEventType.TWITCH_DISCONNECTED, reason);
         this.socket.to('platform-events').emit(SocketEventType.TWITCH_DISCONNECTED, reason);
@@ -527,6 +539,12 @@ export class SocketHandler {
       this.youtubeWrapper.once('connected', (state) => {
         this.socket.emit(SocketEventType.YOUTUBE_CONNECTED, state);
         this.socket.to('platform-events').emit(SocketEventType.YOUTUBE_CONNECTED, state);
+      });
+
+      // Handle reconnection events (can happen multiple times during auto-reconnect)
+      this.youtubeWrapper.on('reconnected', (state) => {
+        this.socket.emit(SocketEventType.YOUTUBE_RECONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.YOUTUBE_RECONNECTED, state);
       });
 
       this.youtubeWrapper.once('disconnected', (reason: string) => {

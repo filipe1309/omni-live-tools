@@ -50,16 +50,19 @@ interface MultiPlatformEventHandlers {
   onRoomUser?: (message: RoomUserMessage) => void;
   onSocial?: (message: SocialMessage) => void;
   onTikTokStreamEnd?: () => void;
+  onTikTokReconnect?: (state: RoomState) => void;
   // Twitch-specific handlers
   onTwitchChat?: (message: UnifiedChatMessage) => void;
   onTwitchSub?: (data: unknown) => void;
   onTwitchResub?: (data: unknown) => void;
   onTwitchRaid?: (data: unknown) => void;
+  onTwitchReconnect?: (state: TwitchConnectionState) => void;
   // YouTube-specific handlers
   onYouTubeChat?: (message: UnifiedChatMessage) => void;
   onYouTubeSuperchat?: (data: unknown) => void;
   onYouTubeMember?: (data: unknown) => void;
   onYouTubeStreamEnd?: () => void;
+  onYouTubeReconnect?: (state: YouTubeConnectionState) => void;
   // General handlers
   onDisconnect?: (platform: PlatformType) => void;
   onSocketReconnect?: () => void;
@@ -180,6 +183,17 @@ export function useMultiPlatformConnection (
       handlersRef.current.onDisconnect?.('tiktok' as PlatformType);
     });
 
+    socket.on('tiktokReconnected', (state: RoomState) => {
+      console.info('[MultiPlatform] TikTok reconnected:', state);
+      setTikTokState(prev => ({
+        ...prev,
+        status: 'connected',
+        roomId: state.roomId,
+        error: null,
+      }));
+      handlersRef.current.onTikTokReconnect?.(state);
+    });
+
     socket.on('chat', (msg: ChatMessage) => {
       // TikTok chat (original format)
       console.log('[MultiPlatform] Received TikTok chat:', msg);
@@ -246,6 +260,17 @@ export function useMultiPlatformConnection (
       handlersRef.current.onDisconnect?.('twitch' as PlatformType);
     });
 
+    socket.on('twitchReconnected', (state: TwitchConnectionState) => {
+      console.info('[MultiPlatform] Twitch reconnected:', state);
+      setTwitchState(prev => ({
+        ...prev,
+        status: 'connected',
+        channel: state.channel,
+        error: null,
+      }));
+      handlersRef.current.onTwitchReconnect?.(state);
+    });
+
     socket.on('twitchChat', (msg: UnifiedChatMessage) => {
       console.log('[MultiPlatform] Received Twitch chat:', msg);
       handlersRef.current.onTwitchChat?.(msg);
@@ -269,6 +294,18 @@ export function useMultiPlatformConnection (
       console.warn('[MultiPlatform] YouTube disconnected:', errMsg);
       setYouTubeState(prev => ({ ...prev, status: 'disconnected', videoId: null, channelName: null }));
       handlersRef.current.onDisconnect?.('youtube' as PlatformType);
+    });
+
+    socket.on('youtubeReconnected', (state: YouTubeConnectionState) => {
+      console.info('[MultiPlatform] YouTube reconnected:', state);
+      setYouTubeState(prev => ({
+        ...prev,
+        status: 'connected',
+        videoId: state.videoId,
+        channelName: state.channelName,
+        error: null,
+      }));
+      handlersRef.current.onYouTubeReconnect?.(state);
     });
 
     socket.on('youtubeChat', (msg: UnifiedChatMessage) => {
