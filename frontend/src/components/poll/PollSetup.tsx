@@ -125,6 +125,7 @@ interface PollSetupProps {
   initialShowBorder?: boolean;
   showStartButton?: boolean;
   hideStatusBarToggle?: boolean;
+  hideBorderToggle?: boolean;
   externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
@@ -141,6 +142,7 @@ export function PollSetup ({
   initialShowBorder = false,
   showStartButton = true,
   hideStatusBarToggle = false,
+  hideBorderToggle = false,
   externalConfig = null,
   externalFullOptions = null
 }: PollSetupProps) {
@@ -783,6 +785,29 @@ export function PollSetup ({
             </div>
           )}
         </div>
+
+        {/* Border Toggle - Show next to profile dropdown when hideStatusBarToggle is true */}
+        {hideStatusBarToggle && !hideBorderToggle && (
+          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
+            ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
+            : 'bg-slate-900/50 border-slate-700/50'
+            }`}>
+            <button
+              type="button"
+              onClick={() => handleShowBorderChange(!showBorder)}
+              disabled={disabled}
+              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
+                ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
+                : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {showBorder && '✓'}
+            </button>
+            <span className="text-sm text-slate-300 whitespace-nowrap">
+              🔲 {t.poll.showBorder}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Question and Timer Row */}
@@ -898,28 +923,30 @@ export function PollSetup ({
           </div>
         )}
 
-        {/* Show Border Toggle - Always visible for streaming capture setup */}
-        <div className="flex items-end">
-          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
-            ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
-            : 'bg-slate-900/50 border-slate-700/50'
-            }`}>
-            <button
-              type="button"
-              onClick={() => handleShowBorderChange(!showBorder)}
-              disabled={disabled}
-              className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
-                ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
-                : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {showBorder && '✓'}
-            </button>
-            <span className="text-sm text-slate-300 whitespace-nowrap">
-              🔲 {t.poll.showBorder}
-            </span>
+        {/* Show Border Toggle - Show in timer row when hideStatusBarToggle is false */}
+        {!hideStatusBarToggle && !hideBorderToggle && (
+          <div className="flex items-end">
+            <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
+              ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
+              : 'bg-slate-900/50 border-slate-700/50'
+              }`}>
+              <button
+                type="button"
+                onClick={() => handleShowBorderChange(!showBorder)}
+                disabled={disabled}
+                className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
+                  ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
+                  : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {showBorder && '✓'}
+              </button>
+              <span className="text-sm text-slate-300 whitespace-nowrap">
+                🔲 {t.poll.showBorder}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Options Grid with Checkboxes */}
