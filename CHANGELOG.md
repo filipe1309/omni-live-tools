@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.14.0] - 2026-02-23
+
+### Added
+
+- Enhance PollProfile to include timer; implement auto-save functionality for profile changes
+- Add poll profiles functionality; implement profile management with localStorage support
+- Update PollSetup layout to display options in three columns for better organization
+- Implement AutocompleteInput component for enhanced user experience; integrate recent poll options functionality
+- Update vote text styles in PollOptionCard for improved readability
+- Add timestamp display to GiftCard component; improve layout structure
+- Add YouTube video support in OBS overlay; update translations for connection messages
+- Add internationalization support for OBS overlay messages and connection status
+- Enhance GiftCard layout and styling; add OBS overlay translations for English and Portuguese; improve grid calculation in ChatPage
+- Add toggle functionality for queue and gift visibility with localStorage persistence; update translations for new features
+- Add OBS pop-out pages for chat, gifts, and queue; enhance ChatPage with broadcasting functionality
+- Add internationalization support for gift details in GiftCard component
+- Implement streak tracking for gifts with timeout handling
+- Enhance GiftContainer with auto-scroll functionality and scroll indicator
+- Update poll options to support 6 total options and adjust defaults
+
+### Changed
+
+- V1.13.0
+
+### Fixed
+
+- Extend onConfigUpdate to include fullOptionsConfig; update related components for improved configuration handling
+
 ## [1.13.0] - 2026-02-23
 
 ### Added
@@ -251,6 +279,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.14.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.11.0...v1.12.0
 [1.11.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.10.0...v1.11.0
