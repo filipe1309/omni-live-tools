@@ -80,6 +80,9 @@ export const en: TranslationKeys = {
     errorConnecting: 'Error connecting',
     reconnected: 'reconnected to',
     popOutOverlay: 'Pop out overlay window',
+    giftName: 'Name:',
+    giftRepeat: 'Repeat:',
+    giftCost: 'Cost:',
   },
 
   // Room Stats

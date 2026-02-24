@@ -1,5 +1,6 @@
 import { ProfilePicture } from '../common/ProfilePicture';
 import { Username } from '../common/Username';
+import { useLanguage } from '@/i18n';
 import type { GiftMessage } from '@/types';
 
 interface GiftCardProps {
@@ -9,6 +10,7 @@ interface GiftCardProps {
 
 export function GiftCard({ gift, isPending = false }: GiftCardProps) {
   const totalCost = gift.diamondCount * gift.repeatCount;
+  const { t } = useLanguage();
 
   return (
     <div className="flex items-start gap-3 py-3 px-4 bg-slate-700/50 rounded-lg animate-slide-up">
@@ -29,18 +31,18 @@ export function GiftCard({ gift, isPending = false }: GiftCardProps) {
           
           <div className="text-sm">
             <div className="text-white">
-              <span className="text-slate-400">Name:</span>{' '}
+              <span className="text-slate-400">{t.chat.giftName}</span>{' '}
               <span className="font-bold">{gift.giftName}</span>
               <span className="text-slate-500 ml-1">(ID:{gift.giftId})</span>
             </div>
             <div>
-              <span className="text-slate-400">Repeat:</span>{' '}
+              <span className="text-slate-400">{t.chat.giftRepeat}</span>{' '}
               <span className={`font-bold ${isPending ? 'text-tiktok-red animate-pulse-soft' : 'text-white'}`}>
                 x{gift.repeatCount.toLocaleString()}
               </span>
             </div>
             <div>
-              <span className="text-slate-400">Cost:</span>{' '}
+              <span className="text-slate-400">{t.chat.giftCost}</span>{' '}
               <span className="font-bold text-yellow-400">
                 💎 {totalCost.toLocaleString()}
               </span>

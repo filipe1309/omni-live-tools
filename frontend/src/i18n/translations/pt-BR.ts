@@ -65,7 +65,7 @@ export const ptBR = {
   // Chat Page
   chat: {
     chats: 'Chats',
-    gifts: 'Gifts',
+    gifts: 'Presentes',
     queue: 'Fila',
     noMessages: 'Nenhuma mensagem ainda...',
     noGifts: 'Nenhum presente ainda...',
@@ -78,6 +78,9 @@ export const ptBR = {
     errorConnecting: 'Erro ao conectar',
     reconnected: 'reconectado a',
     popOutOverlay: 'Abrir janela de overlay',
+    giftName: 'Nome:',
+    giftRepeat: 'Repetir:',
+    giftCost: 'Custo:',
   },
 
   // Room Stats
