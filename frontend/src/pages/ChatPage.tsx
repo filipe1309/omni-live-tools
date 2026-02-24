@@ -34,10 +34,40 @@ interface GiftData extends GiftMessage {
 // Streak timeout in milliseconds (60 seconds)
 const STREAK_TIMEOUT_MS = 60 * 1000;
 
+// LocalStorage keys for visibility preferences
+const STORAGE_KEY_QUEUE_VISIBLE = 'omni-chat-queue-visible';
+const STORAGE_KEY_GIFT_VISIBLE = 'omni-chat-gift-visible';
+
+// Eye icon for toggle buttons
+function EyeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function EyeOffIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+    </svg>
+  );
+}
+
 export function ChatPage () {
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
   const [gifts, setGifts] = useState<GiftData[]>([]);
   const [queueItems, setQueueItems] = useState<ChatItem[]>([]);
+  const [queueVisible, setQueueVisible] = useState<boolean>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY_QUEUE_VISIBLE);
+    return stored !== null ? stored === 'true' : true;
+  });
+  const [giftVisible, setGiftVisible] = useState<boolean>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY_GIFT_VISIBLE);
+    return stored !== null ? stored === 'true' : true;
+  });
   const { t } = useLanguage();
   const { featuredMessageId, setFeaturedMessage, clearFeaturedMessage } = useFeaturedMessage();
   const { broadcastChatItems, broadcastGifts, broadcastQueueItems, broadcastFeaturedMessageId, setActionHandlers } = useChatBroadcaster();
@@ -58,6 +88,23 @@ export function ChatPage () {
   useEffect(() => {
     broadcastFeaturedMessageId(featuredMessageId);
   }, [featuredMessageId, broadcastFeaturedMessageId]);
+
+  // Toggle visibility handlers with localStorage persistence
+  const toggleQueueVisible = useCallback(() => {
+    setQueueVisible(prev => {
+      const newValue = !prev;
+      localStorage.setItem(STORAGE_KEY_QUEUE_VISIBLE, String(newValue));
+      return newValue;
+    });
+  }, []);
+
+  const toggleGiftVisible = useCallback(() => {
+    setGiftVisible(prev => {
+      const newValue = !prev;
+      localStorage.setItem(STORAGE_KEY_GIFT_VISIBLE, String(newValue));
+      return newValue;
+    });
+  }, []);
 
   // Add to queue handler
   const addToQueue = useCallback((item: ChatItem) => {
@@ -276,6 +323,10 @@ export function ChatPage () {
     );
   };
 
+  // Calculate grid columns based on visible panels
+  const visiblePanels = 1 + (queueVisible ? 1 : 0) + (giftVisible ? 1 : 0);
+  const gridClass = visiblePanels === 3 ? 'lg:grid-cols-3' : visiblePanels === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-1';
+
   return (
     <div className="min-h-screen w-full bg-chat-gradient">
       <div className="container mx-auto px-4 py-6">
@@ -290,7 +341,35 @@ export function ChatPage () {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {/* Toggle buttons for Queue and Gift visibility */}
+        <div className="flex items-center gap-2 mb-4">
+          <button
+            onClick={toggleQueueVisible}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm ${
+              queueVisible 
+                ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300' 
+                : 'bg-slate-500/20 hover:bg-slate-500/30 text-slate-400 hover:text-slate-300'
+            }`}
+            title={queueVisible ? t.chat.disableQueue : t.chat.enableQueue}
+          >
+            {queueVisible ? <EyeIcon className="w-4 h-4" /> : <EyeOffIcon className="w-4 h-4" />}
+            <span>📋 {t.chat.queue}</span>
+          </button>
+          <button
+            onClick={toggleGiftVisible}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm ${
+              giftVisible 
+                ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 hover:text-emerald-300' 
+                : 'bg-slate-500/20 hover:bg-slate-500/30 text-slate-400 hover:text-slate-300'
+            }`}
+            title={giftVisible ? t.chat.disableGift : t.chat.enableGift}
+          >
+            {giftVisible ? <EyeIcon className="w-4 h-4" /> : <EyeOffIcon className="w-4 h-4" />}
+            <span>🎁 {t.chat.gifts}</span>
+          </button>
+        </div>
+
+        <div className={`grid ${gridClass} gap-6`}>
           {/* Chat Container with Pop-out */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-2">
@@ -313,49 +392,53 @@ export function ChatPage () {
           </div>
 
           {/* Queue Container with Pop-outs */}
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-semibold text-lg text-slate-200">📋 {t.chat.queue}</h2>
-              <div className="flex items-center gap-1">
+          {queueVisible && (
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="font-semibold text-lg text-slate-200">📋 {t.chat.queue}</h2>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => openPopOut('/obs-queue', 'queue-window')}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
+                    title={t.chat.popOutQueue}
+                  >
+                    <PopOutIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => openPopOut('/obs-featured', 'overlay-window', 800, 600)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors text-sm"
+                    title={t.chat.popOutOverlay}
+                  >
+                    <span className="hidden sm:inline">Overlay</span>
+                  </button>
+                </div>
+              </div>
+              <ChatQueueContainer 
+                items={queueItems} 
+                title="" 
+                onRemove={removeFromQueue} 
+                onSendToOverlay={sendToOverlayFromQueue}
+                featuredMessageId={featuredMessageId}
+              />
+            </div>
+          )}
+
+          {/* Gift Container with Pop-out */}
+          {giftVisible && (
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="font-semibold text-lg text-slate-200">🎁 {t.chat.gifts}</h2>
                 <button
-                  onClick={() => openPopOut('/obs-queue', 'queue-window')}
+                  onClick={() => openPopOut('/obs-gift', 'gift-window')}
                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
-                  title={t.chat.popOutQueue}
+                  title={t.chat.popOutGift}
                 >
                   <PopOutIcon className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => openPopOut('/obs-featured', 'overlay-window', 800, 600)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 transition-colors text-sm"
-                  title={t.chat.popOutOverlay}
-                >
-                  <span className="hidden sm:inline">Overlay</span>
-                </button>
               </div>
+              <GiftContainer gifts={gifts} title="" />
             </div>
-            <ChatQueueContainer 
-              items={queueItems} 
-              title="" 
-              onRemove={removeFromQueue} 
-              onSendToOverlay={sendToOverlayFromQueue}
-              featuredMessageId={featuredMessageId}
-            />
-          </div>
-
-          {/* Gift Container with Pop-out */}
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-semibold text-lg text-slate-200">🎁 {t.chat.gifts}</h2>
-              <button
-                onClick={() => openPopOut('/obs-gift', 'gift-window')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-colors text-sm"
-                title={t.chat.popOutGift}
-              >
-                <PopOutIcon className="w-4 h-4" />
-              </button>
-            </div>
-            <GiftContainer gifts={gifts} title="" />
-          </div>
+          )}
         </div>
       </div>
     </div>

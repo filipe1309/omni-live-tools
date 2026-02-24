@@ -84,6 +84,10 @@ export const ptBR = {
     giftName: 'Nome:',
     giftRepeat: 'Repetir:',
     giftCost: 'Custo:',
+    enableQueue: 'Mostrar fila',
+    disableQueue: 'Ocultar fila',
+    enableGift: 'Mostrar presentes',
+    disableGift: 'Ocultar presentes',
   },
 
   // Room Stats

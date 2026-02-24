@@ -86,6 +86,10 @@ export const en: TranslationKeys = {
     giftName: 'Name:',
     giftRepeat: 'Repeat:',
     giftCost: 'Cost:',
+    enableQueue: 'Show queue',
+    disableQueue: 'Hide queue',
+    enableGift: 'Show gifts',
+    disableGift: 'Hide gifts',
   },
 
   // Room Stats
