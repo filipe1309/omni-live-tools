@@ -404,7 +404,7 @@ export function PollResultsPage () {
               />
 
               {/* Results */}
-              <div className="space-y-3 flex-1 min-h-[440px]">
+              <div className="space-y-3 flex-1 min-h-[380px]">
                 {displayOptions.map((option) => {
                   const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
 
