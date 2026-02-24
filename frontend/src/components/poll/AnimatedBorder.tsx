@@ -19,11 +19,11 @@ export function AnimatedBorder({
   className = '',
 }: AnimatedBorderProps) {
   if (!visible) {
-    return <>{children}</>;
+    return <div className={className}>{children}</div>;
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative flex flex-col ${className}`}>
       {/* Animated gradient border container */}
       <div
         className="absolute inset-0 rounded-2xl animate-border-rotate"
@@ -48,7 +48,7 @@ export function AnimatedBorder({
       />
       
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex-1 flex flex-col">
         {children}
       </div>
     </div>
