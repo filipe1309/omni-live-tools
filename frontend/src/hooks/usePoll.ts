@@ -305,7 +305,7 @@ export function usePoll (): UsePollReturn {
     }
 
     const width = 700;
-    const height = 900;
+    const height = 1000;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
 
