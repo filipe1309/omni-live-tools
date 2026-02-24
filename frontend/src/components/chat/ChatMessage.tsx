@@ -25,12 +25,24 @@ function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube
 export function ChatMessage({ item, onAddToQueue, onSendToOverlay, isOnOverlay }: ChatMessageProps) {
   const initial = (item.user.nickname || item.user.uniqueId || '?').charAt(0);
   const isSuperchat = item.isSuperchat;
+  const isMember = item.user.isSubscriber;
+  
+  const getHighlightClasses = () => {
+    if (isSuperchat) return 'bg-yellow-500/20 border border-yellow-500/40 hover:bg-yellow-500/30';
+    if (isMember) return 'bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30';
+    return 'hover:bg-slate-700/30';
+  };
   
   return (
-    <div className={`flex items-start gap-3 py-2 px-3 rounded-lg animate-fade-in group ${isSuperchat ? 'bg-yellow-500/20 border border-yellow-500/40 hover:bg-yellow-500/30' : 'hover:bg-slate-700/30'} ${isOnOverlay ? 'ring-2 ring-cyan-400/50' : ''}`}>
+    <div className={`flex items-start gap-3 py-2 px-3 rounded-lg animate-fade-in group ${getHighlightClasses()} ${isOnOverlay ? 'ring-2 ring-cyan-400/50' : ''}`}>
       {isSuperchat && (
         <span className="text-yellow-400 flex-shrink-0" title="Super Chat">
           💰
+        </span>
+      )}
+      {isMember && !isSuperchat && (
+        <span className="text-emerald-400 flex-shrink-0" title="Member">
+          ⭐
         </span>
       )}
       <ProfilePicture 

@@ -377,13 +377,26 @@ export class YouTubeConnectionWrapper extends EventEmitter {
     const author = item.author;
     const message = item.message?.toString() || '';
 
+    // Debug: log author object to understand structure
+    if (this.enableLog) {
+      this.log(`[DEBUG] Author object keys: ${author ? Object.keys(author).join(', ') : 'null'}`);
+      this.log(`[DEBUG] Author: is_member=${author?.is_member}, membership=${author?.membership}, badges=${JSON.stringify(author?.badges)}`);
+    }
+
+    // Check membership from multiple sources
+    const isMember = this.checkMemberStatus(author);
+    
+    if (this.enableLog) {
+      this.log(`[DEBUG] isMember result: ${isMember}`);
+    }
+
     const youtubeUser = createYouTubeUser({
       odlUserId: author?.id || '',
       channelId: author?.id || '',
       username: author?.name || '',
       displayName: author?.name || '',
       profilePictureUrl: this.getBestThumbnail(author?.thumbnails),
-      isMember: author?.is_member || false,
+      isMember,
       isModerator: author?.is_moderator || false,
       isOwner: author?.is_owner || false,
       isVerified: author?.is_verified || false,
@@ -408,13 +421,16 @@ export class YouTubeConnectionWrapper extends EventEmitter {
     const author = item.author;
     const message = item.message?.toString() || '';
 
+    // Check membership from multiple sources
+    const isMember = this.checkMemberStatus(author);
+
     const youtubeUser = createYouTubeUser({
       odlUserId: author?.id || '',
       channelId: author?.id || '',
       username: author?.name || '',
       displayName: author?.name || '',
       profilePictureUrl: this.getBestThumbnail(author?.thumbnails),
-      isMember: author?.is_member || false,
+      isMember,
       isModerator: author?.is_moderator || false,
       isOwner: author?.is_owner || false,
       isVerified: author?.is_verified || false,
@@ -493,6 +509,35 @@ export class YouTubeConnectionWrapper extends EventEmitter {
       label: badge.label,
       iconUrl: badge.icon_url,
     }));
+  }
+
+  /**
+   * Check if author is a channel member
+   * Checks multiple sources: direct property, membership object, and badges
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private checkMemberStatus(author: any): boolean {
+    if (!author) return false;
+    
+    // Direct property check (youtubei.js uses is_member)
+    if (author.is_member === true) return true;
+    
+    // Check membership object (some versions may use this)
+    if (author.membership) return true;
+    
+    // Check badges for member indication
+    // youtubei.js badge structure: { type: "LiveChatAuthorBadge", tooltip: "Member (2 months)", custom_thumbnail: [...] }
+    if (Array.isArray(author.badges)) {
+      const hasMemberBadge = author.badges.some((badge: { label?: string; type?: string; tooltip?: string }) => {
+        const tooltip = badge.tooltip?.toLowerCase() || '';
+        const label = badge.label?.toLowerCase() || '';
+        return tooltip.includes('member') || label.includes('member') || 
+               tooltip.includes('membro') || label.includes('membro'); // Portuguese support
+      });
+      if (hasMemberBadge) return true;
+    }
+    
+    return false;
   }
 
   /**
