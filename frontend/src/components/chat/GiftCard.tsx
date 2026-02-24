@@ -6,19 +6,24 @@ import type { GiftMessage } from '@/types';
 interface GiftCardProps {
   gift: GiftMessage;
   isPending?: boolean;
+  timestamp?: Date;
 }
 
-export function GiftCard({ gift, isPending = false }: GiftCardProps) {
+export function GiftCard({ gift, isPending = false, timestamp = new Date() }: GiftCardProps) {
   const totalCost = gift.diamondCount * gift.repeatCount;
   const { t } = useLanguage();
+  const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="flex items-start gap-2 py-2 px-3 bg-slate-700/50 rounded-lg animate-slide-up">
       <ProfilePicture src={gift.profilePictureUrl} size="sm" />
       
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm mb-0.5">
-          <Username uniqueId={gift.uniqueId} />
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-medium text-sm truncate">
+            <Username uniqueId={gift.uniqueId} />
+          </div>
+          <span className="text-[10px] text-slate-500 flex-shrink-0">{timeString}</span>
         </div>
         <p className="text-slate-300 text-xs mb-1 truncate">{gift.describe}</p>
         
