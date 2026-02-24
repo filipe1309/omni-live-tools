@@ -20,6 +20,7 @@ export type { Toast, ToastType } from './useToast';
 export { useFeaturedMessage } from './useFeaturedMessage';
 export { useChatBroadcaster, useChatReceiver } from './useChatBroadcast';
 export type { GiftData } from './useChatBroadcast';
+export { useRecentPollOptions } from './useRecentPollOptions';
 
 // Re-export poll types from @/types for backward compatibility
 export type {

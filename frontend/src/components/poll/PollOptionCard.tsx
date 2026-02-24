@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollOption } from '@/types';
+import { useRecentPollOptions } from '@/hooks/useRecentPollOptions';
+import { AutocompleteInput } from './AutocompleteInput';
 
 type PollOptionCardSize = 'compact' | 'normal' | 'large';
 
@@ -55,7 +57,7 @@ export function PollOptionCard ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(option.text);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { recentOptions, addRecentOption } = useRecentPollOptions();
 
   // Sync editValue with option.text prop when not editing
   useEffect(() => {
@@ -64,14 +66,6 @@ export function PollOptionCard ({
     }
   }, [option.text, isEditing]);
 
-  // Focus input when entering edit mode
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
   const handleDoubleClick = () => {
     if (editable) {
       setIsEditing(true);
@@ -79,8 +73,10 @@ export function PollOptionCard ({
   };
 
   const handleBlur = () => {
-    if (editValue.trim() && editValue !== option.text) {
-      onOptionTextChange?.(option.id, editValue.trim());
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== option.text) {
+      onOptionTextChange?.(option.id, trimmed);
+      addRecentOption(trimmed);
     } else {
       setEditValue(option.text);
     }
@@ -98,7 +94,9 @@ export function PollOptionCard ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl transition-all duration-300 border ${isWinner
+      className={`relative rounded-xl transition-all duration-300 border ${
+        isEditing ? 'z-50' : 'overflow-hidden'
+      } ${isWinner
         ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
         : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
         }`}
@@ -124,15 +122,13 @@ export function PollOptionCard ({
             {option.id}
           </span>
           {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
+            <AutocompleteInput
               value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
+              onChange={setEditValue}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
+              suggestions={recentOptions}
               className={`bg-transparent border-b-2 border-tiktok-cyan text-white font-semibold outline-none ${config.text}`}
-              style={{ minWidth: '100px' }}
             />
           ) : (
             <span
