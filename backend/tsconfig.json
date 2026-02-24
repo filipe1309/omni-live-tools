@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
@@ -15,14 +14,13 @@
     "declarationMap": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "baseUrl": ".",
     "paths": {
-      "@domain/*": ["domain/*"],
-      "@application/*": ["application/*"],
-      "@infrastructure/*": ["infrastructure/*"],
-      "@presentation/*": ["presentation/*"],
-      "@config/*": ["config/*"],
-      "@shared/*": ["shared/*"]
+      "@domain/*": ["./domain/*"],
+      "@application/*": ["./application/*"],
+      "@infrastructure/*": ["./infrastructure/*"],
+      "@presentation/*": ["./presentation/*"],
+      "@config/*": ["./config/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": ["./**/*"],
