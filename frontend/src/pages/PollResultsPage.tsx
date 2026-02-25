@@ -13,7 +13,7 @@ import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
 import { useBackgroundKeepAlive } from '@/hooks/useBackgroundKeepAlive';
-import { POLL_TIMER, DEFAULT_QUESTION, DEFAULT_POLL_OPTIONS } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, DEFAULT_POLL_OPTIONS, STORAGE_KEYS } from '@/constants';
 import { useLanguage } from '@/i18n';
 
 const initialPollState: PollState = {
@@ -30,7 +30,7 @@ const initialPollState: PollState = {
 
 // Load full options config from localStorage (all options + selected state)
 const loadFullOptionsConfig = (): { allOptions: string[]; selectedOptions: boolean[] } | null => {
-  const saved = localStorage.getItem('tiktok-poll-fullOptions');
+  const saved = localStorage.getItem(STORAGE_KEYS.FULL_OPTIONS);
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -43,7 +43,7 @@ const loadFullOptionsConfig = (): { allOptions: string[]; selectedOptions: boole
 
 // Load saved setup config from localStorage
 const loadSavedSetupConfig = (): SetupConfig | null => {
-  const saved = localStorage.getItem('tiktok-poll-setupConfig');
+  const saved = localStorage.getItem(STORAGE_KEYS.SETUP_CONFIG);
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -65,7 +65,7 @@ export function PollResultsPage () {
   const [isConnected, setIsConnected] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [isAutoReconnectEnabled, setIsAutoReconnectEnabled] = useState(() => {
-    return localStorage.getItem('tiktok-poll-autoReconnect') === 'true';
+    return localStorage.getItem(STORAGE_KEYS.AUTO_RECONNECT) === 'true';
   });
   const [channelRef, setChannelRef] = useState<BroadcastChannel | null>(null);
 
@@ -247,11 +247,11 @@ export function PollResultsPage () {
       // Also update local setupConfig
       setSetupConfig(newConfig);
       // Save to localStorage for persistence
-      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
+      localStorage.setItem(STORAGE_KEYS.SETUP_CONFIG, JSON.stringify(newConfig));
       if (newFullOptions) {
         setFullOptionsConfig(newFullOptions);
         localStorage.setItem(
-          'tiktok-poll-fullOptions',
+          STORAGE_KEYS.FULL_OPTIONS,
           JSON.stringify(newFullOptions)
         );
       }
@@ -265,7 +265,7 @@ export function PollResultsPage () {
       if (!setupConfig) return;
       const newConfig = { ...setupConfig, question: newQuestion };
       setSetupConfig(newConfig);
-      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
+      localStorage.setItem(STORAGE_KEYS.SETUP_CONFIG, JSON.stringify(newConfig));
       if (channelRef) {
         channelRef.postMessage({
           type: 'config-update',
@@ -288,7 +288,7 @@ export function PollResultsPage () {
       );
       const newConfig = { ...setupConfig, options: newOptions };
       setSetupConfig(newConfig);
-      localStorage.setItem('tiktok-poll-setupConfig', JSON.stringify(newConfig));
+      localStorage.setItem(STORAGE_KEYS.SETUP_CONFIG, JSON.stringify(newConfig));
 
       // Also update fullOptionsConfig if available
       if (fullOptionsConfig) {
@@ -300,7 +300,7 @@ export function PollResultsPage () {
           newAllOptions[optionIndex] = newText;
           const newFullConfig = { ...fullOptionsConfig, allOptions: newAllOptions };
           setFullOptionsConfig(newFullConfig);
-          localStorage.setItem('tiktok-poll-fullOptions', JSON.stringify(newFullConfig));
+          localStorage.setItem(STORAGE_KEYS.FULL_OPTIONS, JSON.stringify(newFullConfig));
         }
       }
 

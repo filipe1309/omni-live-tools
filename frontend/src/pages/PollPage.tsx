@@ -4,7 +4,7 @@ import { useLanguage, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType, FullOptionsConfig } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
-import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS } from '@/constants';
 import { safeSetItem } from '@/utils';
 
 export function PollPage () {
@@ -45,7 +45,7 @@ export function PollPage () {
 
   // Load saved setup config from localStorage
   const loadSavedSetupConfig = (): SetupConfig | null => {
-    const saved = localStorage.getItem('tiktok-poll-setupConfig');
+    const saved = localStorage.getItem(STORAGE_KEYS.SETUP_CONFIG);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -58,7 +58,7 @@ export function PollPage () {
 
   // Load full options config (all options + selected state)
   const loadFullOptionsConfig = (): { allOptions: string[]; selectedOptions: boolean[] } | null => {
-    const saved = localStorage.getItem('tiktok-poll-fullOptions');
+    const saved = localStorage.getItem(STORAGE_KEYS.FULL_OPTIONS);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -90,9 +90,9 @@ export function PollPage () {
       setExternalConfig(config);
       setSetupConfig(config);
       // Also save to localStorage so the data persists
-      safeSetItem('tiktok-poll-setupConfig', config);
+      safeSetItem(STORAGE_KEYS.SETUP_CONFIG, config);
       if (fullOptions) {
-        safeSetItem('tiktok-poll-fullOptions', fullOptions);
+        safeSetItem(STORAGE_KEYS.FULL_OPTIONS, fullOptions);
       }
     });
   }, [onConfigUpdate]);
@@ -114,13 +114,13 @@ export function PollPage () {
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
-    const configResult = safeSetItem('tiktok-poll-setupConfig', newConfig);
+    const configResult = safeSetItem(STORAGE_KEYS.SETUP_CONFIG, newConfig);
     if (!configResult.success && configResult.error) {
       toast.warning(configResult.error);
     }
     // Save full options config (all options + selection state)
     if (allOptions && selectedOptions) {
-      const optionsResult = safeSetItem('tiktok-poll-fullOptions', { allOptions, selectedOptions });
+      const optionsResult = safeSetItem(STORAGE_KEYS.FULL_OPTIONS, { allOptions, selectedOptions });
       if (!optionsResult.success && optionsResult.error) {
         toast.warning(optionsResult.error);
       }
@@ -143,7 +143,7 @@ export function PollPage () {
       const newConfig = { ...setupConfig, question: newQuestion };
       setSetupConfig(newConfig);
       setExternalConfig(newConfig);
-      const configResult = safeSetItem('tiktok-poll-setupConfig', newConfig);
+      const configResult = safeSetItem(STORAGE_KEYS.SETUP_CONFIG, newConfig);
       if (!configResult.success && configResult.error) {
         toast.warning(configResult.error);
       }
@@ -164,7 +164,7 @@ export function PollPage () {
       const newConfig = { ...setupConfig, options: newOptions };
       setSetupConfig(newConfig);
       setExternalConfig(newConfig);
-      const configResult = safeSetItem('tiktok-poll-setupConfig', newConfig);
+      const configResult = safeSetItem(STORAGE_KEYS.SETUP_CONFIG, newConfig);
       if (!configResult.success && configResult.error) {
         toast.warning(configResult.error);
       }
@@ -177,7 +177,7 @@ export function PollPage () {
           const newAllOptions = [...currentFullOptions.allOptions];
           newAllOptions[optionIndex] = newText;
           const newFullConfig = { ...currentFullOptions, allOptions: newAllOptions };
-          const optionsResult = safeSetItem('tiktok-poll-fullOptions', newFullConfig);
+          const optionsResult = safeSetItem(STORAGE_KEYS.FULL_OPTIONS, newFullConfig);
           if (!optionsResult.success && optionsResult.error) {
             toast.warning(optionsResult.error);
           }

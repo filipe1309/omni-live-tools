@@ -2,6 +2,8 @@
  * Safe localStorage utilities with error handling
  */
 
+import { STORAGE_KEYS } from '@/constants';
+
 export interface StorageResult<T> {
   success: boolean;
   data?: T;
@@ -84,7 +86,7 @@ export function safeRemoveItem(key: string): StorageResult<void> {
  */
 function cleanupOldStorage(): void {
   const keysToCleanFirst = [
-    'tiktok-poll-questionHistory', // Question history is not critical
+    STORAGE_KEYS.QUESTION_HISTORY, // Question history is not critical
   ];
   
   for (const key of keysToCleanFirst) {

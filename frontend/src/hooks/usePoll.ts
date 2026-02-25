@@ -8,7 +8,7 @@ import type {
   SetupConfig,
   FullOptionsConfig,
 } from '@/types';
-import { POLL_TIMER, DEFAULT_QUESTION } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, STORAGE_KEYS } from '@/constants';
 import { usePollTimer } from './usePollTimer';
 import { usePollSync } from './usePollSync';
 
@@ -61,7 +61,7 @@ const INITIAL_SETUP_CONFIG: SetupConfig = {
 // Load fullOptionsConfig from localStorage
 const loadInitialFullOptionsConfig = (): { allOptions: string[]; selectedOptions: boolean[] } | null => {
   try {
-    const saved = localStorage.getItem('tiktok-poll-fullOptions');
+    const saved = localStorage.getItem(STORAGE_KEYS.FULL_OPTIONS);
     if (saved) {
       return JSON.parse(saved);
     }
@@ -74,7 +74,7 @@ const loadInitialFullOptionsConfig = (): { allOptions: string[]; selectedOptions
 // Load setupConfig from localStorage
 const loadInitialSetupConfig = (): SetupConfig => {
   try {
-    const saved = localStorage.getItem('tiktok-poll-setupConfig');
+    const saved = localStorage.getItem(STORAGE_KEYS.SETUP_CONFIG);
     if (saved) {
       return JSON.parse(saved);
     }

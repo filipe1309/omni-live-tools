@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { STORAGE_KEYS } from '@/constants';
 
 interface UseLeaderElectionOptions {
   /** Unique key for localStorage to store leader info */
@@ -90,7 +91,7 @@ export function useLeaderElection ({
         tryBecomeLeader();
       }
       // Listen for auto-reconnect setting changes
-      if (e.key === 'tiktok-poll-autoReconnect' && onAutoReconnectChange) {
+      if (e.key === STORAGE_KEYS.AUTO_RECONNECT && onAutoReconnectChange) {
         onAutoReconnectChange(e.newValue === 'true');
       }
     };

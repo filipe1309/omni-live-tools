@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
+import { STORAGE_KEYS } from '@/constants';
 
 describe('useLeaderElection', () => {
   beforeEach(() => {
@@ -131,7 +132,7 @@ describe('useLeaderElection', () => {
     // Simulate storage event for auto-reconnect setting
     act(() => {
       const event = new StorageEvent('storage', {
-        key: 'tiktok-poll-autoReconnect',
+        key: STORAGE_KEYS.AUTO_RECONNECT,
         newValue: 'true',
       });
       window.dispatchEvent(event);

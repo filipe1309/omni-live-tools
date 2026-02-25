@@ -19,22 +19,34 @@ export const POLL_OPTIONS = {
   MIN_SELECTED: 2,
 } as const;
 
+// Storage keys - centralized for consistency
+// Use omni-poll- prefix since the app supports multiple platforms
+export const STORAGE_KEYS = {
+  SETUP_CONFIG: 'omni-poll-setupConfig',
+  FULL_OPTIONS: 'omni-poll-fullOptions',
+  AUTO_RECONNECT: 'omni-poll-autoReconnect',
+  QUESTION_HISTORY: 'omni-poll-questionHistory',
+  OPTION_HISTORY: 'omni-poll-optionHistory',
+  PROFILES: 'omni-poll-profiles',
+  SELECTED_PROFILE: 'omni-poll-selectedProfile',
+} as const;
+
 // Question history settings
 export const QUESTION_HISTORY = {
   MAX_ITEMS: 10,
-  STORAGE_KEY: 'omni-live-poll-questionHistory',
+  STORAGE_KEY: STORAGE_KEYS.QUESTION_HISTORY,
 } as const;
 
 // Option history settings
 export const OPTION_HISTORY = {
   MAX_ITEMS: 10,
-  STORAGE_KEY: 'omni-live-poll-optionHistory',
+  STORAGE_KEY: STORAGE_KEYS.OPTION_HISTORY,
 } as const;
 
 // Poll profiles settings
 export const POLL_PROFILES = {
-  STORAGE_KEY: 'omni-live-poll-profiles',
-  SELECTED_KEY: 'omni-live-poll-selectedProfile',
+  STORAGE_KEY: STORAGE_KEYS.PROFILES,
+  SELECTED_KEY: STORAGE_KEYS.SELECTED_PROFILE,
   MAX_PROFILES: 20,
 } as const;
 
