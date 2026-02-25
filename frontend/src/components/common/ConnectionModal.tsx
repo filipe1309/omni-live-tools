@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useRef } from 'react';
+import { FormEvent, KeyboardEvent, useRef, useState, useEffect } from 'react';
 import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { PlatformType } from '@/types';
@@ -36,6 +36,16 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
   const youtubeInputRef = useRef<HTMLInputElement>(null);
+
+  // State for manual dismiss in uncontrolled mode
+  const [dismissedUncontrolled, setDismissedUncontrolled] = useState(false);
+
+  // Reset dismissed state if all connections are lost (to show modal again)
+  useEffect(() => {
+    if (!isAnyConnected) {
+      setDismissedUncontrolled(false);
+    }
+  }, [isAnyConnected]);
 
   const statusConfig = {
     disconnected: {
@@ -122,20 +132,37 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     (showTwitch && twitch.status === 'connecting') ||
     (showYouTube && youtube.status === 'connecting');
 
+  // Check if all selected platforms are connected
+  const areAllSelectedConnected =
+    (!showTikTok || tiktok.status === 'connected') &&
+    (!showTwitch || twitch.status === 'connected') &&
+    (!showYouTube || youtube.status === 'connected');
+
   // Determine if modal should be shown
   // If isOpen is provided (controlled mode), use it
-  // Otherwise, show when not connected (uncontrolled mode for initial connection)
+  // Otherwise, show when ALL selected platforms are connected (not just any)
+  // This allows users to connect multiple platforms before auto-closing
   const isControlled = isOpen !== undefined;
-  const shouldShow = isControlled ? isOpen : !isAnyConnected;
+  const shouldShow = isControlled ? isOpen : !areAllSelectedConnected && !dismissedUncontrolled;
 
   if (!shouldShow) {
     return null;
   }
 
-  const handleBackdropClick = () => {
-    // Only allow closing via backdrop if in controlled mode and connected
-    if (isControlled && isAnyConnected && onClose) {
+  // Allow closing when at least one platform is connected (both controlled and uncontrolled mode)
+  const canClose = isAnyConnected;
+
+  const handleClose = () => {
+    if (isControlled && onClose) {
       onClose();
+    } else if (!isControlled) {
+      setDismissedUncontrolled(true);
+    }
+  };
+
+  const handleBackdropClick = () => {
+    if (canClose) {
+      handleClose();
     }
   };
 
@@ -152,10 +179,10 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
         {/* Top bar with language selector and close button */}
         <div className="absolute top-4 right-4 flex items-center gap-3">
           <LanguageSelector />
-          {/* Close button - only show when in controlled mode and connected */}
-          {isControlled && isAnyConnected && onClose && (
+          {/* Close button - show when at least one platform is connected */}
+          {canClose && (
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-slate-400 hover:text-white transition-colors text-xl"
               aria-label="Close"
             >
