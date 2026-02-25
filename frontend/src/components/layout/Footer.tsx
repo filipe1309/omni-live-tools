@@ -12,7 +12,7 @@ export function Footer () {
           <div>
             <span className="font-bold text-white">OmniLIVE Tools</span>
             <span className="ml-2 px-2 py-0.5 text-xs font-mono bg-slate-700 text-slate-300 rounded">
-              v1.12.0
+              v{__APP_VERSION__}
             </span>
           </div>
         </div>
