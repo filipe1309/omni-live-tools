@@ -65,6 +65,11 @@ export function ObsFeaturedMessagePage() {
 
   const initial = (featuredMessage.user.nickname || featuredMessage.user.uniqueId || '?').charAt(0);
   const isSuperchat = featuredMessage.isSuperchat;
+  
+  // Strip leading @ from uniqueId to avoid double @@ display
+  const displayUsername = featuredMessage.user.uniqueId.startsWith('@') 
+    ? featuredMessage.user.uniqueId.slice(1) 
+    : featuredMessage.user.uniqueId;
 
   return (
     <div 
@@ -95,12 +100,12 @@ export function ObsFeaturedMessagePage() {
                 className="font-bold text-2xl"
                 style={{ color: fontColor }}
               >
-                {featuredMessage.user.nickname || featuredMessage.user.uniqueId}
+                {featuredMessage.user.nickname || displayUsername}
               </span>
             </div>
-            {featuredMessage.user.uniqueId !== featuredMessage.user.nickname && (
+            {displayUsername !== featuredMessage.user.nickname && (
               <span className="text-slate-400 text-lg">
-                @{featuredMessage.user.uniqueId}
+                @{displayUsername}
               </span>
             )}
           </div>

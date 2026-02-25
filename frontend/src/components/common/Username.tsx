@@ -1,17 +1,24 @@
 interface UsernameProps {
   uniqueId: string;
+  userId?: string;
   platform?: 'tiktok' | 'twitch' | 'youtube';
   className?: string;
 }
 
-export function Username({ uniqueId, platform = 'tiktok', className = '' }: UsernameProps) {
+export function Username({ uniqueId, userId, platform = 'tiktok', className = '' }: UsernameProps) {
+  // Strip leading @ from uniqueId to avoid double @@ display
+  const displayName = uniqueId.startsWith('@') ? uniqueId.slice(1) : uniqueId;
+  
   let profileUrl: string;
   if (platform === 'twitch') {
-    profileUrl = `https://www.twitch.tv/${uniqueId}`;
+    profileUrl = `https://www.twitch.tv/${displayName}`;
   } else if (platform === 'youtube') {
-    profileUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(uniqueId)}`;
+    // Use channel URL if userId (channelId) is available, otherwise fallback to handle
+    profileUrl = userId 
+      ? `https://www.youtube.com/channel/${userId}`
+      : `https://www.youtube.com/@${displayName}`;
   } else {
-    profileUrl = `https://www.tiktok.com/@${uniqueId}`;
+    profileUrl = `https://www.tiktok.com/@${displayName}`;
   }
   
   let colorClass: string;
@@ -30,7 +37,7 @@ export function Username({ uniqueId, platform = 'tiktok', className = '' }: User
       rel="noopener noreferrer"
       className={`${colorClass} hover:underline font-medium ${className}`}
     >
-      @{uniqueId}
+      @{displayName}
     </a>
   );
 }

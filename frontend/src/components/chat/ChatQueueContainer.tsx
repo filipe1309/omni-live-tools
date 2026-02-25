@@ -52,7 +52,7 @@ function QueueMessage({ item, onRemove, onSendToOverlay, isOnOverlay }: QueueMes
       <div className="flex-1 min-w-0">
         <span className="font-medium inline-flex items-center gap-1">
           {item.platform && <PlatformBadge platform={item.platform} />}
-          <Username uniqueId={item.user.uniqueId} platform={item.platform} />
+          <Username uniqueId={item.user.uniqueId} userId={item.user.userId} platform={item.platform} />
         </span>
         <span className="text-slate-400 mx-1">:</span>
         <span 

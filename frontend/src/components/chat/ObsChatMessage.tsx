@@ -13,13 +13,18 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
   const isTwitch = item.platform === 'twitch';
   const isYouTube = item.platform === 'youtube';
   
+  // Strip leading @ from uniqueId to avoid double @@ display
+  const displayName = item.user.uniqueId.startsWith('@') 
+    ? item.user.uniqueId.slice(1) 
+    : item.user.uniqueId;
+  
   let profileUrl: string;
   if (isTwitch) {
-    profileUrl = `https://www.twitch.tv/${item.user.uniqueId}`;
+    profileUrl = `https://www.twitch.tv/${displayName}`;
   } else if (isYouTube) {
     profileUrl = `https://www.youtube.com/channel/${item.user.userId}`;
   } else {
-    profileUrl = `https://www.tiktok.com/@${item.user.uniqueId}`;
+    profileUrl = `https://www.tiktok.com/@${displayName}`;
   }
 
   const hasProfilePicture = item.user.profilePictureUrl && item.user.profilePictureUrl.trim() !== '';
@@ -60,7 +65,7 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
           className="font-bold hover:underline"
           style={{ color: isTwitch ? '#9146ff' : isYouTube ? '#ff0000' : 'rgb(102,143,217)' }}
         >
-          {item.user.uniqueId}
+          {displayName}
         </a>
         <span>: </span>
         <span
