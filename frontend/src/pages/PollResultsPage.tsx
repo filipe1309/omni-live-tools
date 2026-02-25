@@ -162,13 +162,13 @@ export function PollResultsPage () {
       if (isLeader) {
         channel.postMessage({ type: 'request-state' });
 
-        // Poll for updates every 500ms as a backup for pushed updates
-        // Primary updates come via broadcast, this catches missed messages
+        // Poll for updates every 2s as a backup for pushed updates
+        // Primary updates come via broadcast in real-time, this only catches edge cases
         pollInterval = setInterval(() => {
           if (channel) {
             channel.postMessage({ type: 'request-state' });
           }
-        }, 500);
+        }, 2000);
       }
 
       return () => {
