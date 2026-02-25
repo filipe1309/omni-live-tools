@@ -1,10 +1,20 @@
-# Omni LIVE Tools
+<div align="right">
+  English | <a href="./README_PTBR.md">PT(BR)</a>
+</div>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-black.svg)](https://socket.io/)
-[![Electron](https://img.shields.io/badge/Electron-25.x-purple.svg)](https://www.electronjs.org/)
+<div align='center'>
+  <img src="./docs/omni-full-logo.png" alt="alt text" width="100%">
+  <h1>Omni LIVE Tools</h1>
+  <h3>A multi-platform toolkit for <strong>TikTok LIVE</strong>, <strong>Twitch</strong>, and <strong>YouTube Live</strong> streamers</h3>
+   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js"></a>
+   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript"></a>
+   <a href="https://socket.io/"><img src="https://img.shields.io/badge/Socket.IO-4.x-black.svg" alt="Socket.IO"></a>
+   <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/Electron-25.x-purple.svg" alt="Electron"></a>
+   <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-18.x-blue.svg" alt="React"></a>
+   <a href="https://jestjs.io/"><img src="https://img.shields.io/badge/Jest-29.x-red.svg" alt="Jest"></a>
+</div>
+
+## About
 
 A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
