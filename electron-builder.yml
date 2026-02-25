@@ -19,6 +19,8 @@ files:
 asarUnpack:
   - "**/node_modules/@twurple/**"
   - "**/node_modules/@d-fischer/**"
+  - "**/node_modules/youtubei.js/**"
+  - "**/node_modules/jintr/**"
 
 # Electron main entry point (compiled from electron/main.ts)
 # electron-builder reads "main" from package.json, but we override here

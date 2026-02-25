@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { YouTubeConnectionState, createYouTubeUser, createYouTubeUnifiedMessage } from '../../domain/entities';
 import type { UnifiedChatMessage } from '../../domain/entities';
 import { PlatformType } from '../../domain/enums';
+import path from 'path';
 
 // Dynamic import for youtubei.js
 type Innertube = InstanceType<typeof import('youtubei.js').Innertube>;
@@ -10,6 +11,25 @@ type LiveChat = ReturnType<Awaited<ReturnType<Innertube['getInfo']>>['getLiveCha
 // Helper to bypass TypeScript's conversion of dynamic import() to require()
 // eslint-disable-next-line @typescript-eslint/no-implied-eval
 const dynamicImport = new Function('specifier', 'return import(specifier)') as <T>(specifier: string) => Promise<T>;
+
+/**
+ * Get the correct import path for youtubei.js
+ * When running in Electron asar, modules unpacked via asarUnpack are in app.asar.unpacked
+ * ESM requires the full path to the entry file, not just the package directory
+ */
+function getYoutubeiPath(): string {
+  // Check if running inside an asar archive
+  if (__dirname.includes('app.asar')) {
+    // Replace app.asar with app.asar.unpacked for unpacked modules
+    const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
+    // Navigate from backend/dist/infrastructure/youtube to root node_modules
+    // Use the Node.js specific entry point for ESM
+    const rootPath = path.resolve(unpackedBase, '../../../../node_modules/youtubei.js/dist/src/platform/node.js');
+    return rootPath;
+  }
+  // Development mode - use normal module resolution
+  return 'youtubei.js';
+}
 
 /**
  * Reconnection configuration for YouTube
@@ -148,8 +168,9 @@ export class YouTubeConnectionWrapper extends EventEmitter {
    */
   private async performConnect(isReconnect: boolean): Promise<YouTubeConnectionState> {
     try {
-      // Dynamic import of youtubei.js
-      const { Innertube } = await dynamicImport<typeof import('youtubei.js')>('youtubei.js');
+      // Dynamic import of youtubei.js with correct path for Electron asar
+      const youtubeiPath = getYoutubeiPath();
+      const { Innertube } = await dynamicImport<typeof import('youtubei.js')>(youtubeiPath);
 
       // Create Innertube client
       this.innertube = await Innertube.create();

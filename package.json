@@ -29,7 +29,8 @@
     "express": "^4.17.2",
     "socket.io": "^4.4.1",
     "tiktok-live-connector": "^2.1.1-beta1",
-    "ws": "^8.19.0"
+    "ws": "^8.19.0",
+    "youtubei.js": "^16.0.1"
   },
   "devDependencies": {
     "electron": "^33.4.11",
