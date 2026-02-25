@@ -136,6 +136,25 @@
     animation: winner-glow 1.5s ease-in-out infinite;
   }
 
+  @keyframes vote-flash {
+    0% {
+      box-shadow: 0 0 0 0 rgba(0, 245, 212, 0.7);
+      border-color: rgb(0, 245, 212);
+    }
+    50% {
+      box-shadow: 0 0 20px 4px rgba(0, 245, 212, 0.5);
+      border-color: rgb(0, 245, 212);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(0, 245, 212, 0);
+      border-color: rgba(51, 65, 85, 0.5);
+    }
+  }
+
+  .animate-vote-flash {
+    animation: vote-flash 0.4s ease-out;
+  }
+
   /* Timer Warning States */
   .timer-warning {
     @apply text-yellow-400;

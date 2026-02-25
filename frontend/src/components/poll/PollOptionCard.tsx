@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollOption } from '@/types';
 import { useRecentPollOptions } from '@/hooks/useRecentPollOptions';
@@ -57,7 +57,26 @@ export function PollOptionCard ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(option.text);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const prevVotesRef = useRef(votes);
   const { recentOptions, addRecentOption } = useRecentPollOptions();
+
+  // Detect vote changes and trigger flash animation
+  useEffect(() => {
+    if (votes > prevVotesRef.current) {
+      setIsFlashing(true);
+      const timer = setTimeout(() => setIsFlashing(false), 400);
+      return () => clearTimeout(timer);
+    }
+    prevVotesRef.current = votes;
+  }, [votes]);
+
+  // Update ref when votes decrease (e.g., poll reset)
+  useEffect(() => {
+    if (votes < prevVotesRef.current) {
+      prevVotesRef.current = votes;
+    }
+  }, [votes]);
 
   // Sync editValue with option.text prop when not editing
   useEffect(() => {
@@ -99,7 +118,7 @@ export function PollOptionCard ({
       } ${isWinner
         ? 'border-yellow-400 bg-yellow-500/10 animate-winner-glow'
         : 'border-slate-700/50 bg-slate-800/50 hover:bg-slate-800/70 hover:border-slate-600/50'
-        }`}
+      } ${isFlashing && !isWinner ? 'animate-vote-flash' : ''}`}
     >
       {/* Background Progress Bar */}
       <div
