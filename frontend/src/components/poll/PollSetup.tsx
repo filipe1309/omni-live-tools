@@ -794,21 +794,21 @@ export function PollSetup ({
 
         {/* Border Toggle - Show next to profile dropdown when hideStatusBarToggle is true */}
         {hideStatusBarToggle && !hideBorderToggle && (
-          <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
-            ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
-            : 'bg-slate-900/50 border-slate-700/50'
-            }`}>
-            <button
-              type="button"
-              onClick={() => handleShowBorderChange(!showBorder)}
-              disabled={disabled}
+          <div
+            onClick={() => !disabled && handleShowBorderChange(!showBorder)}
+            className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] cursor-pointer ${showBorder
+              ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
+              : 'bg-slate-900/50 border-slate-700/50'
+              } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <div
               className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
                 ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
-                : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                : 'bg-slate-800 border-slate-600 text-transparent'
+                }`}
             >
               {showBorder && '✓'}
-            </button>
+            </div>
             <span className="text-sm text-slate-300 whitespace-nowrap">
               🔲 {t.poll.showBorder}
             </span>
@@ -907,21 +907,21 @@ export function PollSetup ({
         {/* Show Status Bar Toggle */}
         {!hideStatusBarToggle && (
           <div className="flex items-end">
-            <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showStatusBar
-              ? 'bg-purple-900/30 border-purple-500/50'
-              : 'bg-slate-900/50 border-slate-700/50'
-              }`}>
-              <button
-                type="button"
-                onClick={() => handleShowStatusBarChange(!showStatusBar)}
-                disabled={disabled}
+            <div
+              onClick={() => !disabled && handleShowStatusBarChange(!showStatusBar)}
+              className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] cursor-pointer ${showStatusBar
+                ? 'bg-purple-900/30 border-purple-500/50'
+                : 'bg-slate-900/50 border-slate-700/50'
+                } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <div
                 className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showStatusBar
                   ? 'bg-purple-600 border-purple-500 text-white'
-                  : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  : 'bg-slate-800 border-slate-600 text-transparent'
+                  }`}
               >
                 {showStatusBar && '✓'}
-              </button>
+              </div>
               <span className="text-sm text-slate-300 whitespace-nowrap">
                 📊 {t.poll.showStatusBar}
               </span>
@@ -932,21 +932,21 @@ export function PollSetup ({
         {/* Show Border Toggle - Show in timer row when hideStatusBarToggle is false */}
         {!hideStatusBarToggle && !hideBorderToggle && (
           <div className="flex items-end">
-            <div className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] ${showBorder
-              ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
-              : 'bg-slate-900/50 border-slate-700/50'
-              }`}>
-              <button
-                type="button"
-                onClick={() => handleShowBorderChange(!showBorder)}
-                disabled={disabled}
+            <div
+              onClick={() => !disabled && handleShowBorderChange(!showBorder)}
+              className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] cursor-pointer ${showBorder
+                ? 'bg-tiktok-cyan/20 border-tiktok-cyan/50'
+                : 'bg-slate-900/50 border-slate-700/50'
+                } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <div
                 className={`w-5 h-5 flex items-center justify-center rounded border-2 transition-all flex-shrink-0 text-sm ${showBorder
                   ? 'bg-tiktok-cyan border-tiktok-cyan text-slate-900'
-                  : 'bg-slate-800 border-slate-600 text-transparent hover:border-slate-500'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  : 'bg-slate-800 border-slate-600 text-transparent'
+                  }`}
               >
                 {showBorder && '✓'}
-              </button>
+              </div>
               <span className="text-sm text-slate-300 whitespace-nowrap">
                 🔲 {t.poll.showBorder}
               </span>
