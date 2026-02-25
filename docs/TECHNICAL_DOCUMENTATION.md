@@ -348,6 +348,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `SplashScreen` - Initial loading animation
 - `ToastContainer` - Toast notifications
 - `ErrorBoundary` - React error boundary
+- `Username` - Platform-aware username display with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`)
 
 **Layout Components** (`components/layout/`):
 - `Header` - App header with navigation and controls
@@ -389,6 +390,44 @@ Vite is configured with `@` alias:
 import { useToast } from '@/hooks';
 import { ChatMessage } from '@/types';
 ```
+
+### Constants
+
+Centralized constants are defined in `frontend/src/constants/`:
+
+**Poll Constants** (`constants/poll.ts`):
+```typescript
+// Storage keys (using platform-agnostic prefix)
+export const STORAGE_KEYS = {
+  SETUP_CONFIG: 'omni-poll-setupConfig',
+  FULL_OPTIONS: 'omni-poll-fullOptions',
+  AUTO_RECONNECT: 'omni-poll-autoReconnect',
+  QUESTION_HISTORY: 'omni-poll-questionHistory',
+  OPTION_HISTORY: 'omni-poll-optionHistory',
+  PROFILES: 'omni-poll-profiles',
+  SELECTED_PROFILE: 'omni-poll-selectedProfile',
+} as const;
+
+// Timer settings
+export const POLL_TIMER = {
+  DEFAULT: 30,
+  MIN: 10,
+  MAX: 300,
+  STEP: 30,
+};
+
+// Options settings
+export const POLL_OPTIONS = {
+  TOTAL: 6,
+  MIN_SELECTED: 2,
+};
+```
+
+**Storage Utilities** (`utils/storage.ts`):
+- `safeGetItem(key)` - Safely get from localStorage with error handling
+- `safeSetItem(key, value)` - Safely set to localStorage with error handling
+- `safeRemoveItem(key)` - Safely remove from localStorage
+- `cleanupOldStorage()` - Clean up deprecated storage keys
 
 ---
 
