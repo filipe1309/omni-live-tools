@@ -343,7 +343,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 ### Component Organization
 
 **Common Components** (`components/common/`):
-- `ConnectionModal` - Modal for connecting to platforms
+- `ConnectionModal` - Modal for connecting to platforms with smart auto-close behavior:
+  - Auto-closes only when ALL selected platforms are connected
+  - Manual close (X button) available when at least one platform is connected
+  - Updates selected platforms to only connected ones on manual dismiss
+  - Supports both controlled (from header) and uncontrolled (initial) modes
 - `ConnectionForm` - Form inputs for connection
 - `SplashScreen` - Initial loading animation
 - `ToastContainer` - Toast notifications
@@ -362,9 +366,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 The app uses **React Context** for global state:
 
 1. **ConnectionContext** (`hooks/useConnectionContext.tsx`):
-   - Stores connection status for TikTok/Twitch
+   - Stores connection status for TikTok/Twitch/YouTube
    - Provides `connect()`, `disconnect()` functions
-   - Tracks `isAnyConnected` state
+   - Tracks `isAnyConnected` and `areAllSelectedConnected` states
+   - Manages `selectedPlatforms` array for multi-platform selection
+   - Controls connection modal visibility (`showConnectionModal`, `connectionModalDismissed`)
 
 2. **ToastContext** (`hooks/useToast.tsx`):
    - Toast notification queue
