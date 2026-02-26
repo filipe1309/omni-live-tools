@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.15.0] - 2026-02-25
+
+### Added
+
+- Update footer version display to use dynamic application version
+- Enhance ConnectionModal to manage visibility based on all selected platforms' connection status
+- Add dynamic import path handling for youtubei.js in Electron environment
+- Add flash animation for vote changes in PollOptionCard component
+- Update PollSetup component to enhance toggle functionality with click events and improved styling
+- Update Username component to handle userId and strip leading @ from uniqueId for display
+- Centralize storage keys for consistency across components
+- Add stream end notifications and connection tracking for TikTok and YouTube
+- Add reconnection handling for TikTok, Twitch, and YouTube, including event emissions and toast notifications
+- Add showBorder property to PollProfile and update auto-save logic in PollSetup
+- Add hideBorderToggle prop and conditional rendering for border visibility in PollSetup
+- Add AnimatedBorder component and integrate border visibility in PollSetup and PollResultsPage
+- Add ignoreDeprecations option to TypeScript configuration for backend and frontend
+- Implement chat relay and platform events handling for overlays
+- Add platform selection toggles and update overlay messages for better user guidance
+- Enhance member status checks and highlight classes in chat messages
+- Update help message in Makefile to enhance visual presentation
+- Update usage instructions for update-version script to include remote push option
+- Add functionality to push commits and tags to remote after version bump
+
+### Changed
+
+- Improve visibility handling and structure in AnimatedBorder component
+- Remove ignoreDeprecations option and update path aliases for consistency in TypeScript configurations
+- Update omni-logo-video-intro.mp4 for improved quality
+- V1.14.0
+
+### Fixed
+
+- Adjust max height of option suggestions dropdown for better visibility
+- Increase poll update interval from 500ms to 2s for improved reliability
+- Update button styles for TikTok, Twitch, and YouTube in ConnectionModal
+- Ensure children are wrapped in a div when not visible and adjust layout in AnimatedBorder component
+- Increase height of popup window in usePoll hook
+- Adjust minimum height of results container in PollResultsPage
+
+### Documentation
+
+- Add Portuguese README for Omni LIVE Tools with features and setup instructions
+- Update README to enhance branding and add additional technology badges
+- Enhance ConnectionModal documentation to reflect new auto-close behavior and platform connection management
+- Enhance connection modal to auto-close upon successful connections with manual close option
+- Enhance technical documentation with Username component details and centralized constants for polls
+- Enhance documentation with shared connection mode details and platform event handling
+- Add shared connection mode and member highlighting to enhance overlay functionality
+- Update technical documentation to include new OBS pop-out windows and versioning scripts
+- Update README to enhance feature descriptions and add new functionalities
+
 ## [1.14.0] - 2026-02-23
 
 ### Added
@@ -279,6 +331,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.15.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.11.0...v1.12.0
