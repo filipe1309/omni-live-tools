@@ -54,7 +54,8 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 - ⚡ **Rate Limiting** - Proteção integrada contra requisições excessivas
 - 🔌 **Integração Socket.IO** - Comunicação bidirecional em tempo real
 - 🔄 **Auto-Reconexão** - Reconexão automática com indicador visual quando a conexão é perdida
-- 🔔 **Sons de Notificação** - Feedback de áudio para eventos de enquete
+- � **Detecção de Fim de Stream** - Notificação automática quando uma live termina no TikTok ou YouTube
+- �🔔 **Sons de Notificação** - Feedback de áudio para eventos de enquete
 - ✨ **UI Aprimorada** - Efeitos de brilho neon, animações e telas de splash em vídeo
 - 🧪 **Testes** - Testes unitários e de integração abrangentes com Jest e React Testing Library
 - 🛠️ **Makefile** - Fluxo de trabalho de desenvolvimento simplificado com comandos Make
@@ -94,7 +95,7 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
    - **TikTok**: Digite o @username do streamer
    - **Twitch**: Digite o nome do canal
    - **YouTube**: Digite o ID do vídeo ou URL da live
-3. Configure sua enquete com 2-10 opções
+3. Configure sua enquete com 2-6 opções
 4. Defina a duração do timer (10-300 segundos)
 5. Inicie a enquete
 6. Os espectadores votam digitando números (1, 2, 3, etc.) no chat
@@ -104,12 +105,12 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
 
 - **Votação multiplataforma** - Colete votos do TikTok, Twitch e YouTube simultaneamente
 - **Um voto por usuário por plataforma** - Cada espectador pode votar apenas uma vez por enquete por plataforma
-- **Resultados em tempo real** - Contagem de votos e porcentagens atualizam instantaneamente
+- **Resultados em tempo real** - Contagem de votos e porcentagens atualizam instantaneamente com animação flash nas mudanças
 - **Badges de plataforma** - Indicadores visuais mostram de qual plataforma cada voto veio
 - **Perfis de enquete** - Salve e carregue configurações de enquetes com auto-save e suporte a localStorage
-- **Opções de autocomplete** - Opções de enquetes recentes são sugeridas enquanto você digita
+- **Opções de autocomplete** - Opções de enquetes recentes são sugeridas enquanto você digita (até 10 sugestões)
 - **Edição inline** - Clique duplo para editar perguntas e opções da enquete diretamente
-- **Opções configuráveis** - Suporte para 2-6 opções de enquete (padrão: 4)
+- **Opções configuráveis** - Suporte para 2-6 opções de enquete (padrão: 2)
 - **Log de votos** - Log detalhado opcional de cada voto com info da plataforma
 - **Display do timer** - Contagem regressiva mostra tempo restante com efeitos de animação glitch
 - **Sons de notificação** - Feedback de áudio quando votos são recebidos

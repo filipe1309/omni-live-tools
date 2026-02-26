@@ -54,7 +54,8 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 - ⚡ **Rate Limiting** - Built-in protection against excessive requests
 - 🔌 **Socket.IO Integration** - Real-time bidirectional communication
 - 🔄 **Auto-Reconnect** - Automatic reconnection with visual indicator when connection is lost
-- 🔔 **Notification Sounds** - Audio feedback for poll events
+- � **Stream End Detection** - Automatic notification when a stream ends on TikTok or YouTube
+- �🔔 **Notification Sounds** - Audio feedback for poll events
 - ✨ **Enhanced UI** - Neon glow effects, animations, and video splash screens
 - 🧪 **Testing** - Comprehensive unit and integration tests with Jest and React Testing Library
 - 🛠️ **Makefile** - Simplified development workflow with Make commands
@@ -94,7 +95,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
    - **TikTok**: Enter the streamer's @username
    - **Twitch**: Enter the channel name
    - **YouTube**: Enter the video ID or live stream URL
-3. Configure your poll with 2-10 options
+3. Configure your poll with 2-6 options
 4. Set the timer duration (10-300 seconds)
 5. Start the poll
 6. Viewers vote by typing numbers (1, 2, 3, etc.) in the chat
@@ -104,12 +105,12 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 - **Multi-platform voting** - Collect votes from TikTok, Twitch, and YouTube simultaneously
 - **One vote per user per platform** - Each viewer can only vote once per poll per platform
-- **Real-time results** - Vote counts and percentages update instantly
+- **Real-time results** - Vote counts and percentages update instantly with flash animation on changes
 - **Platform badges** - Visual indicators show which platform each vote came from
 - **Poll profiles** - Save and load poll configurations with auto-save and localStorage support
-- **Autocomplete options** - Recent poll options are suggested as you type
+- **Autocomplete options** - Recent poll options are suggested as you type (up to 10 suggestions)
 - **Inline editing** - Double-click to edit poll questions and options directly
-- **Configurable options** - Support for 2-6 poll options (default: 4)
+- **Configurable options** - Support for 2-6 poll options (default: 2)
 - **Vote logging** - Optional detailed log of each vote with platform info
 - **Timer display** - Countdown shows remaining time with glitch animation effects
 - **Notification sounds** - Audio feedback when votes are received
