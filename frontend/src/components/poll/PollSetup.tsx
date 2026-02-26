@@ -1016,7 +1016,7 @@ export function PollSetup ({
                 {activeOptionIndex === index && optionSuggestions.length > 0 && (
                   <div
                     ref={optionSuggestionsRef}
-                    className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-48 overflow-y-auto"
+                    className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-100 overflow-y-auto"
                   >
                     {optionSuggestions.map((suggestion, suggestionIndex) => (
                       <button
