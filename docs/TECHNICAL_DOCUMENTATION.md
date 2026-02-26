@@ -37,9 +37,11 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - SuperChat highlighting with auto-queue for YouTube
 - Member highlighting for channel subscribers across all platforms
 - Gift tracking with streak detection and timeout handling
-- Interactive polls where viewers vote by typing numbers
-- Poll profiles for saving and loading poll configurations
+- Interactive polls where viewers vote by typing numbers (with flash animation on vote changes)
+- Poll profiles for saving and loading poll configurations (with auto-save)
 - OBS overlay support for streaming software
+- Smart connection modal (auto-closes when all selected platforms connect)
+- Stream end notifications and reconnection handling
 - Multi-language support (PT-BR and EN)
 
 ---
@@ -353,13 +355,25 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `ToastContainer` - Toast notifications
 - `ErrorBoundary` - React error boundary
 - `Username` - Platform-aware username display with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`)
+- `AnimatedBorder` - Decorative animated border effect for poll results
 
 **Layout Components** (`components/layout/`):
 - `Header` - App header with navigation and controls
+- `Footer` - App footer with version display and social links
 
 **Feature Components**:
 - `components/chat/` - Chat message display components (ChatContainer, ChatMessage, ChatQueueContainer, GiftContainer)
-- `components/poll/` - Poll UI components
+- `components/poll/` - Poll UI components:
+  - `PollSetup` - Poll configuration form with question, options, timer, and profile management
+  - `PollOptionCard` - Individual poll option with vote count, percentage, and flash animation
+  - `PollResults` - Real-time poll results display
+  - `PollQuestion` - Poll question display with inline editing
+  - `PollStatusBar` - Poll timer and status indicator
+  - `PollControlButtons` - Start/reset poll controls
+  - `CountdownOverlay` - Countdown animation overlay
+  - `VoteLog` - Optional detailed vote history log
+  - `AutocompleteInput` - Autocomplete for recent poll options (shows up to 10 suggestions)
+  - `SpotlightTrophyCelebration` - Winner celebration animation
 
 ### State Management
 
@@ -427,6 +441,13 @@ export const POLL_OPTIONS = {
   TOTAL: 6,
   MIN_SELECTED: 2,
 };
+
+// History settings (question and option autocomplete)
+export const QUESTION_HISTORY = { MAX_ITEMS: 10 };
+export const OPTION_HISTORY = { MAX_ITEMS: 10 };
+
+// Profile settings
+export const POLL_PROFILES = { MAX_PROFILES: 20 };
 ```
 
 **Storage Utilities** (`utils/storage.ts`):
