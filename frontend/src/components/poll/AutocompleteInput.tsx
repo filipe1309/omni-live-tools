@@ -148,7 +148,7 @@ export function AutocompleteInput({
       {showDropdown && filteredSuggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
         >
           {filteredSuggestions.map((suggestion, index) => (
             <button

@@ -33,13 +33,13 @@ export const STORAGE_KEYS = {
 
 // Question history settings
 export const QUESTION_HISTORY = {
-  MAX_ITEMS: 10,
+  MAX_ITEMS: 20,
   STORAGE_KEY: STORAGE_KEYS.QUESTION_HISTORY,
 } as const;
 
 // Option history settings
 export const OPTION_HISTORY = {
-  MAX_ITEMS: 10,
+  MAX_ITEMS: 20,
   STORAGE_KEY: STORAGE_KEYS.OPTION_HISTORY,
 } as const;
 
