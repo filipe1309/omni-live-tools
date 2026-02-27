@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'omni-live-tools-recent-poll-options';
 const MAX_RECENT_OPTIONS = 20;
@@ -11,26 +11,31 @@ interface UseRecentPollOptionsReturn {
 }
 
 /**
+ * Helper function to load recent options from localStorage synchronously.
+ * This ensures options are available immediately when the component mounts.
+ */
+function loadFromStorage(): string[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch {
+    console.warn('Failed to load recent poll options from localStorage');
+  }
+  return [];
+}
+
+/**
  * Hook for managing recently used poll options with localStorage persistence.
  * Provides autocomplete suggestions from previously used option texts.
  */
 export function useRecentPollOptions(): UseRecentPollOptionsReturn {
-  const [recentOptions, setRecentOptions] = useState<string[]>([]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setRecentOptions(parsed);
-        }
-      }
-    } catch {
-      console.warn('Failed to load recent poll options from localStorage');
-    }
-  }, []);
+  // Load synchronously from localStorage to ensure options are available immediately
+  const [recentOptions, setRecentOptions] = useState<string[]>(loadFromStorage);
 
   // Save to localStorage whenever recentOptions changes
   const saveToStorage = useCallback((options: string[]) => {

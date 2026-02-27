@@ -167,6 +167,9 @@ export function PollSetup ({
   const [activeOptionIndex, setActiveOptionIndex] = useState<number | null>(null);
   const [optionSuggestions, setOptionSuggestions] = useState<string[]>([]);
   const optionSuggestionsRef = useRef<HTMLDivElement>(null);
+  const activeOptionIndexRef = useRef<number | null>(null);
+  // Keep ref in sync with state
+  activeOptionIndexRef.current = activeOptionIndex;
 
   // Profile state
   const [profiles, setProfiles] = useState<PollProfile[]>(() => loadProfiles());
@@ -438,9 +441,12 @@ export function PollSetup ({
 
   const handleOptionBlur = (index: number) => {
     // Delay to allow click on suggestion
+    // Only close if we're still on the same option (prevents closing when clicking another option)
     setTimeout(() => {
-      setActiveOptionIndex(null);
-      setOptionSuggestions([]);
+      if (activeOptionIndexRef.current === index) {
+        setActiveOptionIndex(null);
+        setOptionSuggestions([]);
+      }
     }, 200);
     // Save to history if non-empty
     if (options[index].trim()) {

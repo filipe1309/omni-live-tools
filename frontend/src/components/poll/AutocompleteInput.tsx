@@ -25,11 +25,13 @@ export function AutocompleteInput({
   className = '',
   placeholder,
 }: AutocompleteInputProps) {
-  const [showDropdown, setShowDropdown] = useState(false);
+  // Start with dropdown open since this component is only shown when editing
+  const [showDropdown, setShowDropdown] = useState(true);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isSelectingRef = useRef(false); // Track if user is selecting from dropdown
 
   // Filter suggestions based on current value
   const filteredSuggestions = value.trim()
@@ -40,11 +42,44 @@ export function AutocompleteInput({
 
   // Focus input on mount
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
+    const timeoutId = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.select();
+      }
+    }, 10);
+    return () => clearTimeout(timeoutId);
   }, []);
+
+  // Handle click outside to close dropdown and exit editing
+  // Delay adding the listener to avoid catching the same click that opened the editor
+  useEffect(() => {
+    let listenerAdded = false;
+    
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+        // Defer onBlur to allow click events to propagate to other elements first
+        // This allows clicking directly from one option to another to work correctly
+        setTimeout(() => {
+          onBlur();
+        }, 0);
+      }
+    };
+
+    // Add listener after a short delay to avoid immediate trigger
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      listenerAdded = true;
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (listenerAdded) {
+        document.removeEventListener('mousedown', handleClickOutside);
+      }
+    };
+  }, [onBlur]);
 
   // Reset highlighted index when filtered suggestions change
   useEffect(() => {
@@ -63,22 +98,16 @@ export function AutocompleteInput({
     setShowDropdown(true);
   }, []);
 
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    // Check if the new focus target is within our container (including dropdown)
-    const relatedTarget = e.relatedTarget as Node | null;
-    if (containerRef.current?.contains(relatedTarget)) {
-      return; // Don't close dropdown if clicking within container
-    }
-    setShowDropdown(false);
-    onBlur();
-  }, [onBlur]);
-
   const handleSelectSuggestion = useCallback((suggestion: string) => {
+    isSelectingRef.current = true;
     onChange(suggestion);
     onSelectSuggestion?.(suggestion);
     setShowDropdown(false);
-    // Focus back to input after selection
-    inputRef.current?.focus();
+    // Refocus input after selection
+    setTimeout(() => {
+      inputRef.current?.focus();
+      isSelectingRef.current = false;
+    }, 0);
   }, [onChange, onSelectSuggestion]);
 
   const handleKeyDownInternal = useCallback((e: React.KeyboardEvent) => {
@@ -137,7 +166,6 @@ export function AutocompleteInput({
           setShowDropdown(true);
         }}
         onFocus={handleFocus}
-        onBlur={handleBlur}
         onKeyDown={handleKeyDownInternal}
         className={className}
         placeholder={placeholder}
@@ -160,7 +188,8 @@ export function AutocompleteInput({
                 index === filteredSuggestions.length - 1 ? 'rounded-b-lg' : ''
               }`}
               onMouseDown={(e) => {
-                e.preventDefault(); // Prevent blur
+                e.preventDefault();
+                e.stopPropagation();
                 handleSelectSuggestion(suggestion);
               }}
               onMouseEnter={() => setHighlightedIndex(index)}

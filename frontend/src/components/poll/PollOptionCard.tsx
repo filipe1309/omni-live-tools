@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/i18n';
 import type { PollOption } from '@/types';
 import { useRecentPollOptions } from '@/hooks/useRecentPollOptions';
@@ -58,6 +58,7 @@ export function PollOptionCard ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(option.text);
   const [isFlashing, setIsFlashing] = useState(false);
+  const [editKey, setEditKey] = useState(0); // Key to force fresh AutocompleteInput mount
   const prevVotesRef = useRef(votes);
   const { recentOptions, addRecentOption } = useRecentPollOptions();
 
@@ -87,12 +88,17 @@ export function PollOptionCard ({
 
   const handleDoubleClick = () => {
     if (editable) {
+      setEditKey((k) => k + 1); // Increment key to force fresh mount
       setIsEditing(true);
     }
   };
 
-  const handleBlur = () => {
-    const trimmed = editValue.trim();
+  // Use ref to store the latest editValue for use in stable handleBlur
+  const editValueRef = useRef(editValue);
+  editValueRef.current = editValue;
+
+  const handleBlur = useCallback(() => {
+    const trimmed = editValueRef.current.trim();
     if (trimmed && trimmed !== option.text) {
       onOptionTextChange?.(option.id, trimmed);
       addRecentOption(trimmed);
@@ -100,8 +106,9 @@ export function PollOptionCard ({
       setEditValue(option.text);
     }
     setIsEditing(false);
-  };
+  }, [option.text, option.id, onOptionTextChange, addRecentOption]);
 
+  // Handle Enter key to save and close
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleBlur();
@@ -142,6 +149,7 @@ export function PollOptionCard ({
           </span>
           {isEditing ? (
             <AutocompleteInput
+              key={editKey}
               value={editValue}
               onChange={setEditValue}
               onBlur={handleBlur}
