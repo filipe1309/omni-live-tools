@@ -17,6 +17,7 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)',
   const [autoScroll, setAutoScroll] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const isScrollingProgrammatically = useRef(false);
+  const lastItemsLength = useRef(items.length);
   const { t } = useLanguage();
 
   // Filter items based on search query
@@ -34,8 +35,8 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)',
   const isAtBottom = useCallback(() => {
     if (!containerRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    // Consider "at bottom" if within 50px of the bottom
-    return scrollHeight - scrollTop - clientHeight < 50;
+    // Consider "at bottom" if within 200px of the bottom (increased for rapid messages)
+    return scrollHeight - scrollTop - clientHeight < 200;
   }, []);
 
   // Handle scroll events to enable/disable auto-scroll
@@ -48,15 +49,22 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)',
   // Auto-scroll to bottom when new items arrive (only if autoScroll is enabled and no search filter)
   useEffect(() => {
     if (containerRef.current && autoScroll && !searchQuery.trim()) {
-      isScrollingProgrammatically.current = true;
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-      // Reset flag after animation completes
-      setTimeout(() => {
-        isScrollingProgrammatically.current = false;
-      }, 500);
+      // Check if new items were added
+      const newItemsAdded = items.length > lastItemsLength.current;
+      lastItemsLength.current = items.length;
+      
+      if (newItemsAdded) {
+        isScrollingProgrammatically.current = true;
+        // Use instant scroll for rapid messages, smooth for normal pace
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight,
+          behavior: 'instant',
+        });
+        // Reset flag immediately for instant scroll
+        requestAnimationFrame(() => {
+          isScrollingProgrammatically.current = false;
+        });
+      }
     }
   }, [items.length, autoScroll, searchQuery]);
 

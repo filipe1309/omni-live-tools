@@ -20,11 +20,11 @@ export function ObsEventContainer({ items, fontColor, maxHeight = 'calc(100vh - 
   // Auto-scroll to bottom when new items arrive
   useEffect(() => {
     if (containerRef.current) {
-      // Stop any ongoing animation
+      // Use instant scroll for reliable auto-scroll during rapid messages
       const container = containerRef.current;
       container.scrollTo({
         top: container.scrollHeight,
-        behavior: 'smooth',
+        behavior: 'instant',
       });
     }
   }, [items.length]);

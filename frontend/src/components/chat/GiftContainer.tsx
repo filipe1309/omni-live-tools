@@ -24,8 +24,8 @@ export function GiftContainer({ gifts, title, maxHeight = 'calc(100vh - 320px)' 
   const isAtBottom = useCallback(() => {
     if (!containerRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    // Consider "at bottom" if within 50px of the bottom
-    return scrollHeight - scrollTop - clientHeight < 50;
+    // Consider "at bottom" if within 200px of the bottom (increased for rapid messages)
+    return scrollHeight - scrollTop - clientHeight < 200;
   }, []);
 
   // Handle scroll events to enable/disable auto-scroll
@@ -41,12 +41,12 @@ export function GiftContainer({ gifts, title, maxHeight = 'calc(100vh - 320px)' 
       isScrollingProgrammatically.current = true;
       containerRef.current.scrollTo({
         top: containerRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: 'instant',
       });
-      // Reset flag after animation completes
-      setTimeout(() => {
+      // Reset flag immediately for instant scroll
+      requestAnimationFrame(() => {
         isScrollingProgrammatically.current = false;
-      }, 500);
+      });
     }
   }, [gifts.length, autoScroll]);
 
