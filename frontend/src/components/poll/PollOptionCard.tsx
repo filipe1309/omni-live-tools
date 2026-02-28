@@ -60,7 +60,7 @@ export function PollOptionCard ({
   const [isFlashing, setIsFlashing] = useState(false);
   const [editKey, setEditKey] = useState(0); // Key to force fresh AutocompleteInput mount
   const prevVotesRef = useRef(votes);
-  const { recentOptions, addRecentOption } = useRecentPollOptions();
+  const { recentOptions, addRecentOption } = useRecentPollOptions(option.id);
 
   // Detect vote changes and trigger flash animation
   useEffect(() => {

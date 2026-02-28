@@ -37,9 +37,12 @@ const saveQuestionToHistory = (question: string) => {
   localStorage.setItem(QUESTION_HISTORY.STORAGE_KEY, JSON.stringify(trimmed));
 };
 
-// Load option history from localStorage
-const loadOptionHistory = (): string[] => {
-  const saved = localStorage.getItem(OPTION_HISTORY.STORAGE_KEY);
+// Load option history from localStorage - per-option storage
+const loadOptionHistory = (optionIndex: number): string[] => {
+  // Use 1-based option ID for storage key (matching option.id)
+  const optionId = optionIndex + 1;
+  const storageKey = `${OPTION_HISTORY.STORAGE_KEY}-${optionId}`;
+  const saved = localStorage.getItem(storageKey);
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -50,17 +53,20 @@ const loadOptionHistory = (): string[] => {
   return [];
 };
 
-// Save option to history
-const saveOptionToHistory = (option: string) => {
+// Save option to history - per-option storage
+const saveOptionToHistory = (option: string, optionIndex: number) => {
   if (!option.trim()) return;
-  const history = loadOptionHistory();
+  // Use 1-based option ID for storage key (matching option.id)
+  const optionId = optionIndex + 1;
+  const storageKey = `${OPTION_HISTORY.STORAGE_KEY}-${optionId}`;
+  const history = loadOptionHistory(optionIndex);
   // Remove if already exists (to move to top)
   const filtered = history.filter(o => o !== option.trim());
   // Add to beginning
   filtered.unshift(option.trim());
   // Keep only last MAX_ITEMS
   const trimmed = filtered.slice(0, OPTION_HISTORY.MAX_ITEMS);
-  localStorage.setItem(OPTION_HISTORY.STORAGE_KEY, JSON.stringify(trimmed));
+  localStorage.setItem(storageKey, JSON.stringify(trimmed));
 };
 
 // Poll profile interface
@@ -393,8 +399,8 @@ export function PollSetup ({
     newOptions[index] = value;
     setOptions(newOptions);
 
-    // Update option suggestions based on input
-    const history = loadOptionHistory();
+    // Update option suggestions based on input - using per-option history
+    const history = loadOptionHistory(index);
     if (value.trim()) {
       const filtered = history.filter(o =>
         o.toLowerCase().includes(value.toLowerCase()) && o !== value
@@ -415,7 +421,7 @@ export function PollSetup ({
 
   const handleOptionFocus = (index: number) => {
     setActiveOptionIndex(index);
-    const history = loadOptionHistory();
+    const history = loadOptionHistory(index);
     const currentValue = options[index];
     if (currentValue.trim()) {
       const filtered = history.filter(o =>
@@ -433,7 +439,7 @@ export function PollSetup ({
       setActiveOptionIndex(null);
       setOptionSuggestions([]);
     } else {
-      const history = loadOptionHistory();
+      const history = loadOptionHistory(index);
       setActiveOptionIndex(index);
       setOptionSuggestions(history.slice(0, OPTION_HISTORY.MAX_ITEMS));
     }
@@ -448,9 +454,9 @@ export function PollSetup ({
         setOptionSuggestions([]);
       }
     }, 200);
-    // Save to history if non-empty
+    // Save to history if non-empty - using per-option storage
     if (options[index].trim()) {
-      saveOptionToHistory(options[index].trim());
+      saveOptionToHistory(options[index].trim(), index);
     }
   };
 
@@ -1005,7 +1011,7 @@ export function PollSetup ({
                   disabled={disabled}
                   autoComplete="off"
                 />
-                {loadOptionHistory().length > 0 && (
+                {loadOptionHistory(index).length > 0 && (
                   <button
                     type="button"
                     onClick={() => handleOptionArrowClick(index)}
