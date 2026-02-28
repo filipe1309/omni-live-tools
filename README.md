@@ -141,10 +141,11 @@ The application reads chat messages from TikTok LIVE, Twitch, YouTube Live, and 
 #### Features
 
 - **Multi-platform support** - Connect to TikTok, Twitch, YouTube, and Kick simultaneously
+- **Display names** - Shows user's display name/nickname instead of handle for better readability
 - **Message queue** - Hover over any message to add it to a reading queue; easily manage which messages to read
 - **Featured message overlay** - Click the broadcast icon to send a message to a dedicated OBS overlay window
 - **Pop-out overlay windows** - Separate pop-out windows for chat, gifts, and queue for flexible OBS integration
-- **Smart auto-scroll** - Auto-scroll pauses when you scroll up to review messages, resumes when you scroll back down
+- **Smart auto-scroll** - Auto-scroll keeps up with high-volume chat; pauses when you scroll up to review messages, resumes when you scroll back down
 - **Search/filter messages** - Quickly find messages by content, username, or nickname
 - **SuperChat highlighting** - YouTube SuperChats are highlighted with a golden background and auto-added to queue
 - **Member highlighting** - Channel members are highlighted with an emerald green background and star icon

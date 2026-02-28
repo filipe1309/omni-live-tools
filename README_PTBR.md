@@ -141,10 +141,11 @@ O aplicativo lê mensagens do chat do TikTok LIVE, Twitch, YouTube Live e Kick e
 #### Funcionalidades
 
 - **Suporte multiplataforma** - Conecte-se ao TikTok, Twitch, YouTube e Kick simultaneamente
+- **Nomes de exibição** - Mostra o nome de exibição/apelido do usuário em vez do handle para melhor legibilidade
 - **Fila de mensagens** - Passe o mouse sobre qualquer mensagem para adicioná-la a uma fila de leitura; gerencie facilmente quais mensagens ler
 - **Overlay de mensagem em destaque** - Clique no ícone de broadcast para enviar uma mensagem para uma janela de overlay OBS dedicada
 - **Janelas pop-out de overlay** - Janelas pop-out separadas para chat, presentes e fila para integração flexível com OBS
-- **Auto-scroll inteligente** - O auto-scroll pausa quando você rola para cima para revisar mensagens, retoma quando você volta para baixo
+- **Auto-scroll inteligente** - O auto-scroll acompanha chats de alto volume; pausa quando você rola para cima para revisar mensagens, retoma quando você volta para baixo
 - **Busca/filtro de mensagens** - Encontre rapidamente mensagens por conteúdo, username ou apelido
 - **Destaque de SuperChat** - SuperChats do YouTube são destacados com fundo dourado e adicionados automaticamente à fila
 - **Destaque de membros** - Membros do canal são destacados com fundo verde esmeralda e ícone de estrela
