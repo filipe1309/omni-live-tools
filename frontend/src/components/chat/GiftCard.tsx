@@ -25,7 +25,6 @@ export function GiftCard({ gift, isPending = false, timestamp = new Date() }: Gi
           </div>
           <span className="text-[10px] text-slate-500 flex-shrink-0">{timeString}</span>
         </div>
-        <p className="text-slate-300 text-xs mb-1 truncate">{gift.describe}</p>
         
         <div className="flex items-center gap-2">
           <img 
