@@ -432,8 +432,14 @@ electron-dist edist: check-electron-deps check-backend-deps frontend-build bump-
 ## electron-clean: Remove Electron build artifacts [alias: ec]
 electron-clean ec:
 	@printf "$(BLUE)🧹 Cleaning Electron build artifacts...$(NC)\n"
-	@rm -rf $(DIST_ELECTRON_DIR)
-	@rm -rf $(RELEASE_DIR)
+	@rm -rf $(DIST_ELECTRON_DIR) 2>/dev/null || true
+	@if [ -d "$(RELEASE_DIR)" ]; then \
+		rm -rf $(RELEASE_DIR) 2>/dev/null || { \
+			chflags -R nouchg $(RELEASE_DIR) 2>/dev/null || true; \
+			xattr -cr $(RELEASE_DIR) 2>/dev/null || true; \
+			rm -rf $(RELEASE_DIR) 2>/dev/null || true; \
+		}; \
+	fi
 	@printf "$(GREEN)✓ Electron clean complete$(NC)\n"
 
 # ------------------------------------------------------------------------------

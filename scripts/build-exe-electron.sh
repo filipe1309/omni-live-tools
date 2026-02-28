@@ -32,7 +32,20 @@ fi
 
 # Step 0: Clean previous Electron build
 echo "🧹 Cleaning previous Electron build..."
-rm -rf electron/dist-electron release
+# Force remove with retries for stubborn directories (macOS sometimes has issues with locked files)
+rm -rf electron/dist-electron 2>/dev/null || true
+if [ -d "release" ]; then
+    # Try normal removal first
+    rm -rf release 2>/dev/null || {
+        # If that fails, try to unlock files first (macOS)
+        if [[ "$(uname -s)" == "Darwin" ]]; then
+            echo "  → Unlocking files in release directory..."
+            chflags -R nouchg release 2>/dev/null || true
+            xattr -cr release 2>/dev/null || true
+        fi
+        rm -rf release 2>/dev/null || true
+    }
+fi
 
 # Step 1: Install root (Electron) dependencies if needed
 if [ ! -d "node_modules" ]; then
