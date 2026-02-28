@@ -23,13 +23,13 @@
 
 ## 1. Overview
 
-Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. It can run as:
+Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, **YouTube Live**, and **Kick** streams. It can run as:
 
 - **Web Server Mode:** Backend serves the frontend, accessible via browser
 - **Desktop App Mode:** Electron wraps everything into a standalone desktop application
 
 ### Main Features
-- Real-time chat reading from TikTok, Twitch, and YouTube
+- Real-time chat reading from TikTok, Twitch, YouTube, and Kick
 - Message queue for organizing messages to read during streams
 - Featured message overlay for displaying messages on OBS with pop-out window support
 - Pop-out OBS windows for chat, gifts, and queue
@@ -59,7 +59,10 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 | Express | 4.x | HTTP server framework |
 | Socket.IO | 4.x | Real-time WebSocket communication |
 | tiktok-live-connector | 2.x | TikTok LIVE API connection |
-| @twurple/chat | 8.x | Twitch chat API || youtubei.js | 16.x | YouTube Live chat API (InnerTube) || Jest | 29.x | Unit testing |
+| @twurple/chat | 8.x | Twitch chat API |
+| youtubei.js | 16.x | YouTube Live chat API (InnerTube) |
+| @retconned/kick-js | 0.5.x | Kick chat API |
+| Jest | 29.x | Unit testing |
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -236,10 +239,10 @@ server.start();
 **Entities** (`domain/entities/`):
 - `ConnectionState` - Represents a connection's state (roomId, isConnected, etc.)
 - `ConnectionOptions` - Options for connecting (sessionId, etc.)
-- `TikTokUser`, `TwitchUser`, `YouTubeUser` - User data structures
+- `TikTokUser`, `TwitchUser`, `YouTubeUser`, `KickUser` - User data structures
 
 **Enums** (`domain/enums/`):
-- `PlatformType` - TIKTOK, TWITCH, YOUTUBE
+- `PlatformType` - TIKTOK, TWITCH, YOUTUBE, KICK
 - `TikTokEventType` - CHAT, GIFT, LIKE, MEMBER, etc.
 - `TwitchEventType` - CHAT, SUB, CHEER, etc.
 - `YouTubeEventType` - CHAT, SUPERCHAT, MEMBER, STREAM_END
@@ -260,6 +263,9 @@ server.start();
 
 **YouTube** (`infrastructure/youtube/`):
 - `YouTubeConnectionWrapper` - Wraps `youtubei.js` library for YouTube Live chat
+
+**Kick** (`infrastructure/kick/`):
+- `KickConnectionWrapper` - Wraps `@retconned/kick-js` library for Kick chat
 
 **Rate Limiter** (`infrastructure/rate-limiter/`):
 - `InMemoryRateLimiterRepository` - In-memory rate limiting storage
@@ -336,7 +342,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `useTikTokConnection` | Manages TikTok socket connection and events |
 | `useTwitchConnection` | Manages Twitch socket connection and events |
 | `useYouTubeConnection` | Manages YouTube socket connection and events |
-| `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube connections, platform events room |
+| `useKickConnection` | Manages Kick socket connection and events |
+| `useMultiPlatformConnection` | Combines TikTok + Twitch + YouTube + Kick connections, platform events room |
 | `useConnectionContext` | Global connection state (React Context) |
 | `useFeaturedMessage` | Manages featured message overlay via Socket.IO |
 | `usePoll` | Poll creation, voting, timer logic |
@@ -357,7 +364,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `SplashScreen` - Initial loading animation
 - `ToastContainer` - Toast notifications
 - `ErrorBoundary` - React error boundary
-- `Username` - Platform-aware username display with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`)
+- `Username` - Platform-aware username display with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`, Kick → `kick.com/{user}`)
 - `AnimatedBorder` - Decorative animated border effect for poll results
 
 **Layout Components** (`components/layout/`):
@@ -383,7 +390,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 The app uses **React Context** for global state:
 
 1. **ConnectionContext** (`hooks/useConnectionContext.tsx`):
-   - Stores connection status for TikTok/Twitch/YouTube
+   - Stores connection status for TikTok/Twitch/YouTube/Kick
    - Provides `connect()`, `disconnect()` functions
    - Tracks `isAnyConnected` and `areAllSelectedConnected` states
    - Manages `selectedPlatforms` array for multi-platform selection
@@ -526,9 +533,11 @@ make electron-dist
 | `setUniqueId` | `(uniqueId, options)` | Connect to TikTok |
 | `setTwitchChannel` | `(channel)` | Connect to Twitch |
 | `setYouTubeVideo` | `(videoId)` | Connect to YouTube Live |
+| `setKickChannel` | `(channel)` | Connect to Kick |
 | `disconnectTikTok` | - | Disconnect TikTok |
 | `disconnectTwitch` | - | Disconnect Twitch |
 | `disconnectYouTube` | - | Disconnect YouTube |
+| `disconnectKick` | - | Disconnect Kick |
 | `setFeaturedMessage` | `ChatItem` | Send message to overlay |
 | `clearFeaturedMessage` | - | Clear overlay message |
 | `join-platform-events` | - | Join platform events room (for shared connections) |
@@ -540,9 +549,11 @@ make electron-dist
 | `tiktokConnected` | `roomState` | TikTok connection success |
 | `twitchConnected` | `channelInfo` | Twitch connection success |
 | `youtubeConnected` | `videoInfo` | YouTube connection success |
+| `kickConnected` | `channelInfo` | Kick connection success |
 | `tiktokDisconnected` | `reason` | TikTok disconnected |
 | `twitchDisconnected` | `reason` | Twitch disconnected |
 | `youtubeDisconnected` | `reason` | YouTube disconnected |
+| `kickDisconnected` | `reason` | Kick disconnected |
 | `chat` | `ChatMessage` | Chat message received |
 | `featuredMessage` | `ChatItem` | Featured message to display |
 | `featuredMessageCleared` | - | Clear featured message |
@@ -557,11 +568,11 @@ make electron-dist
 
 The overlay can reuse platform connections from the main app instead of creating new connections. This is useful when:
 - You want to avoid duplicate API connections
-- The main app is already connected to TikTok/Twitch/YouTube
+- The main app is already connected to TikTok/Twitch/YouTube/Kick
 - Opening the overlay in an external browser (common with Electron)
 
 **How it works:**
-1. When a client connects to a platform (TikTok, Twitch, or YouTube), all events are broadcast to both:
+1. When a client connects to a platform (TikTok, Twitch, YouTube, or Kick), all events are broadcast to both:
    - The originating socket
    - All clients in the `platform-events` room
 2. OBS overlays join the `platform-events` room using the `useAppConnection=1` URL parameter
@@ -584,7 +595,7 @@ Main App                    Backend                      Overlay
 Messages from all platforms are normalized:
 ```typescript
 interface UnifiedChatMessage {
-  platform: 'tiktok' | 'twitch' | 'youtube';
+  platform: 'tiktok' | 'twitch' | 'youtube' | 'kick';
   uniqueId: string;
   nickname: string;
   comment: string;
@@ -610,7 +621,7 @@ interface ChatItem {
   color?: string;
   timestamp: Date;
   isTemporary?: boolean;
-  platform?: 'tiktok' | 'twitch' | 'youtube';
+  platform?: 'tiktok' | 'twitch' | 'youtube' | 'kick';
   isSuperchat?: boolean;
 }
 ```
