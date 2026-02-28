@@ -47,8 +47,9 @@ function getKickJsPath(): string {
  * Configure puppeteer to use system Chrome browser
  * kick-js uses puppeteer internally - we use the system Chrome instead of bundling
  * Chromium to keep the app size smaller and avoid complex asar unpacking
+ * @returns true if Chrome was found, false otherwise
  */
-function configurePuppeteerForElectron(): void {
+function configurePuppeteerForElectron(): boolean {
   // Skip puppeteer's own browser download
   process.env.PUPPETEER_SKIP_DOWNLOAD = 'true';
   
@@ -78,11 +79,12 @@ function configurePuppeteerForElectron(): void {
     if (fs.existsSync(chromePath)) {
       process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
       console.log(`KICK: Using system Chrome at ${chromePath}`);
-      return;
+      return true;
     }
   }
   
   console.warn('KICK: No Chrome browser found. Kick chat requires Google Chrome or Chromium installed.');
+  return false;
 }
 
 /**
@@ -214,7 +216,11 @@ export class KickConnectionWrapper extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       try {
         // Configure puppeteer for Electron before importing kick-js
-        configurePuppeteerForElectron();
+        const chromeFound = configurePuppeteerForElectron();
+        if (!chromeFound) {
+          reject(new Error('CHROME_NOT_INSTALLED: Kick requires Google Chrome or Chromium browser installed on your system.'));
+          return;
+        }
         
         // Dynamic import of kick-js with correct path for Electron asar
         const kickJsPath = getKickJsPath();

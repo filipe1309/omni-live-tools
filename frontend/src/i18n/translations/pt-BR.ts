@@ -264,6 +264,7 @@ export const ptBR = {
     errorConnectingTwitch: 'Erro ao conectar Twitch: {error}',
     errorConnectingYouTube: 'Erro ao conectar YouTube: {error}',
     errorConnectingKick: 'Erro ao conectar Kick: {error}',
+    kickRequiresChrome: 'Kick requer Google Chrome ou Chromium instalado no seu sistema',
   },
 
   // Language

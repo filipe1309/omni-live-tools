@@ -398,7 +398,12 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       toast.success(interpolate(t.toast.kickConnected, { channel }));
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      toast.error(interpolate(t.toast.errorConnectingKick, { error: errorMessage }));
+      // Check for Chrome not installed error
+      if (errorMessage.includes('CHROME_NOT_INSTALLED')) {
+        toast.error(t.toast.kickRequiresChrome);
+      } else {
+        toast.error(interpolate(t.toast.errorConnectingKick, { error: errorMessage }));
+      }
       throw error;
     }
   }, [connection.kick, toast, t, handleSetKickChannel]);

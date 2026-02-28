@@ -266,6 +266,7 @@ export const en: TranslationKeys = {
     errorConnectingTwitch: 'Error connecting Twitch: {error}',
     errorConnectingYouTube: 'Error connecting YouTube: {error}',
     errorConnectingKick: 'Error connecting Kick: {error}',
+    kickRequiresChrome: 'Kick requires Google Chrome or Chromium browser installed on your system',
   },
 
   // Language
