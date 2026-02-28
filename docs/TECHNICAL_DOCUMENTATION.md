@@ -364,7 +364,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `SplashScreen` - Initial loading animation
 - `ToastContainer` - Toast notifications
 - `ErrorBoundary` - React error boundary
-- `Username` - Platform-aware username display with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`, Kick → `kick.com/{user}`)
+- `Username` - Platform-aware display name component that shows the user's nickname (falling back to handle) with clickable profile links (TikTok → `tiktok.com/@user`, Twitch → `twitch.tv/user`, YouTube → `youtube.com/channel/{channelId}`, Kick → `kick.com/{user}`)
 - `AnimatedBorder` - Decorative animated border effect for poll results
 
 **Layout Components** (`components/layout/`):
