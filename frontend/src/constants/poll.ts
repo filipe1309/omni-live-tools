@@ -15,9 +15,9 @@ export const POLL_TIMER = {
 
 // Font size settings for poll results
 export const POLL_FONT_SIZE = {
-  DEFAULT: 1.5,
-  MIN: 1,
-  MAX: 3.5,
+  DEFAULT: 2,
+  MIN: 2,
+  MAX: 4,
   STEP: 0.5,
 } as const;
 
