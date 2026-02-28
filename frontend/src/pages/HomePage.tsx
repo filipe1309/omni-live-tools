@@ -73,9 +73,13 @@ export function HomePage () {
               <a href="https://www.twitch.tv/" className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer">
                 Twitch
               </a>
-              {' '}{t.home.and}{' '}
+              {', '}
               <a href="https://www.youtube.com/live" className="text-red-500 hover:underline" target="_blank" rel="noopener noreferrer">
-                YouTube.
+                YouTube
+              </a>
+              {' '}{t.home.and}{' '}
+              <a href="https://kick.com/" className="text-green-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                Kick.
               </a>
             </p>
           </div>
