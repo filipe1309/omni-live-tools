@@ -264,42 +264,28 @@ Poll constants are in `frontend/src/constants/poll.ts`:
 
 ### Adding a New ESM Package (Electron)
 
-When adding ESM-only npm packages that will be used in Electron, follow these steps to avoid "Cannot find package" errors:
+**Note:** Asar packaging is disabled for this project (`asar: false` in electron-builder.yml) due to the complexity of ESM/CJS module resolution with packages like `kick-js` that have deep puppeteer dependency trees. This simplifies ESM package handling.
+
+When adding ESM-only npm packages that will be used in Electron:
 
 1. **Add to both package.json files:**
    - Root `package.json` (for Electron packaging)
    - `backend/package.json` (for development)
 
-2. **Add to electron-builder.yml asarUnpack:**
-   ```yaml
-   asarUnpack:
-     - "**/node_modules/@scope/package-name/**"
-   ```
-
-3. **Create path helper function** in the wrapper (see `YouTubeConnectionWrapper.ts` or `KickConnectionWrapper.ts`):
+2. **Use dynamic import** for ESM packages in wrappers:
    ```typescript
-   import path from 'path';
+   // Helper to bypass TypeScript's conversion of dynamic import() to require()
+   const dynamicImport = new Function('specifier', 'return import(specifier)') as <T>(specifier: string) => Promise<T>;
    
-   function getPackagePath(): string {
-     if (__dirname.includes('app.asar')) {
-       const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
-       return path.resolve(unpackedBase, '../../../../node_modules/@scope/package/dist/index.js');
-     }
-     return '@scope/package-name';
-   }
+   // Import the ESM module by package name
+   const module = await dynamicImport<typeof import('@scope/package-name')>('@scope/package-name');
    ```
 
-4. **Use dynamic import with path helper:**
-   ```typescript
-   const packagePath = getPackagePath();
-   const module = await dynamicImport<typeof import('@scope/package-name')>(packagePath);
-   ```
+3. **Run `npm install` in root** to update `package-lock.json`
 
-5. **Run `npm install` in root** to update `package-lock.json`
+**Why asar is disabled:** Packages like `@retconned/kick-js` use puppeteer internally, which has a deep dependency tree (puppeteer-extra, puppeteer-extra-plugin-stealth, deepmerge, merge-deep, etc.). When asar is enabled, unpacked ESM modules can't resolve their CJS dependencies that remain in the asar archive. Disabling asar allows normal Node.js module resolution to work.
 
-**Why this is needed:** Electron packages code into an asar archive. ESM modules with dynamic imports need to be unpacked and accessed via their full filesystem path.
-
-**Note on packages using Puppeteer:** Packages like `@retconned/kick-js` that use puppeteer internally have deep dependency trees (puppeteer-extra, puppeteer-extra-plugin-stealth, deepmerge, merge-deep, etc.). Instead of unpacking all these dependencies, configure the wrapper to use the system Chrome browser via `PUPPETEER_EXECUTABLE_PATH`. See `KickConnectionWrapper.ts` for an example. This requires users to have Google Chrome installed.
+**Note on Kick and Chrome:** The `kick-js` package uses puppeteer. The wrapper configures it to use the system Chrome browser via `PUPPETEER_EXECUTABLE_PATH`. See `KickConnectionWrapper.ts` for implementation. This requires users to have Google Chrome installed.
 
 ## Troubleshooting
 
