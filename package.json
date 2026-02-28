@@ -23,6 +23,7 @@
     "version:update:dry": "bash scripts/update-version.sh --dry-run"
   },
   "dependencies": {
+    "@retconned/kick-js": "^0.5.4",
     "@twurple/auth": "^8.0.3",
     "@twurple/chat": "^8.0.3",
     "dotenv": "^16.0.0",

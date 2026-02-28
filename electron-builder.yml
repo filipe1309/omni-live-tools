@@ -19,6 +19,7 @@ files:
 asarUnpack:
   - "**/node_modules/@twurple/**"
   - "**/node_modules/@d-fischer/**"
+  - "**/node_modules/@retconned/kick-js/**"
   - "**/node_modules/youtubei.js/**"
   - "**/node_modules/jintr/**"
 
