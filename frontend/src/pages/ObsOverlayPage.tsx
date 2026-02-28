@@ -242,7 +242,7 @@ export function ObsOverlayPage () {
 
       if (settings.showLikes && typeof msg.likeCount === 'number') {
         // Format label like public/app.js: "{user} liked x{count}"
-        const label = msg.label
+        const label = (msg.label || '')
           .replace('{0:user}', '')
           .replace('likes', `${msg.likeCount} likes`);
         addItem('like', msg, label, '#447dd4', false, PlatformType.TIKTOK);
@@ -272,10 +272,10 @@ export function ObsOverlayPage () {
       const isShare = msg.displayType.includes('share');
 
       if (isFollow && settings.showFollows) {
-        const label = msg.label.replace('{0:user}', '');
+        const label = (msg.label || '').replace('{0:user}', '');
         addItem('social', msg, label, '#ff005e', false, PlatformType.TIKTOK);
       } else if (isShare && settings.showShares) {
-        const label = msg.label.replace('{0:user}', '');
+        const label = (msg.label || '').replace('{0:user}', '');
         addItem('social', msg, label, '#2fb816', false, PlatformType.TIKTOK);
       }
     },

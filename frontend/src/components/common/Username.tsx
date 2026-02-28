@@ -8,8 +8,9 @@ interface UsernameProps {
 }
 
 export function Username({ uniqueId, userId, platform = PlatformType.TIKTOK, className = '' }: UsernameProps) {
-  // Strip leading @ from uniqueId to avoid double @@ display
-  const displayName = uniqueId.startsWith('@') ? uniqueId.slice(1) : uniqueId;
+  // Handle undefined uniqueId and strip leading @ to avoid double @@ display
+  const safeUniqueId = uniqueId || 'unknown';
+  const displayName = safeUniqueId.startsWith('@') ? safeUniqueId.slice(1) : safeUniqueId;
   
   let profileUrl: string;
   if (platform === PlatformType.TWITCH) {

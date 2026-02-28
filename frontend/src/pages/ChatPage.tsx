@@ -252,7 +252,7 @@ export function ChatPage () {
     const unsubscribeGift = registerGiftHandler(handleGift);
 
     const unsubscribeLike = registerLikeHandler((msg: LikeMessage) => {
-      const label = msg.label.replace('{0:user}', '').replace('likes', `${msg.likeCount} likes`);
+      const label = (msg.label || '').replace('{0:user}', '').replace('likes', `${msg.likeCount} likes`);
       addChatItem('like', msg, label, '#447dd4', false, PlatformType.TIKTOK);
     });
 
