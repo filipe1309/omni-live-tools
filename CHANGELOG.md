@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.16.0] - 2026-02-27
+
+### Added
+
+- Add results font size customization across poll components and update related interfaces
+- Add UnifiedChatMessage interface and refactor related user entities to utilize it
+- Enhance ConnectionModal with max height and overflow handling; remove unused language hook in PlatformSelector
+- Add Kick platform connection support in Header component
+- Add Kick platform support
+- Increase countdown text size for better visibility in CountdownOverlay
+- Add duplicate options validation and warning in PollSetup component
+- Adjust maximum height of suggestions dropdown to improve visibility
+- Implement per-option storage for recent poll options in localStorage
+- Enhance AutocompleteInput and PollOptionCard for improved editing experience
+- Increase maximum items for question and option history to 20
+- Add AGENTS.md for AI coding agents context and project documentation
+- Add prompt for updating documentation to reflect recent code changes
+
+### Changed
+
+- V1.15.0
+
+### Documentation
+
+- Update documentation prompt to include AGENTS.md
+- Add stream end detection and update poll configuration options in README
+- Enhance technical documentation with additional features and components details
+
 ## [1.15.0] - 2026-02-25
 
 ### Added
@@ -331,6 +359,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.16.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.12.0...v1.13.0
