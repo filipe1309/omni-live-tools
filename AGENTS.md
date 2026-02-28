@@ -241,7 +241,7 @@ Poll constants are in `frontend/src/constants/poll.ts`:
 - `STORAGE_KEYS` - localStorage key names
 - `POLL_TIMER` - Timer settings (min: 10, max: 300, default: 30)
 - `POLL_OPTIONS` - Options count (2-6, default: 2)
-- `POLL_FONT_SIZE` - Results font size settings (min: 1, max: 3.5, step: 0.5, default: 1.5)
+- `POLL_FONT_SIZE` - Results font size settings (min: 1, max: 3, step: 0.5, default: 1)
 - `QUESTION_HISTORY` / `OPTION_HISTORY` - Autocomplete history (max: 20 items each)
 
 ## Common Patterns
