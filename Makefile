@@ -453,7 +453,7 @@ bump-version-changelog bvc:
 .PHONY: bump-version-changelog-commit bvcc
 ## bump-version-changelog-commit: Update version and changelog with auto-commit [alias: bvcc]
 bump-version-changelog-commit bvcc:
-	@./scripts/update-version.sh --changelog --commit
+	@./scripts/update-version.sh --changelog --commit --yes
 
 .PHONY: bump-version-dry bvd
 ## bump-version-dry: Preview version changes without applying [alias: bvd]
