@@ -21,7 +21,7 @@ export function GiftCard({ gift, isPending = false, timestamp = new Date() }: Gi
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <div className="font-medium text-sm truncate">
-            <Username uniqueId={gift.uniqueId} />
+            <Username uniqueId={gift.uniqueId} nickname={gift.nickname} />
           </div>
           <span className="text-[10px] text-slate-500 flex-shrink-0">{timeString}</span>
         </div>

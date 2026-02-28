@@ -13,18 +13,21 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
   const isTwitch = item.platform === 'twitch';
   const isYouTube = item.platform === 'youtube';
   
-  // Strip leading @ from uniqueId to avoid double @@ display
-  const displayName = item.user.uniqueId.startsWith('@') 
+  // Strip leading @ from uniqueId for profile URL
+  const handle = item.user.uniqueId.startsWith('@') 
     ? item.user.uniqueId.slice(1) 
     : item.user.uniqueId;
   
+  // Display nickname if available, otherwise fall back to handle
+  const displayName = item.user.nickname || handle;
+  
   let profileUrl: string;
   if (isTwitch) {
-    profileUrl = `https://www.twitch.tv/${displayName}`;
+    profileUrl = `https://www.twitch.tv/${handle}`;
   } else if (isYouTube) {
     profileUrl = `https://www.youtube.com/channel/${item.user.userId}`;
   } else {
-    profileUrl = `https://www.tiktok.com/@${displayName}`;
+    profileUrl = `https://www.tiktok.com/@${handle}`;
   }
 
   const hasProfilePicture = item.user.profilePictureUrl && item.user.profilePictureUrl.trim() !== '';

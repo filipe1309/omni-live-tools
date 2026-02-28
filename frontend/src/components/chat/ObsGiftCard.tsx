@@ -12,6 +12,9 @@ interface ObsGiftCardProps {
  */
 export function ObsGiftCard({ gift, isPending = false, fontColor }: ObsGiftCardProps) {
   const totalCost = gift.diamondCount * gift.repeatCount;
+  
+  // Display nickname if available, otherwise fall back to uniqueId
+  const displayName = gift.nickname || gift.uniqueId;
 
   return (
     <div className="flex items-start gap-2">
@@ -28,7 +31,7 @@ export function ObsGiftCard({ gift, isPending = false, fontColor }: ObsGiftCardP
             rel="noopener noreferrer"
             className="text-[rgb(102,143,217)] font-bold hover:underline"
           >
-            {gift.uniqueId}
+            {displayName}
           </a>
           <span>: {gift.describe}</span>
         </div>

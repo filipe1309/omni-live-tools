@@ -112,7 +112,7 @@ export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps)
                     <span className={`font-bold truncate ${
                       entry.platform === 'twitch' ? 'text-purple-400' : 'text-tiktok-cyan'
                     }`}>
-                      {entry.platform === 'twitch' ? '' : '@'}{entry.user.uniqueId}
+                      {entry.user.nickname || entry.user.uniqueId}
                     </span>
                     <span className="text-slate-400">{t.poll.votedFor}</span>
                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded text-purple-300 font-semibold">
