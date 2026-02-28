@@ -45,7 +45,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - OBS overlay support for streaming software
 - Smart connection modal (auto-closes when all selected platforms connect)
 - Stream end notifications and reconnection handling
-- Multi-language support (PT-BR and EN)
+- Multi-language support (PT-BR, EN, and ES)
 
 ---
 
@@ -188,7 +188,7 @@ omni-live-tools/
 │       │   └── useToast.tsx
 │       ├── i18n/               # Internationalization
 │       │   ├── LanguageContext.tsx
-│       │   └── translations/   # Language files (en.ts, pt-BR.ts)
+│       │   └── translations/   # Language files (en.ts, pt-BR.ts, es.ts)
 │       ├── types/              # TypeScript types
 │       ├── constants/          # App constants
 │       └── utils/              # Utility functions
@@ -401,7 +401,7 @@ The app uses **React Context** for global state:
    - `showToast()` function
 
 3. **LanguageContext** (`i18n/LanguageContext.tsx`):
-   - Current language (PT-BR or EN)
+   - Current language (PT-BR, EN, or ES)
    - Translation function `t`
 
 ### Styling
