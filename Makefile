@@ -424,8 +424,8 @@ electron-dev ed: check-electron-deps check-backend-deps build
 ## electron-dist: Build distributable installers [alias: edist]
 electron-dist edist: check-electron-deps check-backend-deps frontend-build bump-version-changelog-commit
 	@printf "$(BLUE)🔨 Building Electron distributables...$(NC)\n"
-	@chmod +x build-exe-electron.sh
-	@./build-exe-electron.sh
+	@chmod +x scripts/build-exe-electron.sh
+	@./scripts/build-exe-electron.sh
 	@printf "$(GREEN)✓ Electron distributables built successfully$(NC)\n"
 
 .PHONY: electron-clean ec

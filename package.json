@@ -18,7 +18,7 @@
     "build:all": "npm run backend:build && npm run frontend:build",
     "electron:build-ts": "tsc -p electron/tsconfig.json",
     "electron:dev": "npm run backend:build && npm run electron:build-ts && electron electron/dist-electron/main.js",
-    "electron:dist": "bash build-exe-electron.sh",
+    "electron:dist": "bash scripts/build-exe-electron.sh",
     "version:update": "bash scripts/update-version.sh",
     "version:update:dry": "bash scripts/update-version.sh --dry-run"
   },
