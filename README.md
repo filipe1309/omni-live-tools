@@ -5,7 +5,7 @@
 <div align='center'>
   <img src="./docs/omni-full-logo.png" alt="alt text" width="100%">
   <h1>Omni LIVE Tools</h1>
-  <h3>A multi-platform toolkit for <strong>TikTok LIVE</strong>, <strong>Twitch</strong>, and <strong>YouTube Live</strong> streamers</h3>
+  <h3>A multi-platform toolkit for <strong>TikTok LIVE</strong>, <strong>Twitch</strong>, <strong>YouTube Live</strong>, and <strong>Kick</strong> streamers</h3>
    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js"></a>
    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript"></a>
    <a href="https://socket.io/"><img src="https://img.shields.io/badge/Socket.IO-4.x-black.svg" alt="Socket.IO"></a>
@@ -16,7 +16,7 @@
 
 ## About
 
-A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
+A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, **YouTube Live**, and **Kick** streams. Built with TypeScript using Clean Architecture principles. Available as a web server or desktop application (Electron).
 
 ![Omni LIVE Tools (Demo)](docs/omni-live-tools.gif)
 
@@ -38,10 +38,10 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 
 ## ✨ Features
 
-- 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, and YouTube Live instantly
+- 💬 **Real-time Chat Reading** - Display chat messages from TikTok LIVE, Twitch, YouTube Live, and Kick instantly
 - 📋 **Message Queue** - Add messages to a reading queue with one click for easy management during streams
 - ⭐ **Featured Message Overlay** - Send messages to a dedicated overlay window for OBS with pop-out support
-- 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, and YouTube simultaneously
+- 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, YouTube, and Kick simultaneously
 - 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports all platforms)
 - 📊 **Poll Profiles** - Save and load poll configurations with auto-save functionality
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with pop-out windows for chat, gifts, and queue
@@ -70,6 +70,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 | YouTube Live | ✅ | ✅ | [youtubei.js](https://github.com/LuanRT/YouTube.js) |
+| Kick | ✅ | ✅ | [@retconned/kick-js](https://github.com/retconned/kick-js) |
 
 ## 🌍 Language Support
 
@@ -90,7 +91,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 #### How It Works
 
-1. Select which platforms to use (TikTok, Twitch, YouTube, or any combination)
+1. Select which platforms to use (TikTok, Twitch, YouTube, Kick, or any combination)
 2. Connect to the live stream(s):
    - **TikTok**: Enter the streamer's @username
    - **Twitch**: Enter the channel name
@@ -103,7 +104,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 #### Features
 
-- **Multi-platform voting** - Collect votes from TikTok, Twitch, and YouTube simultaneously
+- **Multi-platform voting** - Collect votes from TikTok, Twitch, YouTube, and Kick simultaneously
 - **One vote per user per platform** - Each viewer can only vote once per poll per platform
 - **Real-time results** - Vote counts and percentages update instantly with flash animation on changes
 - **Platform badges** - Visual indicators show which platform each vote came from
@@ -121,7 +122,7 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 
 ### 💬 Real-time Chat Reading
 
-The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live in real-time, displaying them on a web page or OBS overlay.
+The application reads chat messages from TikTok LIVE, Twitch, YouTube Live, and Kick in real-time, displaying them on a web page or OBS overlay.
 
 ![Chat Reading Demo](docs/omni-chat.gif)
 
@@ -136,7 +137,7 @@ The application reads chat messages from TikTok LIVE, Twitch, and YouTube Live i
 
 #### Features
 
-- **Multi-platform support** - Connect to TikTok, Twitch, and YouTube simultaneously
+- **Multi-platform support** - Connect to TikTok, Twitch, YouTube, and Kick simultaneously
 - **Message queue** - Hover over any message to add it to a reading queue; easily manage which messages to read
 - **Featured message overlay** - Click the broadcast icon to send a message to a dedicated OBS overlay window
 - **Pop-out overlay windows** - Separate pop-out windows for chat, gifts, and queue for flexible OBS integration

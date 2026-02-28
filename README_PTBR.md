@@ -5,7 +5,7 @@
 <div align='center'>
   <img src="./docs/omni-full-logo.png" alt="alt text" width="100%">
   <h1>Omni LIVE Tools</h1>
-  <h3>Um kit de ferramentas multiplataforma para streamers do <strong>TikTok LIVE</strong>, <strong>Twitch</strong> e <strong>YouTube Live</strong></h3>
+  <h3>Um kit de ferramentas multiplataforma para streamers do <strong>TikTok LIVE</strong>, <strong>Twitch</strong>, <strong>YouTube Live</strong> e <strong>Kick</strong></h3>
    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js"></a>
    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript"></a>
    <a href="https://socket.io/"><img src="https://img.shields.io/badge/Socket.IO-4.x-black.svg" alt="Socket.IO"></a>
@@ -16,7 +16,7 @@
 
 ## Sobre
 
-Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikTok LIVE**, **Twitch** e **YouTube Live**. Construído com TypeScript seguindo princípios de Clean Architecture. Disponível como servidor web ou aplicativo desktop (Electron).
+Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikTok LIVE**, **Twitch**, **YouTube Live** e **Kick**. Construído com TypeScript seguindo princípios de Clean Architecture. Disponível como servidor web ou aplicativo desktop (Electron).
 
 ![Omni LIVE Tools (Demo)](docs/omni-live-tools.gif)
 
@@ -38,10 +38,10 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 
 ## ✨ Funcionalidades
 
-- 💬 **Leitura de Chat em Tempo Real** - Exibe mensagens do chat do TikTok LIVE, Twitch e YouTube Live instantaneamente
+- 💬 **Leitura de Chat em Tempo Real** - Exibe mensagens do chat do TikTok LIVE, Twitch, YouTube Live e Kick instantaneamente
 - 📋 **Fila de Mensagens** - Adicione mensagens a uma fila de leitura com um clique para fácil gerenciamento durante as lives
 - ⭐ **Overlay de Mensagem em Destaque** - Envie mensagens para uma janela de overlay dedicada para OBS com suporte a pop-out
-- 🌐 **Suporte Multiplataforma** - Conecte-se ao TikTok, Twitch e YouTube simultaneamente
+- 🌐 **Suporte Multiplataforma** - Conecte-se ao TikTok, Twitch, YouTube e Kick simultaneamente
 - 🗳️ **Enquetes Interativas** - Crie enquetes onde os espectadores votam digitando números no chat (suporta todas as plataformas)
 - 📊 **Perfis de Enquete** - Salve e carregue configurações de enquetes com salvamento automático
 - 🎬 **Suporte a Overlay OBS** - Páginas de overlay dedicadas para software de streaming com janelas pop-out para chat, presentes e fila
@@ -70,6 +70,7 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 | YouTube Live | ✅ | ✅ | [youtubei.js](https://github.com/LuanRT/YouTube.js) |
+| Kick | ✅ | ✅ | [@retconned/kick-js](https://github.com/retconned/kick-js) |
 
 ## 🌍 Suporte a Idiomas
 
@@ -90,7 +91,7 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
 
 #### Como Funciona
 
-1. Selecione quais plataformas usar (TikTok, Twitch, YouTube ou qualquer combinação)
+1. Selecione quais plataformas usar (TikTok, Twitch, YouTube, Kick ou qualquer combinação)
 2. Conecte-se à(s) live(s):
    - **TikTok**: Digite o @username do streamer
    - **Twitch**: Digite o nome do canal
@@ -103,7 +104,7 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
 
 #### Funcionalidades
 
-- **Votação multiplataforma** - Colete votos do TikTok, Twitch e YouTube simultaneamente
+- **Votação multiplataforma** - Colete votos do TikTok, Twitch, YouTube e Kick simultaneamente
 - **Um voto por usuário por plataforma** - Cada espectador pode votar apenas uma vez por enquete por plataforma
 - **Resultados em tempo real** - Contagem de votos e porcentagens atualizam instantaneamente com animação flash nas mudanças
 - **Badges de plataforma** - Indicadores visuais mostram de qual plataforma cada voto veio
@@ -121,7 +122,7 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
 
 ### 💬 Leitura de Chat em Tempo Real
 
-O aplicativo lê mensagens do chat do TikTok LIVE, Twitch e YouTube Live em tempo real, exibindo-as em uma página web ou overlay OBS.
+O aplicativo lê mensagens do chat do TikTok LIVE, Twitch, YouTube Live e Kick em tempo real, exibindo-as em uma página web ou overlay OBS.
 
 ![Demo de Leitura de Chat](docs/omni-chat.gif)
 
@@ -136,7 +137,7 @@ O aplicativo lê mensagens do chat do TikTok LIVE, Twitch e YouTube Live em temp
 
 #### Funcionalidades
 
-- **Suporte multiplataforma** - Conecte-se ao TikTok, Twitch e YouTube simultaneamente
+- **Suporte multiplataforma** - Conecte-se ao TikTok, Twitch, YouTube e Kick simultaneamente
 - **Fila de mensagens** - Passe o mouse sobre qualquer mensagem para adicioná-la a uma fila de leitura; gerencie facilmente quais mensagens ler
 - **Overlay de mensagem em destaque** - Clique no ícone de broadcast para enviar uma mensagem para uma janela de overlay OBS dedicada
 - **Janelas pop-out de overlay** - Janelas pop-out separadas para chat, presentes e fila para integração flexível com OBS
