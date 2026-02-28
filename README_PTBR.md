@@ -49,7 +49,7 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 - 🎁 **Rastreamento de Presentes** - Exibição de presentes em tempo real com rastreamento de sequências e tratamento de timeout
 - 👁️ **Visibilidade Personalizável** - Ative/desative painéis de fila e presentes com configurações persistentes
 - 🖥️ **App Desktop Multiplataforma** - App Electron independente para Windows e macOS
-- 🌍 **Suporte Multi-idioma** - Disponível em Português (PT-BR) e Inglês (EN) com seletor de idioma no app
+- 🌍 **Suporte Multi-idioma** - Disponível em Português (PT-BR), Inglês (EN) e Espanhol (ES) com seletor de idioma no app
 - 🏗️ **Clean Architecture** - Código TypeScript bem estruturado
 - ⚡ **Rate Limiting** - Proteção integrada contra requisições excessivas
 - 🔌 **Integração Socket.IO** - Comunicação bidirecional em tempo real
@@ -82,6 +82,7 @@ O aplicativo suporta múltiplos idiomas com troca fácil:
 |--------|--------|--------|
 | Português (Brasil) | PT-BR | ✅ Padrão |
 | Inglês | EN | ✅ Disponível |
+| Espanhol | ES | ✅ Disponível |
 
 ## ⭐ Principais Funcionalidades
 
@@ -152,7 +153,7 @@ O aplicativo lê mensagens do chat do TikTok LIVE, Twitch, YouTube Live e Kick e
 - **Display personalizável** - Mostrar/ocultar usernames, badges, timestamps, etc.
 - **Overlay OBS** - Página dedicada otimizada para software de streaming com integração aprimorada do Twitch
 - **Rate limiting** - Proteção contra requisições excessivas
-- **Suporte multi-idioma** - Exiba mensagens em Português (PT-BR) ou Inglês (EN)
+- **Suporte multi-idioma** - Exiba mensagens em Português (PT-BR), Inglês (EN) ou Espanhol (ES)
 - **Auto-reconexão** - Reconecta automaticamente se a conexão for perdida
 - **Modal de conexão inteligente** - Fecha automaticamente quando todas as plataformas selecionadas conectam, com fechamento manual disponível após primeira conexão
 

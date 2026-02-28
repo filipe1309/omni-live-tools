@@ -272,6 +272,7 @@ export const ptBR = {
     label: 'Idioma',
     portuguese: 'Português',
     english: 'English',
+    spanish: 'Español',
   },
 
   // OBS Overlay

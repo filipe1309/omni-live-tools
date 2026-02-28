@@ -274,6 +274,7 @@ export const en: TranslationKeys = {
     label: 'Language',
     portuguese: 'Português',
     english: 'English',
+    spanish: 'Español',
   },
 
   // OBS Overlay

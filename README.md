@@ -49,7 +49,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 - 🎁 **Gift Tracking** - Real-time gift display with streak tracking and timeout handling
 - 👁️ **Customizable Visibility** - Toggle queue and gift panels on/off with persistent settings
 - 🖥️ **Cross-platform Desktop App** - Standalone Electron app for Windows and macOS
-- 🌍 **Multi-language Support** - Available in Portuguese (PT-BR) and English (EN) with in-app language selector
+- 🌍 **Multi-language Support** - Available in Portuguese (PT-BR), English (EN), and Spanish (ES) with in-app language selector
 - 🏗️ **Clean Architecture** - Well-structured TypeScript codebase
 - ⚡ **Rate Limiting** - Built-in protection against excessive requests
 - 🔌 **Socket.IO Integration** - Real-time bidirectional communication
@@ -82,6 +82,7 @@ The application supports multiple languages with easy switching:
 |----------|------|--------|
 | Portuguese (Brazil) | PT-BR | ✅ Default |
 | English | EN | ✅ Available |
+| Spanish | ES | ✅ Available |
 
 ## ⭐ Main Features
 
@@ -152,7 +153,7 @@ The application reads chat messages from TikTok LIVE, Twitch, YouTube Live, and 
 - **Customizable display** - Show/hide usernames, badges, timestamps, etc.
 - **OBS overlay** - Dedicated page optimized for streaming software with enhanced Twitch integration
 - **Rate limiting** - Protect against excessive requests
-- **Multi-language support** - Display messages in Portuguese (PT-BR) or English (EN)
+- **Multi-language support** - Display messages in Portuguese (PT-BR), English (EN), or Spanish (ES)
 - **Auto-reconnect** - Automatically reconnects if connection is lost
 - **Smart connection modal** - Auto-closes when all selected platforms connect, with manual close available after first connection
 

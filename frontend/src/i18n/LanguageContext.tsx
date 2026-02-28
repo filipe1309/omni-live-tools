@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ptBR, en, type TranslationKeys } from './translations';
+import { ptBR, en, es, type TranslationKeys } from './translations';
 
-export type Language = 'pt-BR' | 'en';
+export type Language = 'pt-BR' | 'en' | 'es';
 
 const translations: Record<Language, TranslationKeys> = {
   'pt-BR': ptBR,
   'en': en,
+  'es': es,
 };
 
 interface LanguageContextType {
@@ -21,7 +22,7 @@ const LANGUAGE_STORAGE_KEY = 'omni-live-language';
 function getInitialLanguage(): Language {
   // Check localStorage first
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  if (stored === 'pt-BR' || stored === 'en') {
+  if (stored === 'pt-BR' || stored === 'en' || stored === 'es') {
     return stored;
   }
   
