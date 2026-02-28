@@ -110,6 +110,7 @@ export const ptBR = {
     channelPlaceholder: 'canal',
     videoPlaceholder: 'ID ou URL do vídeo',
     platformsLabel: 'Plataformas',
+    kickConnectionWarning: 'A conexão com o Kick pode levar até 2 minutos. O app pode parecer "Não Respondendo" - isso é normal, aguarde.',
   },
 
   // Connection Modal

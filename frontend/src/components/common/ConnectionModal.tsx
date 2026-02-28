@@ -414,6 +414,12 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                   </button>
                 </form>
 
+                {kick.status === 'connecting' && (
+                  <div className="mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-sm text-yellow-300">
+                    ⏳ {t.connection.kickConnectionWarning}
+                  </div>
+                )}
+
                 {kick.status === 'error' && kick.error && (
                   <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-300">
                     {kick.error}

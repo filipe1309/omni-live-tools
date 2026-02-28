@@ -112,6 +112,7 @@ export const en: TranslationKeys = {
     channelPlaceholder: 'channel',
     videoPlaceholder: 'Video ID or URL',
     platformsLabel: 'Platforms',
+    kickConnectionWarning: 'Kick connection can take up to 2 minutes. The app may appear "Not Responding" - this is normal, please wait.',
   },
 
   // Connection Modal
