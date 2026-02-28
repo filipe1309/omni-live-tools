@@ -299,6 +299,8 @@ When adding ESM-only npm packages that will be used in Electron, follow these st
 
 **Why this is needed:** Electron packages code into an asar archive. ESM modules with dynamic imports need to be unpacked and accessed via their full filesystem path.
 
+**Note on packages using Puppeteer:** Packages like `@retconned/kick-js` that use puppeteer internally have deep dependency trees (puppeteer-extra, puppeteer-extra-plugin-stealth, deepmerge, merge-deep, etc.). Instead of unpacking all these dependencies, configure the wrapper to use the system Chrome browser via `PUPPETEER_EXECUTABLE_PATH`. See `KickConnectionWrapper.ts` for an example. This requires users to have Google Chrome installed.
+
 ## Troubleshooting
 
 **Port in use:**
