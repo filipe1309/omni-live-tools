@@ -200,7 +200,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
       />
 
       {/* Modal content */}
-      <div className="relative bg-slate-800 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-slate-700 my-auto">
+      <div className="relative bg-slate-800 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-slate-700 my-auto max-h-[90vh] overflow-y-auto">
         {/* Top bar with language selector and close button */}
         <div className="absolute top-4 right-4 flex items-center gap-3">
           <LanguageSelector />
