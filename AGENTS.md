@@ -4,10 +4,10 @@
 
 ## Project Overview
 
-Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, and **YouTube Live** streams. It can run as a web server or standalone desktop application (Electron).
+Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch**, **YouTube Live**, and **Kick** streams. It can run as a web server or standalone desktop application (Electron).
 
 ### Main Features
-- Real-time chat reading from TikTok, Twitch, and YouTube
+- Real-time chat reading from TikTok, Twitch, YouTube, and Kick
 - Message queue for organizing messages during streams
 - Featured message overlay for OBS with pop-out window support
 - Interactive polls where viewers vote by typing numbers
@@ -27,6 +27,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 | tiktok-live-connector | 2.x | TikTok LIVE API |
 | @twurple/chat | 8.x | Twitch chat API |
 | youtubei.js | 16.x | YouTube Live API |
+| @retconned/kick-js | 0.5.x | Kick chat API |
 | Jest | 29.x | Testing |
 
 ### Frontend
@@ -62,7 +63,7 @@ The backend follows **Clean Architecture** with four layers:
 │  (Entities, Interfaces, Enums - Business Rules)                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                       INFRASTRUCTURE                            │
-│  (TikTok Wrapper, Twitch Wrapper, YouTube Wrapper)              │
+│  (TikTok Wrapper, Twitch Wrapper, YouTube Wrapper, Kick Wrapper)│
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -80,7 +81,7 @@ omni-live-tools/
 │   ├── application/services/   # Business logic services
 │   ├── config/                 # Environment config
 │   ├── domain/                 # Entities, enums, repository interfaces
-│   ├── infrastructure/         # Platform wrappers (tiktok/, twitch/, youtube/)
+│   ├── infrastructure/         # Platform wrappers (tiktok/, twitch/, youtube/, kick/)
 │   ├── presentation/           # HTTP server, socket handlers
 │   ├── shared/                 # Logger, utilities
 │   └── __tests__/              # Unit & integration tests
@@ -193,9 +194,11 @@ import { ChatMessage } from '@/types';
 | `setUniqueId` | `(uniqueId, options)` | Connect to TikTok |
 | `setTwitchChannel` | `(channel)` | Connect to Twitch |
 | `setYouTubeVideo` | `(videoId)` | Connect to YouTube |
+| `setKickChannel` | `(channel)` | Connect to Kick |
 | `disconnectTikTok` | - | Disconnect TikTok |
 | `disconnectTwitch` | - | Disconnect Twitch |
 | `disconnectYouTube` | - | Disconnect YouTube |
+| `disconnectKick` | - | Disconnect Kick |
 | `setFeaturedMessage` | `ChatItem` | Send message to overlay |
 | `join-platform-events` | - | Join shared connection room |
 
@@ -205,6 +208,7 @@ import { ChatMessage } from '@/types';
 | `tiktokConnected` | `roomState` | TikTok connected |
 | `twitchConnected` | `channelInfo` | Twitch connected |
 | `youtubeConnected` | `videoInfo` | YouTube connected |
+| `kickConnected` | `channelInfo` | Kick connected |
 | `chat` | `ChatMessage` | Chat message received |
 | `gift` | `GiftMessage` | Gift received (TikTok) |
 | `streamEnd` | - | Stream ended |
