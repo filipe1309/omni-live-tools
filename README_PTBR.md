@@ -70,7 +70,9 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 | YouTube Live | ✅ | ✅ | [youtubei.js](https://github.com/LuanRT/YouTube.js) |
-| Kick | ✅ | ✅ | [@retconned/kick-js](https://github.com/retconned/kick-js) |
+| Kick | ✅* | ✅* | [@retconned/kick-js](https://github.com/retconned/kick-js) |
+
+> *O suporte ao Kick requer Google Chrome ou Chromium instalado no seu sistema.
 
 ## 🌍 Suporte a Idiomas
 
