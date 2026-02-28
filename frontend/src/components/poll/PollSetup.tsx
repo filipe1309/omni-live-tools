@@ -877,7 +877,9 @@ export function PollSetup ({
 
         {/* Results Font Size Controls */}
         {!hideFontSizeControls && (
-          <div className="flex items-center gap-2">
+          <div
+            className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] bg-slate-900/50 border-slate-700/50 ${disabled ? 'opacity-50' : ''}`}
+          >
             <span className="text-sm text-slate-300 whitespace-nowrap">
               🔤 {t.poll.resultsFontSize}
             </span>
@@ -886,18 +888,18 @@ export function PollSetup ({
                 type="button"
                 onClick={() => handleResultsFontSizeChange(-POLL_FONT_SIZE.STEP)}
                 disabled={disabled || resultsFontSize <= POLL_FONT_SIZE.MIN}
-                className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 −
               </button>
-              <span className="w-12 text-center text-sm text-slate-200 font-medium">
+              <span className="w-10 text-center text-sm text-slate-200 font-medium">
                 {resultsFontSize.toFixed(1)}
               </span>
               <button
                 type="button"
                 onClick={() => handleResultsFontSizeChange(POLL_FONT_SIZE.STEP)}
                 disabled={disabled || resultsFontSize >= POLL_FONT_SIZE.MAX}
-                className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 +
               </button>
