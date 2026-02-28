@@ -39,6 +39,9 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Gift tracking with streak detection and timeout handling
 - Interactive polls where viewers vote by typing numbers (with flash animation on vote changes)
 - Poll profiles for saving and loading poll configurations (with auto-save)
+- Customizable results font size for polls (1x to 3.5x)
+- Duplicate options validation with warning display
+- Per-option autocomplete history (up to 20 items per option)
 - OBS overlay support for streaming software
 - Smart connection modal (auto-closes when all selected platforms connect)
 - Stream end notifications and reconnection handling
@@ -436,6 +439,14 @@ export const POLL_TIMER = {
   STEP: 30,
 };
 
+// Font size settings for poll results
+export const POLL_FONT_SIZE = {
+  DEFAULT: 1.5,
+  MIN: 1,
+  MAX: 3.5,
+  STEP: 0.5,
+};
+
 // Options settings
 export const POLL_OPTIONS = {
   TOTAL: 6,
@@ -443,8 +454,8 @@ export const POLL_OPTIONS = {
 };
 
 // History settings (question and option autocomplete)
-export const QUESTION_HISTORY = { MAX_ITEMS: 10 };
-export const OPTION_HISTORY = { MAX_ITEMS: 10 };
+export const QUESTION_HISTORY = { MAX_ITEMS: 20 };
+export const OPTION_HISTORY = { MAX_ITEMS: 20 };
 
 // Profile settings
 export const POLL_PROFILES = { MAX_PROFILES: 20 };
