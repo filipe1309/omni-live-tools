@@ -25,6 +25,7 @@ const sizeConfig = {
     text: 'text-lg',
     votes: 'text-xs',
     percentText: 'text-lg',
+    baseFontRem: 1.125, // text-lg = 1.125rem
   },
   normal: {
     padding: 'p-3',
@@ -32,6 +33,7 @@ const sizeConfig = {
     text: 'text-2xl',
     votes: 'text-sm',
     percentText: 'text-xl',
+    baseFontRem: 1.5, // text-2xl = 1.5rem
   },
   large: {
     padding: 'p-3',
@@ -39,6 +41,7 @@ const sizeConfig = {
     text: 'text-3xl',
     votes: 'text-base',
     percentText: 'text-2xl',
+    baseFontRem: 1.875, // text-3xl = 1.875rem
   },
 };
 
@@ -56,7 +59,8 @@ export function PollOptionCard ({
   const { t } = useLanguage();
   const config = sizeConfig[size];
   const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
-  const customFontStyle = fontSize ? { fontSize: `${fontSize}rem` } : undefined;
+  // fontSize multiplier: 1x = base size (matches config.text), 2x = double, etc.
+  const customFontStyle = fontSize ? { fontSize: `${fontSize * config.baseFontRem}rem` } : undefined;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(option.text);

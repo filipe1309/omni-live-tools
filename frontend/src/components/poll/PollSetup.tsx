@@ -892,8 +892,8 @@ export function PollSetup ({
               >
                 −
               </button>
-              <span className="w-10 text-center text-sm text-slate-200 font-medium">
-                {resultsFontSize.toFixed(1)}
+              <span className="w-12 text-center text-sm text-slate-200 font-medium">
+                {resultsFontSize.toFixed(1)}x
               </span>
               <button
                 type="button"

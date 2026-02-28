@@ -4,7 +4,7 @@ import { useLanguage, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
 import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType, FullOptionsConfig } from '@/types';
 import type { SetupConfig } from '@/hooks/usePoll';
-import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS, POLL_FONT_SIZE } from '@/constants';
 import { safeSetItem } from '@/utils';
 
 export function PollPage () {
@@ -111,7 +111,7 @@ export function PollPage () {
       timer,
       showStatusBar: showStatusBar ?? true,
       showBorder: showBorder ?? false,
-      resultsFontSize: resultsFontSize ?? 1.5,
+      resultsFontSize: resultsFontSize ?? POLL_FONT_SIZE.DEFAULT,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads

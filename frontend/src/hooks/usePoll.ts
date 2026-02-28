@@ -8,7 +8,7 @@ import type {
   SetupConfig,
   FullOptionsConfig,
 } from '@/types';
-import { POLL_TIMER, DEFAULT_QUESTION, STORAGE_KEYS } from '@/constants';
+import { POLL_TIMER, DEFAULT_QUESTION, STORAGE_KEYS, POLL_FONT_SIZE } from '@/constants';
 import { usePollTimer } from './usePollTimer';
 import { usePollSync } from './usePollSync';
 
@@ -56,7 +56,7 @@ const INITIAL_SETUP_CONFIG: SetupConfig = {
     { id: 2, text: 'Não' },
   ],
   timer: POLL_TIMER.DEFAULT,
-  resultsFontSize: 1.5,
+  resultsFontSize: POLL_FONT_SIZE.DEFAULT,
 };
 
 // Load fullOptionsConfig from localStorage

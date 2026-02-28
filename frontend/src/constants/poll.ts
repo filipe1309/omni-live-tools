@@ -13,11 +13,11 @@ export const POLL_TIMER = {
   STEP: 30 as number,
 };
 
-// Font size settings for poll results
+// Font size settings for poll results (multiplier: 1x = normal size)
 export const POLL_FONT_SIZE = {
-  DEFAULT: 2,
-  MIN: 2,
-  MAX: 4,
+  DEFAULT: 1,
+  MIN: 1,
+  MAX: 3,
   STEP: 0.5,
 } as const;
 
