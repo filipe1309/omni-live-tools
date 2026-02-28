@@ -1,4 +1,5 @@
 import { PlatformType } from '../enums';
+import { UnifiedChatMessage } from './UnifiedChatMessage';
 
 /**
  * YouTube User Entity
@@ -83,7 +84,7 @@ export function createYouTubeUnifiedMessage(
   message: string,
   timestamp: number,
   messageId?: string
-): import('./TwitchUser').UnifiedChatMessage {
+): UnifiedChatMessage {
   return {
     platform: PlatformType.YOUTUBE,
     odlUserId: user.odlUserId,

@@ -1,5 +1,3 @@
-import { PlatformType } from '../enums';
-
 /**
  * Twitch User Entity
  */
@@ -38,23 +36,6 @@ export function createTwitchUser(data: Partial<TwitchUser>): TwitchUser {
     isBroadcaster: data.isBroadcaster ?? false,
     isVip: data.isVip ?? false,
   };
-}
-
-/**
- * Unified Chat Message - Works across all platforms
- */
-export interface UnifiedChatMessage {
-  readonly platform: PlatformType;
-  readonly odlUserId: string;
-  readonly username: string;
-  readonly displayName: string;
-  readonly message: string;
-  readonly timestamp: number;
-  readonly profilePictureUrl?: string;
-  readonly badges?: Array<{ id: string; name?: string }>;
-  readonly isMod?: boolean;
-  readonly isSubscriber?: boolean;
-  readonly metadata?: Record<string, unknown>;
 }
 
 /**

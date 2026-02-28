@@ -1,4 +1,5 @@
 import { PlatformType } from '../enums';
+import { UnifiedChatMessage } from './UnifiedChatMessage';
 
 /**
  * Kick User Entity
@@ -59,7 +60,7 @@ export function createKickUnifiedMessage(
   message: string,
   messageId: string,
   timestamp: number = Date.now()
-): import('./TwitchUser').UnifiedChatMessage {
+): UnifiedChatMessage {
   return {
     platform: PlatformType.KICK,
     odlUserId: user.odlUserId,

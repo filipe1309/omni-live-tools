@@ -3,3 +3,4 @@ export * from './TwitchUser';
 export * from './YouTubeUser';
 export * from './KickUser';
 export * from './ConnectionState';
+export * from './UnifiedChatMessage';
