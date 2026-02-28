@@ -13,6 +13,7 @@ interface PollOptionCardProps {
   totalVotes: number;
   isWinner: boolean;
   size?: PollOptionCardSize;
+  fontSize?: number;
   editable?: boolean;
   onOptionTextChange?: (optionId: number, newText: string) => void;
 }
@@ -48,12 +49,14 @@ export function PollOptionCard ({
   totalVotes,
   isWinner,
   size = 'normal',
+  fontSize,
   editable = false,
   onOptionTextChange,
 }: PollOptionCardProps) {
   const { t } = useLanguage();
   const config = sizeConfig[size];
   const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
+  const customFontStyle = fontSize ? { fontSize: `${fontSize}rem` } : undefined;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(option.text);
@@ -156,10 +159,12 @@ export function PollOptionCard ({
               onKeyDown={handleKeyDown}
               suggestions={recentOptions}
               className={`bg-transparent border-b-2 border-tiktok-cyan text-white font-semibold outline-none ${config.text}`}
+              style={customFontStyle}
             />
           ) : (
             <span
               className={`font-semibold text-white ${config.text} ${editable ? 'cursor-pointer hover:text-tiktok-cyan' : ''}`}
+              style={customFontStyle}
               onDoubleClick={handleDoubleClick}
               title={editable ? t.pollResults.doubleClickToEdit : undefined}
             >

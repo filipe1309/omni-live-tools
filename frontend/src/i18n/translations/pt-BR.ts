@@ -185,6 +185,7 @@ export const ptBR = {
     optionPlaceholder: 'Opção',
     minOptionsWarning: 'Selecione pelo menos {count} opções para a enquete',
     duplicateOptionsWarning: 'Opções duplicadas detectadas: {options}',
+    resultsFontSize: 'Tamanho da Fonte',
     // Profiles
     profile: 'Perfil',
     selectProfile: 'Selecionar perfil',

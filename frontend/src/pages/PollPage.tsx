@@ -97,7 +97,7 @@ export function PollPage () {
     });
   }, [onConfigUpdate]);
 
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean) => {
+  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, resultsFontSize?: number) => {
     // Skip the first onChange if we have saved config (PollSetup sends default values on mount)
     if (hasSavedConfig.current && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
@@ -111,6 +111,7 @@ export function PollPage () {
       timer,
       showStatusBar: showStatusBar ?? true,
       showBorder: showBorder ?? false,
+      resultsFontSize: resultsFontSize ?? 1.5,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
@@ -395,6 +396,7 @@ export function PollPage () {
             initialTimer={loadSavedSetupConfig()?.timer}
             initialShowStatusBar={loadSavedSetupConfig()?.showStatusBar}
             initialShowBorder={loadSavedSetupConfig()?.showBorder}
+            initialResultsFontSize={loadSavedSetupConfig()?.resultsFontSize}
           />
         </div>
 
@@ -436,6 +438,7 @@ export function PollPage () {
                   getTotalVotes={getTotalVotes}
                   showStatusBar={currentSetupConfig.showStatusBar ?? true}
                   size="large"
+                  fontSize={currentSetupConfig.resultsFontSize}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}
@@ -453,6 +456,7 @@ export function PollPage () {
                   getTotalVotes={() => 0}
                   showStatusBar={currentSetupConfig.showStatusBar ?? true}
                   size="large"
+                  fontSize={currentSetupConfig.resultsFontSize}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}

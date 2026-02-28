@@ -9,6 +9,7 @@ interface AutocompleteInputProps {
   onSelectSuggestion?: (suggestion: string) => void;
   className?: string;
   placeholder?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -24,6 +25,7 @@ export function AutocompleteInput({
   onSelectSuggestion,
   className = '',
   placeholder,
+  style,
 }: AutocompleteInputProps) {
   // Start with dropdown open since this component is only shown when editing
   const [showDropdown, setShowDropdown] = useState(true);
@@ -170,6 +172,7 @@ export function AutocompleteInput({
         className={className}
         placeholder={placeholder}
         autoComplete="off"
+        style={style}
       />
       
       {/* Dropdown */}

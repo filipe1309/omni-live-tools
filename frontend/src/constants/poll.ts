@@ -13,6 +13,14 @@ export const POLL_TIMER = {
   STEP: 30 as number,
 };
 
+// Font size settings for poll results
+export const POLL_FONT_SIZE = {
+  DEFAULT: 1.5,
+  MIN: 1,
+  MAX: 3.5,
+  STEP: 0.5,
+} as const;
+
 // Options settings
 export const POLL_OPTIONS = {
   TOTAL: 6,

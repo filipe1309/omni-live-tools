@@ -3,6 +3,7 @@ import { useLanguage, interpolate } from '@/i18n';
 import {
   POLL_TIMER,
   POLL_OPTIONS,
+  POLL_FONT_SIZE,
   QUESTION_HISTORY,
   OPTION_HISTORY,
   POLL_PROFILES,
@@ -122,7 +123,7 @@ interface OptionWithId {
 
 interface PollSetupProps {
   onStart: (question: string, options: OptionWithId[], timer: number) => void;
-  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean) => void;
+  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, resultsFontSize?: number) => void;
   disabled?: boolean;
   initialQuestion?: string;
   initialOptions?: string[];
@@ -130,10 +131,12 @@ interface PollSetupProps {
   initialTimer?: number;
   initialShowStatusBar?: boolean;
   initialShowBorder?: boolean;
+  initialResultsFontSize?: number;
   showStartButton?: boolean;
   hideStatusBarToggle?: boolean;
   hideBorderToggle?: boolean;
-  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean } | null;
+  hideFontSizeControls?: boolean;
+  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean; resultsFontSize?: number } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
 
@@ -147,9 +150,11 @@ export function PollSetup ({
   initialTimer = POLL_TIMER.DEFAULT,
   initialShowStatusBar = true,
   initialShowBorder = false,
+  initialResultsFontSize = POLL_FONT_SIZE.DEFAULT,
   showStartButton = true,
   hideStatusBarToggle = false,
   hideBorderToggle = false,
+  hideFontSizeControls = false,
   externalConfig = null,
   externalFullOptions = null
 }: PollSetupProps) {
@@ -159,6 +164,7 @@ export function PollSetup ({
   const [timer, setTimer] = useState(initialTimer);
   const [showStatusBar, setShowStatusBar] = useState(initialShowStatusBar);
   const [showBorder, setShowBorder] = useState(initialShowBorder);
+  const [resultsFontSize, setResultsFontSize] = useState(initialResultsFontSize);
   const hasSentInitialChange = useRef(false);
   const { t } = useLanguage();
 
@@ -333,6 +339,9 @@ export function PollSetup ({
       if (externalConfig.showBorder !== undefined) {
         setShowBorder(externalConfig.showBorder);
       }
+      if (externalConfig.resultsFontSize !== undefined) {
+        setResultsFontSize(externalConfig.resultsFontSize);
+      }
 
       // Only rebuild options from externalConfig if we don't have externalFullOptions
       // (externalFullOptions is more complete and should take precedence for options)
@@ -385,7 +394,7 @@ export function PollSetup ({
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
       console.log('[PollSetup] Sending initial onChange with options:', selectedPollOptionsWithIds);
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
       hasSentInitialChange.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -415,7 +424,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder, resultsFontSize);
     }
   };
 
@@ -475,7 +484,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(options, newSelected);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder, resultsFontSize);
     }
   };
 
@@ -487,7 +496,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder, resultsFontSize);
     }
   };
 
@@ -499,7 +508,20 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value, resultsFontSize);
+    }
+  };
+
+  // Handle resultsFontSize change
+  const handleResultsFontSizeChange = (delta: number) => {
+    const newSize = Math.min(POLL_FONT_SIZE.MAX, Math.max(POLL_FONT_SIZE.MIN, Number((resultsFontSize + delta).toFixed(1))));
+    setResultsFontSize(newSize);
+
+    // Notify parent of change
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, newSize);
     }
   };
 
@@ -525,7 +547,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = value.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
     }
   };
 
@@ -537,7 +559,7 @@ export function PollSetup ({
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
-      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder);
+      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
     }
   };
 
@@ -572,7 +594,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder);
+      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
     }
   };
 
@@ -635,7 +657,7 @@ export function PollSetup ({
         .filter(opt => opt.selected && opt.text)
         .map(opt => ({ id: opt.id, text: opt.text }));
 
-      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder);
+      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder, resultsFontSize);
     }
   };
 
@@ -852,6 +874,36 @@ export function PollSetup ({
             </span>
           </div>
         )}
+
+        {/* Results Font Size Controls */}
+        {!hideFontSizeControls && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-300 whitespace-nowrap">
+              🔤 {t.poll.resultsFontSize}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => handleResultsFontSizeChange(-POLL_FONT_SIZE.STEP)}
+                disabled={disabled || resultsFontSize <= POLL_FONT_SIZE.MIN}
+                className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                −
+              </button>
+              <span className="w-12 text-center text-sm text-slate-200 font-medium">
+                {resultsFontSize.toFixed(1)}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleResultsFontSizeChange(POLL_FONT_SIZE.STEP)}
+                disabled={disabled || resultsFontSize >= POLL_FONT_SIZE.MAX}
+                className="w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Question and Timer Row */}
@@ -991,6 +1043,7 @@ export function PollSetup ({
             </div>
           </div>
         )}
+
       </div>
 
       {/* Options Grid with Checkboxes */}

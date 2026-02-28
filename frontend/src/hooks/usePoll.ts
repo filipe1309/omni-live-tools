@@ -56,6 +56,7 @@ const INITIAL_SETUP_CONFIG: SetupConfig = {
     { id: 2, text: 'Não' },
   ],
   timer: POLL_TIMER.DEFAULT,
+  resultsFontSize: 1.5,
 };
 
 // Load fullOptionsConfig from localStorage
