@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { ProfilePicture } from '@/components/common/ProfilePicture';
-import { TikTokIcon, TwitchIcon, YouTubeIcon } from '@/components/common/PlatformSelector';
+import { TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '@/components/common/PlatformSelector';
 import type { ChatItem } from '@/types';
+import { PlatformType } from '@/types';
 
-function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
+function PlatformBadge({ platform }: { platform?: PlatformType }) {
   if (!platform) return null;
   
-  if (platform === 'tiktok') {
+  if (platform === PlatformType.TIKTOK) {
     return <TikTokIcon className="w-8 h-8 text-cyan-400 flex-shrink-0" />;
   }
-  if (platform === 'youtube') {
+  if (platform === PlatformType.YOUTUBE) {
     return <YouTubeIcon className="w-8 h-8 text-red-500 flex-shrink-0" />;
+  }
+  if (platform === PlatformType.KICK) {
+    return <KickIcon className="w-8 h-8 text-green-400 flex-shrink-0" />;
   }
   return <TwitchIcon className="w-8 h-8 text-purple-400 flex-shrink-0" />;
 }

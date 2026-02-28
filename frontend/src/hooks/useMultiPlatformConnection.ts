@@ -11,6 +11,7 @@ import type {
   ConnectionOptions,
   TwitchConnectionState,
   YouTubeConnectionState,
+  KickConnectionState,
   UnifiedChatMessage,
   PlatformType,
 } from '@/types';
@@ -39,6 +40,12 @@ interface YouTubeState {
   error: string | null;
 }
 
+interface KickState {
+  status: ConnectionStatus;
+  channel: string | null;
+  error: string | null;
+}
+
 interface MultiPlatformEventHandlers {
   // Unified chat handler (receives messages from both platforms)
   onChat?: (message: UnifiedChatMessage) => void;
@@ -63,6 +70,12 @@ interface MultiPlatformEventHandlers {
   onYouTubeMember?: (data: unknown) => void;
   onYouTubeStreamEnd?: () => void;
   onYouTubeReconnect?: (state: YouTubeConnectionState) => void;
+  // Kick-specific handlers
+  onKickChat?: (message: UnifiedChatMessage) => void;
+  onKickSub?: (data: unknown) => void;
+  onKickGiftedSub?: (data: unknown) => void;
+  onKickStreamEnd?: () => void;
+  onKickReconnect?: (state: KickConnectionState) => void;
   // General handlers
   onDisconnect?: (platform: PlatformType) => void;
   onSocketReconnect?: () => void;
@@ -84,6 +97,12 @@ interface UseMultiPlatformConnectionReturn {
   // YouTube state and methods
   youtube: YouTubeState & {
     connect: (videoIdOrUrl: string) => Promise<YouTubeConnectionState>;
+    disconnect: () => void;
+    isConnected: boolean;
+  };
+  // Kick state and methods
+  kick: KickState & {
+    connect: (channel: string) => Promise<KickConnectionState>;
     disconnect: () => void;
     isConnected: boolean;
   };
@@ -112,6 +131,7 @@ export function useMultiPlatformConnection (
   const wasConnectedToTikTokRef = useRef(false);
   const wasConnectedToTwitchRef = useRef(false);
   const wasConnectedToYouTubeRef = useRef(false);
+  const wasConnectedToKickRef = useRef(false);
 
   const [tiktokState, setTikTokState] = useState<TikTokState>({
     status: 'disconnected',
@@ -135,6 +155,12 @@ export function useMultiPlatformConnection (
     error: null,
   });
 
+  const [kickState, setKickState] = useState<KickState>({
+    status: 'disconnected',
+    channel: null,
+    error: null,
+  });
+
   // Keep handlers ref up to date
   useEffect(() => {
     handlersRef.current = handlers;
@@ -149,7 +175,7 @@ export function useMultiPlatformConnection (
     socket.on('connect', () => {
       console.info('[MultiPlatform] Socket connected!');
       // Trigger reconnect callbacks if we were previously connected
-      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current) {
+      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current || wasConnectedToKickRef.current) {
         console.info('[MultiPlatform] Socket reconnected - triggering onSocketReconnect');
         handlersRef.current.onSocketReconnect?.();
       }
@@ -160,11 +186,12 @@ export function useMultiPlatformConnection (
       setTikTokState(prev => ({ ...prev, status: 'disconnected' }));
       setTwitchState(prev => ({ ...prev, status: 'disconnected' }));
       setYouTubeState(prev => ({ ...prev, status: 'disconnected' }));
+      setKickState(prev => ({ ...prev, status: 'disconnected' }));
     });
 
     socket.io.on('reconnect', () => {
       console.info('[MultiPlatform] Socket.IO reconnected!');
-      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current) {
+      if (wasConnectedToTikTokRef.current || wasConnectedToTwitchRef.current || wasConnectedToYouTubeRef.current || wasConnectedToKickRef.current) {
         handlersRef.current.onSocketReconnect?.();
       }
     });
@@ -327,6 +354,45 @@ export function useMultiPlatformConnection (
       handlersRef.current.onYouTubeStreamEnd?.();
       handlersRef.current.onDisconnect?.('youtube' as PlatformType);
       setYouTubeState(prev => ({ ...prev, status: 'disconnected', videoId: null, channelName: null }));
+    });
+
+    // ============ Kick Events ============
+    socket.on('kickDisconnected', (errMsg: string) => {
+      console.warn('[MultiPlatform] Kick disconnected:', errMsg);
+      setKickState(prev => ({ ...prev, status: 'disconnected', channel: null }));
+      handlersRef.current.onDisconnect?.('kick' as PlatformType);
+    });
+
+    socket.on('kickReconnected', (state: KickConnectionState) => {
+      console.info('[MultiPlatform] Kick reconnected:', state);
+      setKickState(prev => ({
+        ...prev,
+        status: 'connected',
+        channel: state.channel,
+        error: null,
+      }));
+      handlersRef.current.onKickReconnect?.(state);
+    });
+
+    socket.on('kickChat', (msg: UnifiedChatMessage) => {
+      console.log('[MultiPlatform] Received Kick chat:', msg);
+      handlersRef.current.onKickChat?.(msg);
+      handlersRef.current.onChat?.(msg);
+    });
+
+    socket.on('kickSub', (data: unknown) => {
+      handlersRef.current.onKickSub?.(data);
+    });
+
+    socket.on('kickGiftedSub', (data: unknown) => {
+      handlersRef.current.onKickGiftedSub?.(data);
+    });
+
+    socket.on('kickStreamEnd', () => {
+      console.warn('[MultiPlatform] Kick stream ended!');
+      handlersRef.current.onKickStreamEnd?.();
+      handlersRef.current.onDisconnect?.('kick' as PlatformType);
+      setKickState(prev => ({ ...prev, status: 'disconnected', channel: null }));
     });
 
     return () => {
@@ -556,14 +622,88 @@ export function useMultiPlatformConnection (
     });
   }, []);
 
+  // ============ Kick Methods ============
+  const connectKick = useCallback(
+    (channel: string): Promise<KickConnectionState> => {
+      return new Promise((resolve, reject) => {
+        const socket = socketRef.current;
+        if (!socket) {
+          reject('Socket not initialized');
+          return;
+        }
+
+        setKickState(prev => ({
+          ...prev,
+          status: 'connecting',
+          error: null,
+        }));
+
+        // Normalize channel name
+        const normalizedChannel = channel.toLowerCase().trim();
+        socket.emit('setKickChannel', normalizedChannel);
+
+        const cleanup = () => {
+          clearTimeout(timeout);
+          socket.off('kickConnected', onConnected);
+          socket.off('kickDisconnected', onDisconnected);
+        };
+
+        const onConnected = (connectionState: KickConnectionState) => {
+          cleanup();
+          wasConnectedToKickRef.current = true;
+          setKickState(prev => ({
+            ...prev,
+            status: 'connected',
+            channel: connectionState.channel,
+            error: null,
+          }));
+          resolve(connectionState);
+        };
+
+        const onDisconnected = (errorMessage: string) => {
+          cleanup();
+          setKickState(prev => ({
+            ...prev,
+            status: 'error',
+            error: errorMessage,
+          }));
+          reject(errorMessage);
+        };
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          setKickState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
+          reject('Connection Timeout');
+        }, 15000);
+
+        socket.once('kickConnected', onConnected);
+        socket.once('kickDisconnected', onDisconnected);
+      });
+    },
+    []
+  );
+
+  const disconnectKick = useCallback(() => {
+    wasConnectedToKickRef.current = false;
+    // Emit disconnect event to backend
+    socketRef.current?.emit('disconnectKick');
+    setKickState({
+      status: 'disconnected',
+      channel: null,
+      error: null,
+    });
+  }, []);
+
   // Computed properties
   const tiktokConnected = tiktokState.status === 'connected';
   const twitchConnected = twitchState.status === 'connected';
   const youtubeConnected = youtubeState.status === 'connected';
+  const kickConnected = kickState.status === 'connected';
   const connectedPlatforms: PlatformType[] = [];
   if (tiktokConnected) connectedPlatforms.push('tiktok' as PlatformType);
   if (twitchConnected) connectedPlatforms.push('twitch' as PlatformType);
   if (youtubeConnected) connectedPlatforms.push('youtube' as PlatformType);
+  if (kickConnected) connectedPlatforms.push('kick' as PlatformType);
 
   // Chat relay methods for overlay communication
   const joinChatRelay = useCallback(() => {
@@ -616,7 +756,13 @@ export function useMultiPlatformConnection (
       disconnect: disconnectYouTube,
       isConnected: youtubeConnected,
     },
-    isAnyConnected: tiktokConnected || twitchConnected || youtubeConnected,
+    kick: {
+      ...kickState,
+      connect: connectKick,
+      disconnect: disconnectKick,
+      isConnected: kickConnected,
+    },
+    isAnyConnected: tiktokConnected || twitchConnected || youtubeConnected || kickConnected,
     connectedPlatforms,
     joinChatRelay,
     leaveChatRelay,

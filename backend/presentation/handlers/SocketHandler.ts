@@ -16,6 +16,10 @@ import {
   YouTubeConnectionWrapper,
   createYouTubeConnectionWrapper
 } from '../../infrastructure/youtube';
+import {
+  KickConnectionWrapper,
+  createKickConnectionWrapper
+} from '../../infrastructure/kick';
 
 /**
  * Error patterns that indicate eulerstream/rate limit issues
@@ -38,6 +42,7 @@ export class SocketHandler {
   private tikfinityWrapper: TikFinityConnectionWrapper | null = null;
   private twitchWrapper: TwitchConnectionWrapper | null = null;
   private youtubeWrapper: YouTubeConnectionWrapper | null = null;
+  private kickWrapper: KickConnectionWrapper | null = null;
   private clientIp: string;
   private useFallback = false;
 
@@ -66,6 +71,9 @@ export class SocketHandler {
     // YouTube connection handler
     this.socket.on(SocketEventType.SET_YOUTUBE_VIDEO, this.handleSetYouTubeVideo.bind(this));
     this.socket.on('disconnectYouTube', this.handleDisconnectYouTube.bind(this));
+    // Kick connection handler
+    this.socket.on(SocketEventType.SET_KICK_CHANNEL, this.handleSetKickChannel.bind(this));
+    this.socket.on('disconnectKick', this.handleDisconnectKick.bind(this));
     this.socket.on('disconnect', this.handleDisconnect.bind(this));
 
     // Chat relay handlers for overlay communication
@@ -112,6 +120,17 @@ export class SocketHandler {
       console.info('Disconnecting YouTube by client request');
       this.youtubeWrapper.disconnect();
       this.youtubeWrapper = null;
+    }
+  }
+
+  /**
+   * Handle disconnectKick event
+   */
+  private handleDisconnectKick(): void {
+    if (this.kickWrapper) {
+      console.info('Disconnecting Kick by client request');
+      this.kickWrapper.disconnect();
+      this.kickWrapper = null;
     }
   }
 
@@ -595,6 +614,116 @@ export class SocketHandler {
   }
 
   /**
+   * Handle setKickChannel event
+   */
+  private handleSetKickChannel(channel: string): void {
+    // Check rate limiting
+    this.rateLimiterService.recordRequest(this.clientIp);
+    
+    if (this.rateLimiterService.shouldBlockClient(this.clientIp)) {
+      this.socket.emit(
+        SocketEventType.KICK_DISCONNECTED,
+        this.rateLimiterService.getRateLimitMessage()
+      );
+      return;
+    }
+
+    // Create Kick connection
+    this.connectToKick(channel);
+  }
+
+  /**
+   * Connect to Kick chat
+   */
+  private connectToKick(channel: string): void {
+    try {
+      // Disconnect existing Kick connection if any
+      if (this.kickWrapper) {
+        this.kickWrapper.disconnect();
+        this.kickWrapper = null;
+      }
+
+      const kickFactory = createKickConnectionWrapper(
+        (delta) => {
+          if (delta > 0) {
+            this.statisticsService.incrementConnectionCount();
+          } else {
+            this.statisticsService.decrementConnectionCount();
+          }
+        }
+      );
+
+      this.kickWrapper = kickFactory(channel);
+      
+      // Set up event forwarding
+      this.setupKickEventForwarding();
+
+      // Handle connection events
+      this.kickWrapper.once('connected', (state) => {
+        this.socket.emit(SocketEventType.KICK_CONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.KICK_CONNECTED, state);
+      });
+
+      // Handle reconnection events (can happen multiple times during auto-reconnect)
+      this.kickWrapper.on('reconnected', (state) => {
+        this.socket.emit(SocketEventType.KICK_RECONNECTED, state);
+        this.socket.to('platform-events').emit(SocketEventType.KICK_RECONNECTED, state);
+      });
+
+      this.kickWrapper.once('disconnected', (reason: string) => {
+        this.socket.emit(SocketEventType.KICK_DISCONNECTED, reason);
+        this.socket.to('platform-events').emit(SocketEventType.KICK_DISCONNECTED, reason);
+      });
+
+      // Connect
+      this.kickWrapper.connect().catch((err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        this.socket.emit(SocketEventType.KICK_DISCONNECTED, errorMessage);
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.socket.emit(SocketEventType.KICK_DISCONNECTED, errorMessage);
+    }
+  }
+
+  /**
+   * Set up Kick event forwarding to the socket
+   */
+  private setupKickEventForwarding(): void {
+    if (!this.kickWrapper) return;
+
+    // Forward chat messages
+    this.kickWrapper.on('chat', (msg: UnifiedChatMessage) => {
+      this.socket.emit('kickChat', msg);
+      this.socket.to('platform-events').emit('kickChat', msg);
+    });
+
+    // Forward subscription events
+    this.kickWrapper.on('sub', (data: unknown) => {
+      this.socket.emit('kickSub', data);
+      this.socket.to('platform-events').emit('kickSub', data);
+    });
+
+    // Forward gifted subscription events
+    this.kickWrapper.on('giftedSub', (data: unknown) => {
+      this.socket.emit('kickGiftedSub', data);
+      this.socket.to('platform-events').emit('kickGiftedSub', data);
+    });
+
+    // Forward host events
+    this.kickWrapper.on('host', (data: unknown) => {
+      this.socket.emit('kickHost', data);
+      this.socket.to('platform-events').emit('kickHost', data);
+    });
+
+    // Forward stream end event
+    this.kickWrapper.on('streamEnd', () => {
+      this.socket.emit('kickStreamEnd');
+      this.socket.to('platform-events').emit('kickStreamEnd');
+    });
+  }
+
+  /**
    * Handle socket disconnect
    */
   private handleDisconnect(): void {
@@ -616,6 +745,11 @@ export class SocketHandler {
     if (this.youtubeWrapper) {
       this.youtubeWrapper.disconnect();
       this.youtubeWrapper = null;
+    }
+
+    if (this.kickWrapper) {
+      this.kickWrapper.disconnect();
+      this.kickWrapper = null;
     }
   }
 

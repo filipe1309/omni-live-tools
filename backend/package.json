@@ -17,6 +17,7 @@
     "test:ci": "jest -c jest.config.js --ci --coverage --reporters=default --reporters=jest-junit"
   },
   "dependencies": {
+    "@retconned/kick-js": "^0.5.4",
     "@twurple/auth": "^8.0.3",
     "@twurple/chat": "^8.0.3",
     "dotenv": "^16.0.0",

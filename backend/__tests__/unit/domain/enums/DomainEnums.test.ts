@@ -1,4 +1,4 @@
-import { TikTokEventType, TwitchEventType, PlatformType, ConnectionStatus, SocketEventType } from '../../../../domain/enums';
+import { TikTokEventType, TwitchEventType, KickEventType, PlatformType, ConnectionStatus, SocketEventType } from '../../../../domain/enums';
 
 describe('Domain Enums', () => {
   describe('PlatformType', () => {
@@ -6,11 +6,12 @@ describe('Domain Enums', () => {
       expect(PlatformType.TIKTOK).toBe('tiktok');
       expect(PlatformType.TWITCH).toBe('twitch');
       expect(PlatformType.YOUTUBE).toBe('youtube');
+      expect(PlatformType.KICK).toBe('kick');
     });
 
     it('should have the correct number of platform types', () => {
       const platforms = Object.values(PlatformType);
-      expect(platforms).toHaveLength(3);
+      expect(platforms).toHaveLength(4);
     });
   });
 
@@ -58,6 +59,25 @@ describe('Domain Enums', () => {
     });
   });
 
+  describe('KickEventType', () => {
+    it('should have all expected Kick event types', () => {
+      expect(KickEventType.CHAT).toBe('chat');
+      expect(KickEventType.SUB).toBe('sub');
+      expect(KickEventType.GIFTED_SUB).toBe('giftedSub');
+      expect(KickEventType.HOST).toBe('host');
+      expect(KickEventType.BAN).toBe('ban');
+      expect(KickEventType.STREAM_END).toBe('streamEnd');
+      expect(KickEventType.CONNECTED).toBe('connected');
+      expect(KickEventType.DISCONNECTED).toBe('disconnected');
+      expect(KickEventType.RECONNECTED).toBe('reconnected');
+    });
+
+    it('should have the correct number of Kick event types', () => {
+      const eventTypes = Object.values(KickEventType);
+      expect(eventTypes).toHaveLength(9);
+    });
+  });
+
   describe('ConnectionStatus', () => {
     it('should have all expected connection statuses', () => {
       expect(ConnectionStatus.DISCONNECTED).toBe('disconnected');
@@ -89,6 +109,11 @@ describe('Domain Enums', () => {
       expect(SocketEventType.YOUTUBE_DISCONNECTED).toBe('youtubeDisconnected');
       expect(SocketEventType.YOUTUBE_RECONNECTED).toBe('youtubeReconnected');
       expect(SocketEventType.SET_YOUTUBE_VIDEO).toBe('setYouTubeVideo');
+      // Kick events
+      expect(SocketEventType.KICK_CONNECTED).toBe('kickConnected');
+      expect(SocketEventType.KICK_DISCONNECTED).toBe('kickDisconnected');
+      expect(SocketEventType.KICK_RECONNECTED).toBe('kickReconnected');
+      expect(SocketEventType.SET_KICK_CHANNEL).toBe('setKickChannel');
       // Shared events
       expect(SocketEventType.STREAM_END).toBe('streamEnd');
       expect(SocketEventType.STATISTIC).toBe('statistic');
@@ -97,7 +122,7 @@ describe('Domain Enums', () => {
 
     it('should have the correct number of socket event types', () => {
       const eventTypes = Object.values(SocketEventType);
-      expect(eventTypes).toHaveLength(15);
+      expect(eventTypes).toHaveLength(19);
     });
   });
 });

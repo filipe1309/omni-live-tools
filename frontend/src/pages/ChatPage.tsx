@@ -4,6 +4,7 @@ import { useFeaturedMessage } from '@/hooks/useFeaturedMessage';
 import { useLanguage } from '@/i18n';
 import { RoomStats, ChatContainer, GiftContainer, ChatQueueContainer } from '@/components';
 import type { ChatItem, GiftMessage, ChatMessage, LikeMessage, MemberMessage, SocialMessage, UnifiedChatMessage } from '@/types';
+import { PlatformType } from '@/types';
 
 // Pop-out overlay icon
 function PopOutIcon({ className }: { className?: string }) {
@@ -82,6 +83,7 @@ export function ChatPage () {
     registerSocialHandler,
     registerTwitchChatHandler,
     registerYouTubeChatHandler,
+    registerKickChatHandler,
   } = useConnectionContext();
 
   // Broadcast data to pop-out windows via BroadcastChannel
@@ -170,7 +172,7 @@ export function ChatPage () {
     content: string,
     color?: string,
     isTemporary = false,
-    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok',
+    platform: PlatformType = PlatformType.TIKTOK,
     autoAddToQueue = false,
     isSuperchat = false
   ) => {
@@ -244,24 +246,24 @@ export function ChatPage () {
   useEffect(() => {
     const unsubscribeTikTokChat = registerTikTokChatHandler((msg: ChatMessage) => {
       console.log('[ChatPage] Processing TikTok chat:', msg.uniqueId, msg.comment);
-      addChatItem('chat', msg, msg.comment, undefined, false, 'tiktok');
+      addChatItem('chat', msg, msg.comment, undefined, false, PlatformType.TIKTOK);
     });
 
     const unsubscribeGift = registerGiftHandler(handleGift);
 
     const unsubscribeLike = registerLikeHandler((msg: LikeMessage) => {
       const label = msg.label.replace('{0:user}', '').replace('likes', `${msg.likeCount} likes`);
-      addChatItem('like', msg, label, '#447dd4', false, 'tiktok');
+      addChatItem('like', msg, label, '#447dd4', false, PlatformType.TIKTOK);
     });
 
     const unsubscribeMember = registerMemberHandler((msg: MemberMessage) => {
-      addChatItem('member', msg, 'joined', '#21b2c2', true, 'tiktok');
+      addChatItem('member', msg, 'joined', '#21b2c2', true, PlatformType.TIKTOK);
     });
 
     const unsubscribeSocial = registerSocialHandler((msg: SocialMessage) => {
       const color = msg.displayType.includes('follow') ? '#ff005e' : '#2fb816';
       const label = msg.label.replace('{0:user}', '');
-      addChatItem('social', msg, label, color, false, 'tiktok');
+      addChatItem('social', msg, label, color, false, PlatformType.TIKTOK);
     });
 
     const unsubscribeTwitchChat = registerTwitchChatHandler((msg: UnifiedChatMessage) => {
@@ -279,7 +281,7 @@ export function ChatPage () {
         isSubscriber: msg.isSubscriber || false,
         topGifterRank: null,
       };
-      addChatItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, 'twitch');
+      addChatItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, PlatformType.TWITCH);
     });
 
     const unsubscribeYouTubeChat = registerYouTubeChatHandler((msg: UnifiedChatMessage) => {
@@ -299,7 +301,25 @@ export function ChatPage () {
       };
       // Auto-add superchats to queue
       const isSuperchat = !!msg.metadata?.superchat;
-      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube', isSuperchat, isSuperchat);
+      addChatItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, PlatformType.YOUTUBE, isSuperchat, isSuperchat);
+    });
+
+    const unsubscribeKickChat = registerKickChatHandler((msg: UnifiedChatMessage) => {
+      console.log('[ChatPage] Processing Kick chat:', msg.username, msg.message);
+      // Convert Kick message to ChatItem format
+      const kickUser = {
+        uniqueId: msg.username,
+        nickname: msg.displayName,
+        userId: msg.odlUserId,
+        profilePictureUrl: msg.profilePictureUrl || '',
+        followRole: 0,
+        userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
+        isModerator: msg.isMod || false,
+        isNewGifter: false,
+        isSubscriber: msg.isSubscriber || false,
+        topGifterRank: null,
+      };
+      addChatItem('chat', kickUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, PlatformType.KICK);
     });
 
     return () => {
@@ -310,8 +330,9 @@ export function ChatPage () {
       unsubscribeSocial();
       unsubscribeTwitchChat();
       unsubscribeYouTubeChat();
+      unsubscribeKickChat();
     };
-  }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler, registerYouTubeChatHandler]);
+  }, [addChatItem, handleGift, registerTikTokChatHandler, registerGiftHandler, registerLikeHandler, registerMemberHandler, registerSocialHandler, registerTwitchChatHandler, registerYouTubeChatHandler, registerKickChatHandler]);
 
   // Helper to open pop-out windows
   const openPopOut = (path: string, name: string, width = 600, height = 800) => {

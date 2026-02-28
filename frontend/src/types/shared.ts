@@ -12,6 +12,7 @@ export enum PlatformType {
   TIKTOK = 'tiktok',
   TWITCH = 'twitch',
   YOUTUBE = 'youtube',
+  KICK = 'kick',
 }
 
 /**
@@ -45,6 +46,9 @@ export interface PlatformConnectionConfig {
   youtube?: {
     videoId: string;
   };
+  kick?: {
+    channel: string;
+  };
 }
 
 // Poll types
@@ -71,7 +75,7 @@ export interface VoteEntry {
   optionId: number;
   optionText: string;
   timestamp: Date;
-  platform?: 'tiktok' | 'twitch' | 'youtube';
+  platform?: PlatformType;
 }
 
 // Chat item for display
@@ -85,6 +89,6 @@ export interface ChatItem {
   isTemporary?: boolean;
   giftData?: GiftMessage;
   isPendingStreak?: boolean;
-  platform?: 'tiktok' | 'twitch' | 'youtube';
+  platform?: PlatformType;
   isSuperchat?: boolean;
 }

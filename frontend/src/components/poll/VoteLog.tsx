@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
-import { ProfilePicture, TikTokIcon, TwitchIcon, YouTubeIcon } from '../common';
+import { ProfilePicture, TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '../common';
 import { useLanguage } from '@/i18n';
 import type { VoteEntry } from '@/types';
+import { PlatformType } from '@/types';
 
 interface VoteLogProps {
   entries: VoteEntry[];
@@ -12,18 +13,25 @@ interface VoteLogProps {
 /**
  * Platform badge component for vote entries
  */
-function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
-  if (platform === 'twitch') {
+function PlatformBadge({ platform }: { platform?: PlatformType }) {
+  if (platform === PlatformType.TWITCH) {
     return (
       <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-purple-500/20 text-purple-400" title="Twitch">
         <TwitchIcon className="w-3 h-3" />
       </span>
     );
   }
-  if (platform === 'youtube') {
+  if (platform === PlatformType.YOUTUBE) {
     return (
       <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-red-500/20 text-red-500" title="YouTube">
         <YouTubeIcon className="w-3 h-3" />
+      </span>
+    );
+  }
+  if (platform === PlatformType.KICK) {
+    return (
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-green-500/20 text-green-400" title="Kick">
+        <KickIcon className="w-3 h-3" />
       </span>
     );
   }

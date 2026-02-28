@@ -1,7 +1,8 @@
 import { ProfilePicture } from '../common/ProfilePicture';
 import { Username } from '../common/Username';
-import { TikTokIcon, TwitchIcon, YouTubeIcon } from '../common/PlatformSelector';
+import { TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '../common/PlatformSelector';
 import type { ChatItem } from '@/types';
+import { PlatformType } from '@/types';
 
 interface ChatMessageProps {
   item: ChatItem;
@@ -10,14 +11,17 @@ interface ChatMessageProps {
   isOnOverlay?: boolean;
 }
 
-function PlatformBadge({ platform }: { platform?: 'tiktok' | 'twitch' | 'youtube' }) {
+function PlatformBadge({ platform }: { platform?: PlatformType }) {
   if (!platform) return null;
   
-  if (platform === 'tiktok') {
+  if (platform === PlatformType.TIKTOK) {
     return <TikTokIcon className="w-4 h-4 text-cyan-400 flex-shrink-0" />;
   }
-  if (platform === 'youtube') {
+  if (platform === PlatformType.YOUTUBE) {
     return <YouTubeIcon className="w-4 h-4 text-red-500 flex-shrink-0" />;
+  }
+  if (platform === PlatformType.KICK) {
+    return <KickIcon className="w-4 h-4 text-green-400 flex-shrink-0" />;
   }
   return <TwitchIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />;
 }

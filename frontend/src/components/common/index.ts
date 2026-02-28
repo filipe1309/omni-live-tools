@@ -5,7 +5,7 @@ export { ConnectionModal } from './ConnectionModal';
 export { RoomStats } from './RoomStats';
 export { Username } from './Username';
 export { ToastContainer } from './ToastContainer';
-export { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon } from './PlatformSelector';
+export { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from './PlatformSelector';
 export { LanguageSelector } from './LanguageSelector';
 export { SplashScreen } from './SplashScreen';
 export { LoadScreen } from './LoadScreen';

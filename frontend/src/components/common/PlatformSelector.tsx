@@ -8,6 +8,7 @@ interface PlatformSelectorProps {
   tiktokConnected?: boolean;
   twitchConnected?: boolean;
   youtubeConnected?: boolean;
+  kickConnected?: boolean;
 }
 
 /**
@@ -21,11 +22,13 @@ export function PlatformSelector({
   tiktokConnected = false,
   twitchConnected = false,
   youtubeConnected = false,
+  kickConnected = false,
 }: PlatformSelectorProps) {
   const { t } = useLanguage();
   const isTikTokSelected = selectedPlatforms.includes(PlatformType.TIKTOK);
   const isTwitchSelected = selectedPlatforms.includes(PlatformType.TWITCH);
   const isYouTubeSelected = selectedPlatforms.includes(PlatformType.YOUTUBE);
+  const isKickSelected = selectedPlatforms.includes(PlatformType.KICK);
 
   const togglePlatform = (platform: PlatformType) => {
     if (disabled) return;
@@ -105,6 +108,27 @@ export function PlatformSelector({
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
         )}
       </button>
+
+      {/* Kick Button */}
+      <button
+        type="button"
+        onClick={() => togglePlatform(PlatformType.KICK)}
+        disabled={disabled}
+        className={`
+          flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all
+          ${isKickSelected 
+            ? 'border-green-500 bg-green-500/10 text-green-400' 
+            : 'border-slate-600 bg-slate-800/50 text-slate-400 hover:border-slate-500'
+          }
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}
+      >
+        <KickIcon className="w-5 h-5" />
+        <span className="text-sm font-medium">Kick</span>
+        {kickConnected && (
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        )}
+      </button>
     </div>
   );
 }
@@ -151,5 +175,19 @@ function YouTubeIcon({ className }: { className?: string }) {
   );
 }
 
+// Kick Icon Component
+function KickIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M1.333 0v24h5.12V13.6L12.907 24h6.187l-7.68-12 7.68-12h-6.187L6.453 10.4V0z" />
+    </svg>
+  );
+}
+
 // Export icons for use elsewhere
-export { TikTokIcon, TwitchIcon, YouTubeIcon };
+export { TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon };

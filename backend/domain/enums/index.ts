@@ -5,6 +5,7 @@ export enum PlatformType {
   TIKTOK = 'tiktok',
   TWITCH = 'twitch',
   YOUTUBE = 'youtube',
+  KICK = 'kick',
 }
 
 /**
@@ -62,6 +63,21 @@ export enum YouTubeEventType {
   STREAM_END = 'streamEnd',
 }
 
+/**
+ * Kick Event Types
+ */
+export enum KickEventType {
+  CHAT = 'chat',
+  SUB = 'sub',
+  GIFTED_SUB = 'giftedSub',
+  HOST = 'host',
+  BAN = 'ban',
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+  RECONNECTED = 'reconnected',
+  STREAM_END = 'streamEnd',
+}
+
 export enum SocketEventType {
   // TikTok events
   TIKTOK_CONNECTED = 'tiktokConnected',
@@ -78,6 +94,11 @@ export enum SocketEventType {
   YOUTUBE_DISCONNECTED = 'youtubeDisconnected',
   YOUTUBE_RECONNECTED = 'youtubeReconnected',
   SET_YOUTUBE_VIDEO = 'setYouTubeVideo',
+  // Kick events
+  KICK_CONNECTED = 'kickConnected',
+  KICK_DISCONNECTED = 'kickDisconnected',
+  KICK_RECONNECTED = 'kickReconnected',
+  SET_KICK_CHANNEL = 'setKickChannel',
   // Shared events
   STREAM_END = 'streamEnd',
   STATISTIC = 'statistic',

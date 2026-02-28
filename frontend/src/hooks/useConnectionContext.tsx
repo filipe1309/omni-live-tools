@@ -48,6 +48,16 @@ interface ConnectionContextType {
     disconnect: () => void;
     videoInput: string;
   };
+  // Kick state
+  kick: {
+    status: ConnectionStatus;
+    channel: string | null;
+    error: string | null;
+    isConnected: boolean;
+    connect: (channel: string) => Promise<void>;
+    disconnect: () => void;
+    channelName: string;
+  };
   // Combined state
   isAnyConnected: boolean;
   connectedPlatforms: PlatformType[];
@@ -57,6 +67,7 @@ interface ConnectionContextType {
   setTikTokUsername: (username: string) => void;
   setTwitchChannel: (channel: string) => void;
   setYouTubeVideo: (videoIdOrUrl: string) => void;
+  setKickChannel: (channel: string) => void;
   // Modal state
   showConnectionModal: boolean;
   setShowConnectionModal: (show: boolean) => void;
@@ -73,6 +84,7 @@ interface ConnectionContextType {
   registerRoomUserHandler: (handler: (msg: RoomUserMessage) => void) => () => void;
   registerTwitchChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
   registerYouTubeChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
+  registerKickChatHandler: (handler: (msg: UnifiedChatMessage) => void) => () => void;
   registerDisconnectHandler: (handler: (platform: PlatformType) => void) => () => void;
   registerSocketReconnectHandler: (handler: () => void) => () => void;
   registerStreamEndHandler: (handler: () => void) => () => void;
@@ -109,6 +121,11 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     return saved ? JSON.parse(saved) : '';
   });
 
+  const [kickChannel, setKickChannel] = useState(() => {
+    const saved = localStorage.getItem('shared-kick-channel');
+    return saved ? JSON.parse(saved) : '';
+  });
+
   // Modal state
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
@@ -126,6 +143,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
   const tiktokConnectedRef = useRef(false);
   const twitchConnectedRef = useRef(false);
   const youtubeConnectedRef = useRef(false);
+  const kickConnectedRef = useRef(false);
 
   const [selectedPlatforms, setSelectedPlatformsState] = useState<PlatformType[]>(() => {
     const saved = localStorage.getItem('shared-selected-platforms');
@@ -149,6 +167,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
   const [roomUserHandlers] = useState<Set<(msg: RoomUserMessage) => void>>(() => new Set());
   const [twitchChatHandlers] = useState<Set<(msg: UnifiedChatMessage) => void>>(() => new Set());
   const [youtubeChatHandlers] = useState<Set<(msg: UnifiedChatMessage) => void>>(() => new Set());
+  const [kickChatHandlers] = useState<Set<(msg: UnifiedChatMessage) => void>>(() => new Set());
   const [disconnectHandlers] = useState<Set<(platform: PlatformType) => void>>(() => new Set());
   const [socketReconnectHandlers] = useState<Set<() => void>>(() => new Set());
   const [streamEndHandlers] = useState<Set<() => void>>(() => new Set());
@@ -199,6 +218,11 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     return () => { youtubeChatHandlers.delete(handler); };
   }, [youtubeChatHandlers]);
 
+  const registerKickChatHandler = useCallback((handler: (msg: UnifiedChatMessage) => void) => {
+    kickChatHandlers.add(handler);
+    return () => { kickChatHandlers.delete(handler); };
+  }, [kickChatHandlers]);
+
   const registerDisconnectHandler = useCallback((handler: (platform: PlatformType) => void) => {
     disconnectHandlers.add(handler);
     return () => { disconnectHandlers.delete(handler); };
@@ -243,6 +267,9 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     onYouTubeChat: (msg) => {
       youtubeChatHandlers.forEach(handler => handler(msg));
     },
+    onKickChat: (msg) => {
+      kickChatHandlers.forEach(handler => handler(msg));
+    },
     onDisconnect: (platform) => {
       disconnectHandlers.forEach(handler => handler(platform));
     },
@@ -254,7 +281,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       toast.warning(t.toast.tiktokStreamEnded);
       // Check if no other platforms are connected and open modal after small delay
       setTimeout(() => {
-        if (!twitchConnectedRef.current && !youtubeConnectedRef.current) {
+        if (!twitchConnectedRef.current && !youtubeConnectedRef.current && !kickConnectedRef.current) {
           setShowConnectionModal(true);
         }
       }, 500);
@@ -264,7 +291,17 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       toast.warning(t.toast.youtubeStreamEnded);
       // Check if no other platforms are connected and open modal after small delay
       setTimeout(() => {
-        if (!tiktokConnectedRef.current && !twitchConnectedRef.current) {
+        if (!tiktokConnectedRef.current && !twitchConnectedRef.current && !kickConnectedRef.current) {
+          setShowConnectionModal(true);
+        }
+      }, 500);
+    },
+    onKickStreamEnd: () => {
+      streamEndHandlers.forEach(handler => handler());
+      toast.warning(t.toast.kickStreamEnded);
+      // Check if no other platforms are connected and open modal after small delay
+      setTimeout(() => {
+        if (!tiktokConnectedRef.current && !twitchConnectedRef.current && !youtubeConnectedRef.current) {
           setShowConnectionModal(true);
         }
       }, 500);
@@ -278,6 +315,9 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     onYouTubeReconnect: (state) => {
       toast.success(interpolate(t.toast.youtubeReconnected, { channel: state.channelName || state.videoId }));
     },
+    onKickReconnect: (state) => {
+      toast.success(interpolate(t.toast.kickReconnected, { channel: state.channel }));
+    },
   });
 
   // Sync connection refs for stream end handlers
@@ -285,7 +325,8 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     tiktokConnectedRef.current = connection.tiktok.isConnected;
     twitchConnectedRef.current = connection.twitch.isConnected;
     youtubeConnectedRef.current = connection.youtube.isConnected;
-  }, [connection.tiktok.isConnected, connection.twitch.isConnected, connection.youtube.isConnected]);
+    kickConnectedRef.current = connection.kick.isConnected;
+  }, [connection.tiktok.isConnected, connection.twitch.isConnected, connection.youtube.isConnected, connection.kick.isConnected]);
 
   // Persist settings
   const setSelectedPlatforms = useCallback((platforms: PlatformType[]) => {
@@ -306,6 +347,11 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
   const handleSetYouTubeVideo = useCallback((videoIdOrUrl: string) => {
     setYouTubeVideo(videoIdOrUrl);
     localStorage.setItem('shared-youtube-video', JSON.stringify(videoIdOrUrl));
+  }, []);
+
+  const handleSetKickChannel = useCallback((channel: string) => {
+    setKickChannel(channel);
+    localStorage.setItem('shared-kick-channel', JSON.stringify(channel));
   }, []);
 
   // Connect handlers with toast notifications
@@ -344,6 +390,18 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       throw error;
     }
   }, [connection.youtube, toast, t, handleSetYouTubeVideo]);
+
+  const connectKick = useCallback(async (channel: string) => {
+    try {
+      await connection.kick.connect(channel);
+      handleSetKickChannel(channel);
+      toast.success(interpolate(t.toast.kickConnected, { channel }));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(interpolate(t.toast.errorConnectingKick, { error: errorMessage }));
+      throw error;
+    }
+  }, [connection.kick, toast, t, handleSetKickChannel]);
 
   // Auto-reconnect handler
   const setAutoReconnect = useCallback((enabled: boolean) => {
@@ -410,6 +468,19 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
             console.log('[ConnectionContext] YouTube auto-reconnect failed, will retry:', error);
           });
       }
+
+      // Reconnect Kick if needed
+      const kickSelected = selectedPlatforms.includes('kick' as PlatformType);
+      if (kickSelected && kickChannel && !connection.kick.isConnected && connection.kick.status !== 'connecting') {
+        console.log('[ConnectionContext] Auto-reconnect attempt to Kick:', kickChannel);
+        connectKick(kickChannel)
+          .then(() => {
+            console.log('[ConnectionContext] Kick auto-reconnect successful!');
+          })
+          .catch((error: unknown) => {
+            console.log('[ConnectionContext] Kick auto-reconnect failed, will retry:', error);
+          });
+      }
     };
 
     // First attempt after 3 seconds
@@ -422,7 +493,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       clearTimeout(initialTimeout);
       clearInterval(intervalId);
     };
-  }, [autoReconnect, connection.isAnyConnected, connection.tiktok, connection.twitch, connection.youtube, selectedPlatforms, tiktokUsername, twitchChannel, youtubeVideo, connectTikTok, connectTwitch, connectYouTube]);
+  }, [autoReconnect, connection.isAnyConnected, connection.tiktok, connection.twitch, connection.youtube, connection.kick, selectedPlatforms, tiktokUsername, twitchChannel, youtubeVideo, kickChannel, connectTikTok, connectTwitch, connectYouTube, connectKick]);
 
   const value: ConnectionContextType = {
     tiktok: {
@@ -440,6 +511,11 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
       connect: connectYouTube,
       videoInput: youtubeVideo,
     },
+    kick: {
+      ...connection.kick,
+      connect: connectKick,
+      channelName: kickChannel,
+    },
     isAnyConnected: connection.isAnyConnected,
     connectedPlatforms: connection.connectedPlatforms,
     selectedPlatforms,
@@ -447,6 +523,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     setTikTokUsername: handleSetTikTokUsername,
     setTwitchChannel: handleSetTwitchChannel,
     setYouTubeVideo: handleSetYouTubeVideo,
+    setKickChannel: handleSetKickChannel,
     showConnectionModal,
     setShowConnectionModal,
     autoReconnect,
@@ -460,6 +537,7 @@ export function ConnectionProvider ({ children }: ConnectionProviderProps) {
     registerRoomUserHandler,
     registerTwitchChatHandler,
     registerYouTubeChatHandler,
+    registerKickChatHandler,
     registerDisconnectHandler,
     registerSocketReconnectHandler,
     registerStreamEndHandler,

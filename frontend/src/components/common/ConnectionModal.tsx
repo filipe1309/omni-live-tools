@@ -2,7 +2,7 @@ import { FormEvent, KeyboardEvent, useRef, useState, useEffect } from 'react';
 import { useConnectionContext } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { PlatformType } from '@/types';
-import { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon } from './PlatformSelector';
+import { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from './PlatformSelector';
 import { LanguageSelector } from './LanguageSelector';
 
 interface ConnectionModalProps {
@@ -22,11 +22,13 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     tiktok,
     twitch,
     youtube,
+    kick,
     selectedPlatforms,
     setSelectedPlatforms,
     setTikTokUsername,
     setTwitchChannel,
     setYouTubeVideo,
+    setKickChannel,
     isAnyConnected,
     autoReconnect,
     setAutoReconnect,
@@ -36,6 +38,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
   const youtubeInputRef = useRef<HTMLInputElement>(null);
+  const kickInputRef = useRef<HTMLInputElement>(null);
 
   // State for manual dismiss in uncontrolled mode
   const [dismissedUncontrolled, setDismissedUncontrolled] = useState(false);
@@ -69,6 +72,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   const showTikTok = selectedPlatforms.includes(PlatformType.TIKTOK);
   const showTwitch = selectedPlatforms.includes(PlatformType.TWITCH);
   const showYouTube = selectedPlatforms.includes(PlatformType.YOUTUBE);
+  const showKick = selectedPlatforms.includes(PlatformType.KICK);
 
   const handleTikTokSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -127,16 +131,37 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     }
   };
 
+  const handleKickSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (kick.status === 'connected') {
+      kick.disconnect();
+    } else if (kick.channelName.trim()) {
+      try {
+        await kick.connect(kick.channelName.trim());
+      } catch {
+        // Error handling is done in the context
+      }
+    }
+  };
+
+  const handleKickKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleKickSubmit(e);
+    }
+  };
+
   const isConnecting =
     (showTikTok && tiktok.status === 'connecting') ||
     (showTwitch && twitch.status === 'connecting') ||
-    (showYouTube && youtube.status === 'connecting');
+    (showYouTube && youtube.status === 'connecting') ||
+    (showKick && kick.status === 'connecting');
 
   // Check if all selected platforms are connected
   const areAllSelectedConnected =
     (!showTikTok || tiktok.status === 'connected') &&
     (!showTwitch || twitch.status === 'connected') &&
-    (!showYouTube || youtube.status === 'connected');
+    (!showYouTube || youtube.status === 'connected') &&
+    (!showKick || kick.status === 'connected');
 
   // Determine if modal should be shown
   // If isOpen is provided (controlled mode), use it
@@ -210,6 +235,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
               tiktokConnected={tiktok.status === 'connected'}
               twitchConnected={twitch.status === 'connected'}
               youtubeConnected={youtube.status === 'connected'}
+              kickConnected={kick.status === 'connected'}
             />
           </div>
 
@@ -346,6 +372,51 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
                 {youtube.status === 'error' && youtube.error && (
                   <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-300">
                     {youtube.error}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Kick Connection */}
+            {showKick && (
+              <div className={`p-4 rounded-lg border-2 transition-all ${kick.status === 'connected'
+                ? 'border-green-500/50 bg-green-500/5'
+                : 'border-slate-700/50 bg-slate-700/30'
+                }`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <KickIcon className="w-5 h-5 text-green-400" />
+                  <span className="font-semibold text-white">Kick</span>
+                  <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-bold border ${statusConfig[kick.status].className}`}>
+                    {statusConfig[kick.status].text}
+                  </span>
+                </div>
+
+                <form onSubmit={handleKickSubmit} className="flex flex-wrap gap-2">
+                  <input
+                    ref={kickInputRef}
+                    type="text"
+                    value={kick.channelName}
+                    onChange={(e) => setKickChannel(e.target.value)}
+                    onKeyUp={handleKickKeyUp}
+                    placeholder={t.connection.kickChannel || 'Kick channel name'}
+                    className="input-field flex-1 min-w-0 disabled:cursor-not-allowed"
+                    disabled={kick.status === 'connecting' || kick.status === 'connected'}
+                  />
+                  <button
+                    type="submit"
+                    disabled={kick.status === 'connecting' || (!kick.channelName.trim() && kick.status !== 'connected')}
+                    className={`px-4 py-2 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${kick.status === 'connected'
+                      ? 'bg-red-600 text-white hover:bg-red-500'
+                      : 'bg-[#53fc18] text-slate-900 hover:bg-[#4ae615]'
+                      }`}
+                  >
+                    {kick.status === 'connecting' ? '...' : kick.status === 'connected' ? t.common.disconnect : t.common.connect}
+                  </button>
+                </form>
+
+                {kick.status === 'error' && kick.error && (
+                  <div className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded text-sm text-red-300">
+                    {kick.error}
                   </div>
                 )}
               </div>

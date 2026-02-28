@@ -4,6 +4,7 @@ import { useMultiPlatformConnection } from '@/hooks';
 import { useLanguage } from '@/i18n';
 import { ObsEventContainer } from '@/components/chat';
 import type { ChatItem, ChatMessage, GiftMessage, LikeMessage, MemberMessage, SocialMessage, RoomUserMessage, UnifiedChatMessage } from '@/types';
+import { PlatformType } from '@/types';
 
 // Generate unique ID for chat items
 let chatIdCounter = 0;
@@ -82,7 +83,7 @@ export function ObsOverlayPage () {
     content: string,
     color?: string,
     isTemporary = false,
-    platform: 'tiktok' | 'twitch' | 'youtube' = 'tiktok'
+    platform: PlatformType = PlatformType.TIKTOK
   ) => {
     setItems(prev => {
       // Remove temporary items when adding new non-temporary messages
@@ -150,7 +151,7 @@ export function ObsOverlayPage () {
     // TikTok Chat messages
     onTikTokChat: (msg: ChatMessage) => {
       if (settings.showChats) {
-        addItem('chat', msg, msg.comment, undefined, false, 'tiktok');
+        addItem('chat', msg, msg.comment, undefined, false, PlatformType.TIKTOK);
       }
     },
 
@@ -170,7 +171,7 @@ export function ObsOverlayPage () {
           isSubscriber: msg.isSubscriber || false,
           topGifterRank: null,
         };
-        addItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, 'twitch');
+        addItem('chat', twitchUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, PlatformType.TWITCH);
       }
     },
 
@@ -190,7 +191,27 @@ export function ObsOverlayPage () {
           isSubscriber: msg.isSubscriber || false,
           topGifterRank: null,
         };
-        addItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, 'youtube');
+        addItem('chat', youtubeUser as unknown as ChatMessage, msg.message, undefined, false, PlatformType.YOUTUBE);
+      }
+    },
+
+    // Kick Chat messages
+    onKickChat: (msg: UnifiedChatMessage) => {
+      if (settings.showChats) {
+        // Convert Kick message to ChatItem format
+        const kickUser = {
+          uniqueId: msg.username,
+          nickname: msg.displayName,
+          userId: msg.odlUserId,
+          profilePictureUrl: '',
+          followRole: 0,
+          userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
+          isModerator: msg.isMod || false,
+          isNewGifter: false,
+          isSubscriber: msg.isSubscriber || false,
+          topGifterRank: null,
+        };
+        addItem('chat', kickUser as unknown as ChatMessage, msg.message, msg.metadata?.color as string | undefined, false, PlatformType.KICK);
       }
     },
 
@@ -224,7 +245,7 @@ export function ObsOverlayPage () {
         const label = msg.label
           .replace('{0:user}', '')
           .replace('likes', `${msg.likeCount} likes`);
-        addItem('like', msg, label, '#447dd4', false, 'tiktok');
+        addItem('like', msg, label, '#447dd4', false, PlatformType.TIKTOK);
       }
     },
 
@@ -241,7 +262,7 @@ export function ObsOverlayPage () {
 
       setTimeout(() => {
         joinMsgDelayRef.current -= addDelay;
-        addItem('member', msg, t.obsOverlay.joined, '#21b2c2', true, 'tiktok');
+        addItem('member', msg, t.obsOverlay.joined, '#21b2c2', true, PlatformType.TIKTOK);
       }, addDelay > 0 ? joinMsgDelayRef.current - addDelay : 0);
     },
 
@@ -252,10 +273,10 @@ export function ObsOverlayPage () {
 
       if (isFollow && settings.showFollows) {
         const label = msg.label.replace('{0:user}', '');
-        addItem('social', msg, label, '#ff005e', false, 'tiktok');
+        addItem('social', msg, label, '#ff005e', false, PlatformType.TIKTOK);
       } else if (isShare && settings.showShares) {
         const label = msg.label.replace('{0:user}', '');
-        addItem('social', msg, label, '#2fb816', false, 'tiktok');
+        addItem('social', msg, label, '#2fb816', false, PlatformType.TIKTOK);
       }
     },
 

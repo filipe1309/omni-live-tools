@@ -1,31 +1,37 @@
+import { PlatformType } from '@/types';
+
 interface UsernameProps {
   uniqueId: string;
   userId?: string;
-  platform?: 'tiktok' | 'twitch' | 'youtube';
+  platform?: PlatformType;
   className?: string;
 }
 
-export function Username({ uniqueId, userId, platform = 'tiktok', className = '' }: UsernameProps) {
+export function Username({ uniqueId, userId, platform = PlatformType.TIKTOK, className = '' }: UsernameProps) {
   // Strip leading @ from uniqueId to avoid double @@ display
   const displayName = uniqueId.startsWith('@') ? uniqueId.slice(1) : uniqueId;
   
   let profileUrl: string;
-  if (platform === 'twitch') {
+  if (platform === PlatformType.TWITCH) {
     profileUrl = `https://www.twitch.tv/${displayName}`;
-  } else if (platform === 'youtube') {
+  } else if (platform === PlatformType.YOUTUBE) {
     // Use channel URL if userId (channelId) is available, otherwise fallback to handle
     profileUrl = userId 
       ? `https://www.youtube.com/channel/${userId}`
       : `https://www.youtube.com/@${displayName}`;
+  } else if (platform === PlatformType.KICK) {
+    profileUrl = `https://kick.com/${displayName}`;
   } else {
     profileUrl = `https://www.tiktok.com/@${displayName}`;
   }
   
   let colorClass: string;
-  if (platform === 'twitch') {
+  if (platform === PlatformType.TWITCH) {
     colorClass = 'text-purple-400';
-  } else if (platform === 'youtube') {
+  } else if (platform === PlatformType.YOUTUBE) {
     colorClass = 'text-red-500';
+  } else if (platform === PlatformType.KICK) {
+    colorClass = 'text-green-400';
   } else {
     colorClass = 'text-tiktok-cyan';
   }
