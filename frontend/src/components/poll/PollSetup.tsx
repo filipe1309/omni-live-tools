@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLanguage, interpolate } from '@/i18n';
 import {
   POLL_TIMER,
@@ -696,7 +696,33 @@ export function PollSetup ({
 
   // At least MIN_SELECTED options must be selected
   const selectedCount = selectedOptions.filter(Boolean).length;
-  const isValid = selectedCount >= POLL_OPTIONS.MIN_SELECTED;
+  
+  // Check for duplicate options among selected options
+  const duplicateOptions = useMemo(() => {
+    const selectedTexts = options
+      .map((opt, idx) => ({ text: opt.trim().toLowerCase(), index: idx, original: opt.trim() }))
+      .filter(item => selectedOptions[item.index] && item.text); // Only selected and non-empty
+    
+    const seen = new Map<string, string[]>();
+    selectedTexts.forEach(item => {
+      if (!seen.has(item.text)) {
+        seen.set(item.text, []);
+      }
+      seen.get(item.text)!.push(item.original);
+    });
+    
+    // Return duplicates (texts that appear more than once)
+    const duplicates: string[] = [];
+    seen.forEach((originals) => {
+      if (originals.length > 1) {
+        duplicates.push(originals[0]); // Use original casing
+      }
+    });
+    return duplicates;
+  }, [options, selectedOptions]);
+  
+  const hasDuplicates = duplicateOptions.length > 0;
+  const isValid = selectedCount >= POLL_OPTIONS.MIN_SELECTED && !hasDuplicates;
 
   return (
     <div className="space-y-6">
@@ -1049,6 +1075,11 @@ export function PollSetup ({
         {selectedCount < POLL_OPTIONS.MIN_SELECTED && (
           <p className="text-red-400 text-sm mt-2">
             ⚠️ {interpolate(t.poll.minOptionsWarning, { count: POLL_OPTIONS.MIN_SELECTED })}
+          </p>
+        )}
+        {hasDuplicates && (
+          <p className="text-yellow-400 text-sm mt-2">
+            ⚠️ {interpolate(t.poll.duplicateOptionsWarning, { options: duplicateOptions.join(', ') })}
           </p>
         )}
       </div>

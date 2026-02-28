@@ -185,6 +185,7 @@ export const en: TranslationKeys = {
     optionsHint: 'check the options you want to include in the poll',
     optionPlaceholder: 'Option',
     minOptionsWarning: 'Select at least {count} options for the poll',
+    duplicateOptionsWarning: 'Duplicate options detected: {options}',
     // Profiles
     profile: 'Profile',
     selectProfile: 'Select profile',

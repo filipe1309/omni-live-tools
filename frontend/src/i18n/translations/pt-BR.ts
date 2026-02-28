@@ -183,6 +183,7 @@ export const ptBR = {
     optionsHint: 'marque as opções que deseja incluir na enquete',
     optionPlaceholder: 'Opção',
     minOptionsWarning: 'Selecione pelo menos {count} opções para a enquete',
+    duplicateOptionsWarning: 'Opções duplicadas detectadas: {options}',
     // Profiles
     profile: 'Perfil',
     selectProfile: 'Selecionar perfil',
