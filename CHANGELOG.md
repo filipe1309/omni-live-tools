@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.16.1] - 2026-02-27
+
+### Changed
+
+- V1.16.0
+
+### Documentation
+
+- Update TECHNICAL_DOCUMENTATION.md to include Kick platform support in overview and features
+- Update AGENTS.md to include Kick platform support in project overview and features
+- Add @retconned/kick-js dependency and update asar unpack settings
+- Update HomePage to include Kick platform link in footer
+- Update README files to include Kick platform support in features and descriptions
+- Update AGENTS.md to include POLL_FONT_SIZE settings and increase autocomplete history limit
+- Update technical documentation and enhance poll settings with customizable font size, duplicate validation, and extended autocomplete history
+- Enhance poll feature with customizable results font size, increased autocomplete suggestions, and duplicate validation
+
 ## [1.16.0] - 2026-02-27
 
 ### Added
@@ -359,6 +376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.16.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.14.0...v1.15.0
 [1.14.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.13.0...v1.14.0

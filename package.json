@@ -1,6 +1,6 @@
 {
   "name": "omni-live-tools",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "Omni LIVE Tools is a desktop application that provides a unified interface for managing and monitoring live streaming activities across multiple platforms, including Twitch and TikTok.",
   "main": "electron/dist-electron/main.js",
   "scripts": {
