@@ -9,7 +9,7 @@
    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js"></a>
    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript"></a>
    <a href="https://socket.io/"><img src="https://img.shields.io/badge/Socket.IO-4.x-black.svg" alt="Socket.IO"></a>
-   <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/Electron-25.x-purple.svg" alt="Electron"></a>
+   <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/Electron-33.x-purple.svg" alt="Electron"></a>
    <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-18.x-blue.svg" alt="React"></a>
    <a href="https://jestjs.io/"><img src="https://img.shields.io/badge/Jest-29.x-red.svg" alt="Jest"></a>
 </div>
