@@ -15,15 +15,9 @@ files:
   - node_modules/**/*
   - package.json
 
-# Unpack ESM-only modules from asar so dynamic imports work at runtime
-# kick-js uses system Chrome (requires Google Chrome installed), so we don't need
-# to unpack puppeteer's deep dependency tree
-asarUnpack:
-  - "**/node_modules/@twurple/**"
-  - "**/node_modules/@d-fischer/**"
-  - "**/node_modules/@retconned/**"
-  - "**/node_modules/youtubei.js/**"
-  - "**/node_modules/jintr/**"
+# Disable asar packaging to avoid ESM/CJS module resolution issues
+# kick-js has a deep puppeteer dependency tree that breaks when partially unpacked
+asar: false
 
 # Electron main entry point (compiled from electron/main.ts)
 # electron-builder reads "main" from package.json, but we override here
