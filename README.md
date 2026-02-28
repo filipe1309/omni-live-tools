@@ -108,7 +108,9 @@ The poll feature allows viewers to vote by typing numbers in chat from **TikTok 
 - **Real-time results** - Vote counts and percentages update instantly with flash animation on changes
 - **Platform badges** - Visual indicators show which platform each vote came from
 - **Poll profiles** - Save and load poll configurations with auto-save and localStorage support
-- **Autocomplete options** - Recent poll options are suggested as you type (up to 10 suggestions)
+- **Autocomplete options** - Recent poll options are suggested as you type (up to 20 suggestions per option)
+- **Results font size** - Customize the font size of poll results for better visibility (1x to 3.5x)
+- **Duplicate validation** - Automatic detection and warning for duplicate poll options
 - **Inline editing** - Double-click to edit poll questions and options directly
 - **Configurable options** - Support for 2-6 poll options (default: 2)
 - **Vote logging** - Optional detailed log of each vote with platform info

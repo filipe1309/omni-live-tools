@@ -108,7 +108,9 @@ A funcionalidade de enquetes permite que espectadores votem digitando números n
 - **Resultados em tempo real** - Contagem de votos e porcentagens atualizam instantaneamente com animação flash nas mudanças
 - **Badges de plataforma** - Indicadores visuais mostram de qual plataforma cada voto veio
 - **Perfis de enquete** - Salve e carregue configurações de enquetes com auto-save e suporte a localStorage
-- **Opções de autocomplete** - Opções de enquetes recentes são sugeridas enquanto você digita (até 10 sugestões)
+- **Opções de autocomplete** - Opções de enquetes recentes são sugeridas enquanto você digita (até 20 sugestões por opção)
+- **Tamanho da fonte dos resultados** - Personalize o tamanho da fonte dos resultados da enquete para melhor visibilidade (1x a 3.5x)
+- **Validação de duplicados** - Detecção automática e aviso para opções de enquete duplicadas
 - **Edição inline** - Clique duplo para editar perguntas e opções da enquete diretamente
 - **Opções configuráveis** - Suporte para 2-6 opções de enquete (padrão: 2)
 - **Log de votos** - Log detalhado opcional de cada voto com info da plataforma
