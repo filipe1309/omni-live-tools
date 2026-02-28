@@ -44,16 +44,16 @@ function getKickJsPath(): string {
 }
 
 /**
- * Configure puppeteer for Electron asar environment
- * kick-js uses puppeteer internally, which needs special handling in Electron builds
- * Falls back to system Chrome if puppeteer's bundled browser isn't available
+ * Configure puppeteer to use system Chrome browser
+ * kick-js uses puppeteer internally - we use the system Chrome instead of bundling
+ * Chromium to keep the app size smaller and avoid complex asar unpacking
  */
 function configurePuppeteerForElectron(): void {
-  // Skip puppeteer's own browser download check
+  // Skip puppeteer's own browser download
   process.env.PUPPETEER_SKIP_DOWNLOAD = 'true';
   
   // System Chrome locations by platform
-  const systemChromePaths = {
+  const systemChromePaths: Record<string, string[]> = {
     darwin: [
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       '/Applications/Chromium.app/Contents/MacOS/Chromium',
@@ -72,9 +72,7 @@ function configurePuppeteerForElectron(): void {
     ],
   };
 
-  // Try system Chrome first (more reliable in packaged apps)
-  const platform = process.platform as 'darwin' | 'win32' | 'linux';
-  const chromeCandidates = systemChromePaths[platform] || [];
+  const chromeCandidates = systemChromePaths[process.platform] || [];
   
   for (const chromePath of chromeCandidates) {
     if (fs.existsSync(chromePath)) {
@@ -83,52 +81,8 @@ function configurePuppeteerForElectron(): void {
       return;
     }
   }
-
-  // If in asar, also try puppeteer cache as fallback
-  if (__dirname.includes('app.asar')) {
-    const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
-    const cachePaths = [
-      path.join(unpackedBase, '../../../node_modules/.cache/puppeteer'),
-      path.join(unpackedBase, '../../../../node_modules/.cache/puppeteer'),
-    ];
-    
-    for (const puppeteerCachePath of cachePaths) {
-      if (fs.existsSync(puppeteerCachePath)) {
-        process.env.PUPPETEER_CACHE_DIR = puppeteerCachePath;
-        
-        try {
-          const chromeDirs = fs.readdirSync(puppeteerCachePath).filter(d => d.startsWith('chrome'));
-          for (const chromeDir of chromeDirs) {
-            const chromeBase = path.join(puppeteerCachePath, chromeDir);
-            if (!fs.existsSync(chromeBase)) continue;
-            
-            const platformDirs = fs.readdirSync(chromeBase);
-            for (const platformDir of platformDirs) {
-              const candidates = [
-                path.join(chromeBase, platformDir, 'chrome-headless-shell'),
-                path.join(chromeBase, platformDir, 'chrome-headless-shell.exe'),
-                path.join(chromeBase, platformDir, 'chrome'),
-                path.join(chromeBase, platformDir, 'chrome.exe'),
-                path.join(chromeBase, platformDir, 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing'),
-              ];
-              
-              for (const chromePath of candidates) {
-                if (fs.existsSync(chromePath)) {
-                  process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
-                  console.log(`KICK: Using bundled puppeteer executable at ${chromePath}`);
-                  return;
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error(`KICK: Error scanning puppeteer cache: ${err}`);
-        }
-      }
-    }
-  }
   
-  console.warn('KICK: No Chrome browser found. Kick chat may not work. Install Google Chrome for Kick support.');
+  console.warn('KICK: No Chrome browser found. Kick chat requires Google Chrome or Chromium installed.');
 }
 
 /**
