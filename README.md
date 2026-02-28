@@ -70,7 +70,9 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 | TikTok LIVE | ✅ | ✅ | [TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector) |
 | Twitch | ✅ | ✅ | [@twurple/chat](https://twurple.js.org/) |
 | YouTube Live | ✅ | ✅ | [youtubei.js](https://github.com/LuanRT/YouTube.js) |
-| Kick | ✅ | ✅ | [@retconned/kick-js](https://github.com/retconned/kick-js) |
+| Kick | ✅* | ✅* | [@retconned/kick-js](https://github.com/retconned/kick-js) |
+
+> *Kick support requires Google Chrome or Chromium installed on your system.
 
 ## 🌍 Language Support
 
