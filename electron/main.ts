@@ -129,6 +129,17 @@ async function waitForServer (url: string, retries = 30, delay = 500): Promise<v
 
 // ─── App Lifecycle ───────────────────────────────────────────────────
 
+// Handle uncaught errors gracefully to prevent app crashes
+process.on('uncaughtException', (error) => {
+  console.error('Electron uncaught exception:', error);
+  // Don't exit for non-critical errors
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Electron unhandled rejection:', reason);
+  // Don't exit - just log
+});
+
 app.whenReady().then(async () => {
   // Start the backend first
   startBackendServer();
