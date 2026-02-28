@@ -262,6 +262,43 @@ Poll constants are in `frontend/src/constants/poll.ts`:
 2. Export from the folder's `index.ts`
 3. Import using `@/components`
 
+### Adding a New ESM Package (Electron)
+
+When adding ESM-only npm packages that will be used in Electron, follow these steps to avoid "Cannot find package" errors:
+
+1. **Add to both package.json files:**
+   - Root `package.json` (for Electron packaging)
+   - `backend/package.json` (for development)
+
+2. **Add to electron-builder.yml asarUnpack:**
+   ```yaml
+   asarUnpack:
+     - "**/node_modules/@scope/package-name/**"
+   ```
+
+3. **Create path helper function** in the wrapper (see `YouTubeConnectionWrapper.ts` or `KickConnectionWrapper.ts`):
+   ```typescript
+   import path from 'path';
+   
+   function getPackagePath(): string {
+     if (__dirname.includes('app.asar')) {
+       const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
+       return path.resolve(unpackedBase, '../../../../node_modules/@scope/package/dist/index.js');
+     }
+     return '@scope/package-name';
+   }
+   ```
+
+4. **Use dynamic import with path helper:**
+   ```typescript
+   const packagePath = getPackagePath();
+   const module = await dynamicImport<typeof import('@scope/package-name')>(packagePath);
+   ```
+
+5. **Run `npm install` in root** to update `package-lock.json`
+
+**Why this is needed:** Electron packages code into an asar archive. ESM modules with dynamic imports need to be unpacked and accessed via their full filesystem path.
+
 ## Troubleshooting
 
 **Port in use:**
