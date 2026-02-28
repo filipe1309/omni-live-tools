@@ -117,7 +117,7 @@ export function ObsFeaturedMessagePage() {
 
         {/* Message content */}
         <div 
-          className="text-center leading-relaxed"
+          className="text-center leading-relaxed break-all"
           style={{ 
             color: featuredMessage.color || fontColor,
             fontSize,

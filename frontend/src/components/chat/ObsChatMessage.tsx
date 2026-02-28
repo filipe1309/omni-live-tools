@@ -69,6 +69,7 @@ export function ObsChatMessage ({ item, fontColor }: ObsChatMessageProps) {
         </a>
         <span>: </span>
         <span
+          className="break-all"
           style={{
             color: item.color || fontColor || 'inherit',
           }}

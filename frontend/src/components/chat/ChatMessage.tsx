@@ -61,7 +61,7 @@ export function ChatMessage({ item, onAddToQueue, onSendToOverlay, isOnOverlay }
         </span>
         <span className="text-slate-400 mx-1">:</span>
         <span 
-          className="break-words"
+          className="break-all"
           style={{ color: item.color || 'inherit' }}
         >
           {item.content}
