@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.18.0] - 2026-02-28
+
+### Added
+
+- Improve Electron build cleanup process to handle locked files on macOS
+
+### Changed
+
+- V1.17.0
+
+### Fixed
+
+- Remove unused gift description paragraph from GiftCard component
+- Update font size handling in poll components for consistency
+- Add warning message for Kick connection delay in multiple languages
+- Simplify application description in package.json
+- Simplify ESM package handling in Electron by disabling asar packaging and updating import instructions
+- Enhance ESM compatibility for kick-js and youtubei.js by converting paths to file URLs
+- Remove unnecessary asarUnpack configuration to simplify packaging process
+
+### Documentation
+
+- Update results font size range for polls in English and Portuguese README files
+- Update poll font size settings for consistency
+- Update customizable results font size for polls and add connection timeout details for Kick
+
 ## [1.17.0] - 2026-02-28
 
 ### Added
@@ -424,6 +450,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.18.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.2...v1.17.0
 [1.16.2]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.1...v1.16.2
 [1.16.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.0...v1.16.1
