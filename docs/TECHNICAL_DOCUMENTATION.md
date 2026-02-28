@@ -39,7 +39,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Gift tracking with streak detection and timeout handling
 - Interactive polls where viewers vote by typing numbers (with flash animation on vote changes)
 - Poll profiles for saving and loading poll configurations (with auto-save)
-- Customizable results font size for polls (1x to 3.5x)
+- Customizable results font size for polls (1x to 3x)
 - Duplicate options validation with warning display
 - Per-option autocomplete history (up to 20 items per option)
 - OBS overlay support for streaming software
@@ -266,6 +266,10 @@ server.start();
 
 **Kick** (`infrastructure/kick/`):
 - `KickConnectionWrapper` - Wraps `@retconned/kick-js` library for Kick chat
+- **Requires Google Chrome or Chromium** installed on the system (uses puppeteer internally)
+- Connection timeout is 120 seconds (puppeteer can be slow on Windows)
+- Uses "first-message" fallback if the 'ready' event doesn't fire
+- Shows a warning message to users that connections may take up to 2 minutes
 
 **Rate Limiter** (`infrastructure/rate-limiter/`):
 - `InMemoryRateLimiterRepository` - In-memory rate limiting storage
@@ -513,6 +517,7 @@ mainWindow.loadURL('http://localhost:8081');
 - **macOS:** Builds `.zip` for x64 and arm64
 - **Windows:** Builds `.exe` installer (NSIS) and portable
 - **Linux:** Builds AppImage and .deb
+- **Asar Packaging:** Disabled (`asar: false`) due to ESM/CJS module resolution issues with kick-js and its puppeteer dependencies
 
 ### Building
 
