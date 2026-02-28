@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.16.2] - 2026-02-27
+
+### Changed
+
+- V1.16.1
+
+### Fixed
+
+- Add --yes flag to bump-version-changelog-commit for automatic confirmation
+
 ## [1.16.1] - 2026-02-27
 
 ### Changed
@@ -376,6 +386,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.16.2]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.1...v1.16.2
 [1.16.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.14.0...v1.15.0
