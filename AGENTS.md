@@ -12,7 +12,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Featured message overlay for OBS with pop-out window support
 - Interactive polls where viewers vote by typing numbers
 - Poll profiles for saving/loading configurations
-- Multi-language support (PT-BR and EN)
+- Multi-language support (PT-BR, EN, and ES)
 - Smart connection modal (auto-closes when all selected platforms connect)
 
 ## Tech Stack
@@ -114,7 +114,7 @@ omni-live-tools/
 | `backend/domain/enums/index.ts` | All event type definitions |
 | `frontend/src/App.tsx` | Route definitions, providers setup |
 | `frontend/src/hooks/useConnectionContext.tsx` | Global connection state |
-| `frontend/src/i18n/translations/` | All text content (en.ts, pt-BR.ts) |
+| `frontend/src/i18n/translations/` | All text content (en.ts, pt-BR.ts, es.ts) |
 | `Makefile` | All development commands |
 | `electron-builder.yml` | Desktop build configuration |
 
