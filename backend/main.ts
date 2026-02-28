@@ -120,6 +120,15 @@ class Application {
 
     process.on('uncaughtException', (error) => {
       console.error('Uncaught exception:', error);
+      // Don't shutdown for non-critical errors (like puppeteer/kick-js issues)
+      if (error.message?.includes('EPIPE') || 
+          error.message?.includes('ECONNRESET') ||
+          error.message?.includes('WebSocket') ||
+          error.message?.includes('puppeteer') ||
+          error.message?.includes('kick')) {
+        console.warn('Non-critical error, continuing...');
+        return;
+      }
       shutdown('uncaughtException');
     });
 
@@ -128,8 +137,9 @@ class Application {
       if (this.isShuttingDown) {
         return;
       }
+      // Log but don't exit for unhandled rejections
       console.error('Unhandled rejection:', reason);
-      shutdown('unhandledRejection');
+      // Don't shutdown - just log error and continue
     });
   }
 }

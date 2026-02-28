@@ -46,6 +46,17 @@ if [ ! -d "backend/node_modules" ]; then
     cd backend && npm install && cd ..
 fi
 
+# Step 2b: Ensure puppeteer's Chrome is downloaded to backend/node_modules/.cache
+# This is needed for kick-js to work in the packaged Electron app
+echo "📦 Ensuring puppeteer browser is in backend cache..."
+export PUPPETEER_CACHE_DIR="$(pwd)/backend/node_modules/.cache/puppeteer"
+mkdir -p "$PUPPETEER_CACHE_DIR"
+# Run puppeteer's browser download script
+cd backend && npx puppeteer browsers install chrome-headless-shell || {
+    echo "⚠️  Could not install puppeteer browser. Kick support may not work in packaged app."
+}
+cd ..
+
 # Step 3: Compile backend TypeScript
 echo "📝 Compiling backend TypeScript..."
 npm run backend:build

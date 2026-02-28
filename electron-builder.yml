@@ -15,13 +15,12 @@ files:
   - node_modules/**/*
   - package.json
 
-# Unpack ESM-only modules from asar so dynamic imports work at runtime
+# Unpack all node_modules from asar so dynamic imports work at runtime
+# This is necessary because puppeteer-extra and kick-js have deep dependency trees
+# that would require tracking dozens of transitive dependencies individually
 asarUnpack:
-  - "**/node_modules/@twurple/**"
-  - "**/node_modules/@d-fischer/**"
-  - "**/node_modules/@retconned/kick-js/**"
-  - "**/node_modules/youtubei.js/**"
-  - "**/node_modules/jintr/**"
+  - "**/node_modules/**"
+  - "**/node_modules/.cache/**"
 
 # Electron main entry point (compiled from electron/main.ts)
 # electron-builder reads "main" from package.json, but we override here

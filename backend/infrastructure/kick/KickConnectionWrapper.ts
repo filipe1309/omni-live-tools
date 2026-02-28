@@ -2,10 +2,134 @@ import { EventEmitter } from 'events';
 import { KickConnectionState, createKickUser, createKickUnifiedMessage } from '../../domain/entities';
 import type { UnifiedChatMessage } from '../../domain/entities';
 import { PlatformType } from '../../domain/enums';
+import path from 'path';
+import fs from 'fs';
 
 // Dynamic import for kick-js (ESM module)
 // eslint-disable-next-line @typescript-eslint/no-implied-eval
 const dynamicImport = new Function('specifier', 'return import(specifier)') as <T>(specifier: string) => Promise<T>;
+
+/**
+ * Get the correct import path for @retconned/kick-js
+ * When running in Electron asar, modules unpacked via asarUnpack are in app.asar.unpacked
+ * ESM requires the full path to the entry file, not just the package directory
+ */
+function getKickJsPath(): string {
+  // Check if running inside an asar archive
+  if (__dirname.includes('app.asar')) {
+    // Replace app.asar with app.asar.unpacked for unpacked modules
+    const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
+    
+    // Try multiple possible locations for kick-js
+    // 1. backend/node_modules (where it's installed via backend/package.json)
+    // 2. root node_modules (if hoisted)
+    const candidates = [
+      path.resolve(unpackedBase, '../../../node_modules/@retconned/kick-js/dist/index.js'),
+      path.resolve(unpackedBase, '../../../../node_modules/@retconned/kick-js/dist/index.js'),
+    ];
+    
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        console.log(`KICK: Found kick-js at ${candidate}`);
+        return candidate;
+      }
+    }
+    
+    // Fallback to backend path even if not found (will error with helpful message)
+    console.error('KICK: Could not find kick-js in unpacked modules. Tried:', candidates);
+    return candidates[0];
+  }
+  // Development mode - use normal module resolution
+  return '@retconned/kick-js';
+}
+
+/**
+ * Configure puppeteer for Electron asar environment
+ * kick-js uses puppeteer internally, which needs special handling in Electron builds
+ * Falls back to system Chrome if puppeteer's bundled browser isn't available
+ */
+function configurePuppeteerForElectron(): void {
+  // Skip puppeteer's own browser download check
+  process.env.PUPPETEER_SKIP_DOWNLOAD = 'true';
+  
+  // System Chrome locations by platform
+  const systemChromePaths = {
+    darwin: [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+      `${process.env.HOME}/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`,
+    ],
+    win32: [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`,
+    ],
+    linux: [
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/snap/bin/chromium',
+    ],
+  };
+
+  // Try system Chrome first (more reliable in packaged apps)
+  const platform = process.platform as 'darwin' | 'win32' | 'linux';
+  const chromeCandidates = systemChromePaths[platform] || [];
+  
+  for (const chromePath of chromeCandidates) {
+    if (fs.existsSync(chromePath)) {
+      process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
+      console.log(`KICK: Using system Chrome at ${chromePath}`);
+      return;
+    }
+  }
+
+  // If in asar, also try puppeteer cache as fallback
+  if (__dirname.includes('app.asar')) {
+    const unpackedBase = __dirname.replace('app.asar', 'app.asar.unpacked');
+    const cachePaths = [
+      path.join(unpackedBase, '../../../node_modules/.cache/puppeteer'),
+      path.join(unpackedBase, '../../../../node_modules/.cache/puppeteer'),
+    ];
+    
+    for (const puppeteerCachePath of cachePaths) {
+      if (fs.existsSync(puppeteerCachePath)) {
+        process.env.PUPPETEER_CACHE_DIR = puppeteerCachePath;
+        
+        try {
+          const chromeDirs = fs.readdirSync(puppeteerCachePath).filter(d => d.startsWith('chrome'));
+          for (const chromeDir of chromeDirs) {
+            const chromeBase = path.join(puppeteerCachePath, chromeDir);
+            if (!fs.existsSync(chromeBase)) continue;
+            
+            const platformDirs = fs.readdirSync(chromeBase);
+            for (const platformDir of platformDirs) {
+              const candidates = [
+                path.join(chromeBase, platformDir, 'chrome-headless-shell'),
+                path.join(chromeBase, platformDir, 'chrome-headless-shell.exe'),
+                path.join(chromeBase, platformDir, 'chrome'),
+                path.join(chromeBase, platformDir, 'chrome.exe'),
+                path.join(chromeBase, platformDir, 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing'),
+              ];
+              
+              for (const chromePath of candidates) {
+                if (fs.existsSync(chromePath)) {
+                  process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
+                  console.log(`KICK: Using bundled puppeteer executable at ${chromePath}`);
+                  return;
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`KICK: Error scanning puppeteer cache: ${err}`);
+        }
+      }
+    }
+  }
+  
+  console.warn('KICK: No Chrome browser found. Kick chat may not work. Install Google Chrome for Kick support.');
+}
 
 /**
  * Reconnection configuration for Kick
@@ -135,16 +259,33 @@ export class KickConnectionWrapper extends EventEmitter {
   private async performConnect(isReconnect: boolean): Promise<KickConnectionState> {
     return new Promise(async (resolve, reject) => {
       try {
-        // Dynamic import of kick-js
-        const kickModule = await dynamicImport<typeof import('@retconned/kick-js')>('@retconned/kick-js');
+        // Configure puppeteer for Electron before importing kick-js
+        configurePuppeteerForElectron();
+        
+        // Dynamic import of kick-js with correct path for Electron asar
+        const kickJsPath = getKickJsPath();
+        let kickModule;
+        try {
+          kickModule = await dynamicImport<typeof import('@retconned/kick-js')>(kickJsPath);
+        } catch (importError) {
+          this.log(`Failed to import kick-js: ${importError}`);
+          reject(new Error(`Failed to load kick-js module: ${importError}`));
+          return;
+        }
         const { createClient } = kickModule;
 
         // Create Kick client with readOnly mode (auto-initializes)
-        this.kickClient = createClient(this.channel, {
-          readOnly: true,
-          plainEmote: true,
-          logger: this.enableLog,
-        });
+        try {
+          this.kickClient = createClient(this.channel, {
+            readOnly: true,
+            plainEmote: true,
+            logger: this.enableLog,
+          });
+        } catch (createError) {
+          this.log(`Failed to create Kick client: ${createError}`);
+          reject(new Error(`Failed to create Kick client: ${createError}`));
+          return;
+        }
 
         // Set up event handlers before waiting for ready
         this.setupChatEvents();
@@ -152,6 +293,7 @@ export class KickConnectionWrapper extends EventEmitter {
         // Wait for the 'ready' event to resolve the connection
         this.kickClient.on('ready', (user: { id: number; username: string; tag: string }) => {
           this.log(`${isReconnect ? 'Reconnected' : 'Connected'} to channel ${this.channel} (id: ${user?.id})`);
+
 
           this.connected = true;
           this.connectedAt = Date.now();
