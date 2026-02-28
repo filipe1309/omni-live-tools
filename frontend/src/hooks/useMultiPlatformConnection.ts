@@ -674,7 +674,7 @@ export function useMultiPlatformConnection (
           cleanup();
           setKickState(prev => ({ ...prev, status: 'error', error: 'Connection Timeout' }));
           reject('Connection Timeout');
-        }, 15000);
+        }, 120000); // 120 seconds - Kick uses puppeteer which is slow on Windows
 
         socket.once('kickConnected', onConnected);
         socket.once('kickDisconnected', onDisconnected);

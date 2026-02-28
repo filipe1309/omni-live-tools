@@ -3,6 +3,7 @@ import { YouTubeConnectionState, createYouTubeUser, createYouTubeUnifiedMessage 
 import type { UnifiedChatMessage } from '../../domain/entities';
 import { PlatformType } from '../../domain/enums';
 import path from 'path';
+import { pathToFileURL } from 'url';
 
 // Dynamic import for youtubei.js
 type Innertube = InstanceType<typeof import('youtubei.js').Innertube>;
@@ -25,7 +26,8 @@ function getYoutubeiPath(): string {
     // Navigate from backend/dist/infrastructure/youtube to root node_modules
     // Use the Node.js specific entry point for ESM
     const rootPath = path.resolve(unpackedBase, '../../../../node_modules/youtubei.js/dist/src/platform/node.js');
-    return rootPath;
+    // Convert to file:// URL for ESM compatibility on Windows
+    return pathToFileURL(rootPath).href;
   }
   // Development mode - use normal module resolution
   return 'youtubei.js';

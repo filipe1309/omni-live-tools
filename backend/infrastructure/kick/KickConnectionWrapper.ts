@@ -4,6 +4,7 @@ import type { UnifiedChatMessage } from '../../domain/entities';
 import { PlatformType } from '../../domain/enums';
 import path from 'path';
 import fs from 'fs';
+import { pathToFileURL } from 'url';
 
 // Dynamic import for kick-js (ESM module)
 // eslint-disable-next-line @typescript-eslint/no-implied-eval
@@ -31,13 +32,15 @@ function getKickJsPath(): string {
     for (const candidate of candidates) {
       if (fs.existsSync(candidate)) {
         console.log(`KICK: Found kick-js at ${candidate}`);
-        return candidate;
+        // Convert to file:// URL for ESM compatibility on Windows
+        return pathToFileURL(candidate).href;
       }
     }
     
     // Fallback to backend path even if not found (will error with helpful message)
     console.error('KICK: Could not find kick-js in unpacked modules. Tried:', candidates);
-    return candidates[0];
+    // Convert to file:// URL for ESM compatibility on Windows
+    return pathToFileURL(candidates[0]).href;
   }
   // Development mode - use normal module resolution
   return '@retconned/kick-js';
@@ -214,6 +217,56 @@ export class KickConnectionWrapper extends EventEmitter {
    */
   private async performConnect(isReconnect: boolean): Promise<KickConnectionState> {
     return new Promise(async (resolve, reject) => {
+      let connectionResolved = false;
+      
+      // Helper to mark connection as successful (called by 'ready' or first message)
+      const markConnected = (source: string, channelId?: number) => {
+        if (connectionResolved || this.connected) return;
+        connectionResolved = true;
+        
+        this.log(`${isReconnect ? 'Reconnected' : 'Connected'} to channel ${this.channel} via ${source}${channelId ? ` (id: ${channelId})` : ''}`);
+
+        this.connected = true;
+        this.connectedAt = Date.now();
+        this.channelId = channelId || 0;
+        this.onConnectionCountChange?.(1);
+
+        // Cancel any pending reconnect reset from previous connection
+        if (this.reconnectResetTimeout) {
+          clearTimeout(this.reconnectResetTimeout);
+          this.reconnectResetTimeout = null;
+        }
+
+        // Delay resetting reconnect state to prevent infinite loops
+        this.reconnectResetTimeout = setTimeout(() => {
+          this.reconnectCount = 0;
+          this.reconnectDelayMs = this.reconnectConfig.initialDelayMs;
+          this.reconnectResetTimeout = null;
+          this.log('Reconnect state reset after stable connection');
+        }, KickConnectionWrapper.RECONNECT_RESET_DELAY_MS);
+
+        // Client disconnected while establishing connection
+        if (this.clientDisconnected) {
+          this.kickClient = null;
+          reject(new Error('Client disconnected during connection'));
+          return;
+        }
+
+        const connectionState: KickConnectionState = {
+          channel: this.channel,
+          channelId: this.channelId,
+          isConnected: true,
+        };
+
+        if (!isReconnect) {
+          this.emit('connected', connectionState);
+        } else {
+          this.emit('reconnected', connectionState);
+        }
+
+        resolve(connectionState);
+      };
+      
       try {
         // Configure puppeteer for Electron before importing kick-js
         const chromeFound = configurePuppeteerForElectron();
@@ -248,52 +301,11 @@ export class KickConnectionWrapper extends EventEmitter {
         }
 
         // Set up event handlers before waiting for ready
-        this.setupChatEvents();
+        this.setupChatEvents(markConnected);
 
         // Wait for the 'ready' event to resolve the connection
         this.kickClient.on('ready', (user: { id: number; username: string; tag: string }) => {
-          this.log(`${isReconnect ? 'Reconnected' : 'Connected'} to channel ${this.channel} (id: ${user?.id})`);
-
-
-          this.connected = true;
-          this.connectedAt = Date.now();
-          this.channelId = user?.id || 0;
-          this.onConnectionCountChange?.(1);
-
-          // Cancel any pending reconnect reset from previous connection
-          if (this.reconnectResetTimeout) {
-            clearTimeout(this.reconnectResetTimeout);
-            this.reconnectResetTimeout = null;
-          }
-
-          // Delay resetting reconnect state to prevent infinite loops
-          this.reconnectResetTimeout = setTimeout(() => {
-            this.reconnectCount = 0;
-            this.reconnectDelayMs = this.reconnectConfig.initialDelayMs;
-            this.reconnectResetTimeout = null;
-            this.log('Reconnect state reset after stable connection');
-          }, KickConnectionWrapper.RECONNECT_RESET_DELAY_MS);
-
-          // Client disconnected while establishing connection
-          if (this.clientDisconnected) {
-            this.kickClient = null;
-            reject(new Error('Client disconnected during connection'));
-            return;
-          }
-
-          const connectionState: KickConnectionState = {
-            channel: this.channel,
-            channelId: this.channelId,
-            isConnected: true,
-          };
-
-          if (!isReconnect) {
-            this.emit('connected', connectionState);
-          } else {
-            this.emit('reconnected', connectionState);
-          }
-
-          resolve(connectionState);
+          markConnected('ready', user?.id);
         });
 
         // Handle errors during connection
@@ -301,20 +313,23 @@ export class KickConnectionWrapper extends EventEmitter {
           const errorMessage = error instanceof Error ? error.message : String(error);
           this.log(`${isReconnect ? 'Reconnect' : 'Connection'} error: ${errorMessage}`);
 
-          if (!this.connected) {
+          if (!this.connected && !connectionResolved) {
             // Error during initial connection
             if (isReconnect) {
               this.scheduleReconnect(errorMessage);
             } else {
               this.emit('disconnected', errorMessage);
             }
+            connectionResolved = true;
             reject(error);
           }
         });
 
-        // Set a timeout for connection
+        // Set a longer timeout for connection - Kick uses puppeteer which can be slow
+        // especially on Windows. Messages may start arriving before 'ready' event fires,
+        // in which case the first-message fallback in setupChatEvents will resolve.
         setTimeout(() => {
-          if (!this.connected && !this.clientDisconnected) {
+          if (!this.connected && !this.clientDisconnected && !connectionResolved) {
             const errorMessage = 'Connection timeout';
             this.log(errorMessage);
             if (isReconnect) {
@@ -322,9 +337,10 @@ export class KickConnectionWrapper extends EventEmitter {
             } else {
               this.emit('disconnected', errorMessage);
             }
+            connectionResolved = true;
             reject(new Error(errorMessage));
           }
-        }, 30000); // 30 second timeout
+        }, 120000); // 120 second timeout (2 minutes)
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -343,14 +359,24 @@ export class KickConnectionWrapper extends EventEmitter {
 
   /**
    * Set up Kick chat event handlers
+   * @param onFirstMessage - Callback to mark connection as successful when first message arrives
    */
-  private setupChatEvents(): void {
+  private setupChatEvents(onFirstMessage?: (source: string, channelId?: number) => void): void {
     if (!this.kickClient) return;
+    
+    this.log(`Setting up chat events (onFirstMessage callback: ${onFirstMessage ? 'provided' : 'not provided'})`);
 
     // Handle incoming chat messages
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.kickClient.on('ChatMessage', (message: any) => {
       try {
+        // If 'ready' event never fired but we're receiving messages, mark as connected
+        // This is a fallback for platforms/versions where 'ready' doesn't fire
+        if (onFirstMessage && !this.connected) {
+          this.log('First message received before ready event - marking as connected');
+          onFirstMessage('first-message');
+        }
+        
         const kickUser = createKickUser({
           odlUserId: `kick-${message.sender?.id || message.id}`,
           odlKickId: message.sender?.id || 0,
