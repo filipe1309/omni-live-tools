@@ -42,7 +42,7 @@ Um aplicativo de leitura de chat e enquetes multiplataforma para lives do **TikT
 - 📋 **Fila de Mensagens** - Adicione mensagens a uma fila de leitura com um clique para fácil gerenciamento durante as lives
 - ⭐ **Overlay de Mensagem em Destaque** - Envie mensagens para uma janela de overlay dedicada para OBS com suporte a pop-out
 - 🌐 **Suporte Multiplataforma** - Conecte-se ao TikTok, Twitch, YouTube e Kick simultaneamente
-- 🗳️ **Enquetes Interativas** - Crie enquetes onde os espectadores votam digitando números no chat (suporta todas as plataformas)
+- 🗳️ **Enquetes Interativas** - Crie enquetes onde os espectadores votam digitando números no chat (suporta todas as plataformas, pop-out funciona em todas as páginas)
 - 📊 **Perfis de Enquete** - Salve e carregue configurações de enquetes com salvamento automático
 - 🎬 **Suporte a Overlay OBS** - Páginas de overlay dedicadas para software de streaming com janelas pop-out para chat, presentes e fila
 - 🔗 **Modo de Conexão Compartilhada** - Overlays podem reutilizar as conexões das plataformas do app principal sem reconectar

@@ -42,7 +42,7 @@ A multi-platform chat reader and poll application for **TikTok LIVE**, **Twitch*
 - 📋 **Message Queue** - Add messages to a reading queue with one click for easy management during streams
 - ⭐ **Featured Message Overlay** - Send messages to a dedicated overlay window for OBS with pop-out support
 - 🌐 **Multi-Platform Support** - Connect to TikTok, Twitch, YouTube, and Kick simultaneously
-- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports all platforms)
+- 🗳️ **Interactive Polls** - Create polls where viewers vote by typing numbers in chat (supports all platforms, pop-out works across pages)
 - 📊 **Poll Profiles** - Save and load poll configurations with auto-save functionality
 - 🎬 **OBS Overlay Support** - Dedicated overlay pages for streaming software with pop-out windows for chat, gifts, and queue
 - 🔗 **Shared Connection Mode** - Overlays can reuse the main app's platform connections without reconnecting
