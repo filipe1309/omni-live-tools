@@ -1,6 +1,6 @@
 # Omni LIVE Tools - Technical Documentation
 
-> **Last Updated:** February 2026  
+> **Last Updated:** March 2026  
 > **Purpose:** This document provides all the technical information needed to understand, maintain, and extend the Omni LIVE Tools application.
 
 ## Table of Contents
@@ -364,6 +364,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 **Common Components** (`components/common/`):
 - `ConnectionModal` - Modal for connecting to platforms with smart auto-close behavior:
   - Auto-closes only when ALL selected platforms are connected
+  - Auto-close only triggers if any platform was disconnected when modal opened or during the session (prevents immediate close when just viewing connections)
+  - Tracks disconnections while modal is open (e.g., user disconnects a platform or adds a new unconnected one)
   - Manual close (X button) available when at least one platform is connected
   - Updates selected platforms to only connected ones on manual dismiss
   - Supports both controlled (from header) and uncontrolled (initial) modes
