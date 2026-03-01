@@ -114,6 +114,7 @@ omni-live-tools/
 | `backend/domain/enums/index.ts` | All event type definitions |
 | `frontend/src/App.tsx` | Route definitions, providers setup |
 | `frontend/src/hooks/useConnectionContext.tsx` | Global connection state |
+| `frontend/src/hooks/usePollContext.tsx` | Global poll state (enables pop-out across pages) |
 | `frontend/src/i18n/translations/` | All text content (en.ts, pt-BR.ts, es.ts) |
 | `Makefile` | All development commands |
 | `electron-builder.yml` | Desktop build configuration |
@@ -218,8 +219,9 @@ import { ChatMessage } from '@/types';
 The frontend uses **React Context** for global state:
 
 1. **ConnectionContext** - Connection status, `connect()`/`disconnect()`, `selectedPlatforms`
-2. **ToastContext** - Toast notification queue
-3. **LanguageContext** - Current language, translation function `t()`
+2. **PollContext** - Global poll state, vote processing, pop-out communication via BroadcastChannel
+3. **ToastContext** - Toast notification queue
+4. **LanguageContext** - Current language, translation function `t()`
 
 ## Environment Variables
 
