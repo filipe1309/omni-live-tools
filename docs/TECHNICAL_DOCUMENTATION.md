@@ -315,9 +315,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
   <LanguageProvider>
     <ToastProvider>
       <ConnectionProvider>
-        <BrowserRouter>
-          <Routes>...</Routes>
-        </BrowserRouter>
+        <PollProvider>
+          <BrowserRouter>
+            <Routes>...</Routes>
+          </BrowserRouter>
+        </PollProvider>
       </ConnectionProvider>
     </ToastProvider>
   </LanguageProvider>
@@ -351,6 +353,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 | `useConnectionContext` | Global connection state (React Context) |
 | `useFeaturedMessage` | Manages featured message overlay via Socket.IO |
 | `usePoll` | Poll creation, voting, timer logic |
+| `usePollContext` | Global poll state management (React Context) - enables poll pop-out to work across pages |
 | `usePollProfile` | Manages poll profiles (save/load/auto-save) |
 | `usePollSync` | Syncs poll state across browser tabs |
 | `useToast` | Toast notification system |
@@ -400,11 +403,17 @@ The app uses **React Context** for global state:
    - Manages `selectedPlatforms` array for multi-platform selection
    - Controls connection modal visibility (`showConnectionModal`, `connectionModalDismissed`)
 
-2. **ToastContext** (`hooks/useToast.tsx`):
+2. **PollContext** (`hooks/usePollContext.tsx`):
+   - Global poll state that persists across page navigation
+   - Registers chat handlers at app level for vote processing
+   - Broadcasts poll state/config to pop-out windows via BroadcastChannel
+   - Enables poll pop-out to work even when navigating away from PollPage
+
+3. **ToastContext** (`hooks/useToast.tsx`):
    - Toast notification queue
    - `showToast()` function
 
-3. **LanguageContext** (`i18n/LanguageContext.tsx`):
+4. **LanguageContext** (`i18n/LanguageContext.tsx`):
    - Current language (PT-BR, EN, or ES)
    - Translation function `t`
 
