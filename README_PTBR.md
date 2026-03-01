@@ -156,7 +156,7 @@ O aplicativo lê mensagens do chat do TikTok LIVE, Twitch, YouTube Live e Kick e
 - **Rate limiting** - Proteção contra requisições excessivas
 - **Suporte multi-idioma** - Exiba mensagens em Português (PT-BR), Inglês (EN) ou Espanhol (ES)
 - **Auto-reconexão** - Reconecta automaticamente se a conexão for perdida
-- **Modal de conexão inteligente** - Fecha automaticamente quando todas as plataformas selecionadas conectam, com fechamento manual disponível após primeira conexão
+- **Modal de conexão inteligente** - Fecha automaticamente quando todas as plataformas selecionadas conectam (apenas se alguma estava desconectada), com fechamento manual disponível após primeira conexão
 
 
 

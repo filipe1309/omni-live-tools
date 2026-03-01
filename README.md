@@ -156,7 +156,7 @@ The application reads chat messages from TikTok LIVE, Twitch, YouTube Live, and 
 - **Rate limiting** - Protect against excessive requests
 - **Multi-language support** - Display messages in Portuguese (PT-BR), English (EN), or Spanish (ES)
 - **Auto-reconnect** - Automatically reconnects if connection is lost
-- **Smart connection modal** - Auto-closes when all selected platforms connect, with manual close available after first connection
+- **Smart connection modal** - Auto-closes when all selected platforms connect (only if any was disconnected), with manual close available after first connection
 
 
 
