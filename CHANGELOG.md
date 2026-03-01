@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.19.0] - 2026-03-01
+
+### Added
+
+- Enhance ConnectionModal to track disconnections for improved auto-close logic
+- Integrate PollProvider for global poll state management across pages
+- Allow PollResultsPage to work when app is in any page
+
+### Changed
+
+- V1.18.0
+
+### Documentation
+
+- Update smart connection modal description for clarity on auto-close behavior
+- Clarify smart connection modal behavior in AGENTS.md
+- Enhance ConnectionModal to improve auto-close logic and track disconnections
+- Update interactive polls description to clarify pop-out functionality across pages
+- Update AGENTS.md to include PollContext for global poll state management
+
 ## [1.18.0] - 2026-02-28
 
 ### Added
@@ -450,6 +470,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.19.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.2...v1.17.0
 [1.16.2]: https://github.com/filipe1309/omni-live-tools/compare/v1.16.1...v1.16.2
