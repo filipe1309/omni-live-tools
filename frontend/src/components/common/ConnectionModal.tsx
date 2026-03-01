@@ -43,6 +43,9 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
   // State for manual dismiss in uncontrolled mode
   const [dismissedUncontrolled, setDismissedUncontrolled] = useState(false);
 
+  // Track if any selected platform was disconnected when modal opened (for auto-close logic)
+  const [hadDisconnectedOnOpen, setHadDisconnectedOnOpen] = useState(false);
+
   // Reset dismissed state if all connections are lost (to show modal again)
   useEffect(() => {
     if (!isAnyConnected) {
@@ -163,11 +166,45 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     (!showYouTube || youtube.status === 'connected') &&
     (!showKick || kick.status === 'connected');
 
+  // Check if any selected platform is currently disconnected
+  const hasAnySelectedDisconnected =
+    (showTikTok && tiktok.status !== 'connected') ||
+    (showTwitch && twitch.status !== 'connected') ||
+    (showYouTube && youtube.status !== 'connected') ||
+    (showKick && kick.status !== 'connected');
+
   // Determine if modal should be shown
   // If isOpen is provided (controlled mode), use it
   // Otherwise, show when ALL selected platforms are connected (not just any)
   // This allows users to connect multiple platforms before auto-closing
   const isControlled = isOpen !== undefined;
+
+  // Track when modal opens and capture if any platform was disconnected at that moment
+  // This prevents auto-close when user just wants to view/manage existing connections
+  useEffect(() => {
+    if (isControlled && isOpen) {
+      setHadDisconnectedOnOpen(hasAnySelectedDisconnected);
+    }
+  // Only run when isOpen changes to true, not on connection status changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isControlled, isOpen]);
+
+  // Also track disconnections that happen while modal is open
+  // (e.g., user disconnects a platform or adds a new unconnected platform)
+  useEffect(() => {
+    if (isControlled && isOpen && hasAnySelectedDisconnected) {
+      setHadDisconnectedOnOpen(true);
+    }
+  }, [isControlled, isOpen, hasAnySelectedDisconnected]);
+
+  // Auto-close controlled modal when all selected platforms are connected
+  // Only if there was at least one disconnected platform when modal opened or during session
+  useEffect(() => {
+    if (isControlled && isOpen && hadDisconnectedOnOpen && areAllSelectedConnected && selectedPlatforms.length > 0 && onClose) {
+      onClose();
+    }
+  }, [isControlled, isOpen, hadDisconnectedOnOpen, areAllSelectedConnected, selectedPlatforms.length, onClose]);
+
   const shouldShow = isControlled ? isOpen : !areAllSelectedConnected && !dismissedUncontrolled;
 
   if (!shouldShow) {
