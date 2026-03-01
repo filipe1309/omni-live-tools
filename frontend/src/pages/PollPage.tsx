@@ -1,14 +1,13 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { useConnectionContext, usePoll, useToast, useBackgroundKeepAlive } from '@/hooks';
+import { useConnectionContext, usePollContext, useToast, useBackgroundKeepAlive } from '@/hooks';
 import { useLanguage, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
-import type { ChatMessage, PollOption, UnifiedChatMessage, PlatformType, FullOptionsConfig } from '@/types';
-import type { SetupConfig } from '@/hooks/usePoll';
+import type { PollOption, PlatformType, FullOptionsConfig, SetupConfig } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS, POLL_FONT_SIZE } from '@/constants';
 import { safeSetItem } from '@/utils';
 
 export function PollPage () {
-  const { pollState, voteLog, startPoll, stopPoll, resetPoll, processVote, clearVoteLog, getTotalVotes, getPercentage, openResultsPopup, broadcastSetupConfig, setConnectionStatus, onConfigUpdate, onReconnect } = usePoll();
+  const { pollState, voteLog, startPoll, stopPoll, resetPoll, clearVoteLog, getTotalVotes, getPercentage, openResultsPopup, broadcastSetupConfig, setConnectionStatus, onConfigUpdate, onReconnect } = usePollContext();
   const toast = useToast();
   const { t } = useLanguage();
 
@@ -22,8 +21,6 @@ export function PollPage () {
     isAnyConnected,
     selectedPlatforms,
     autoReconnect,
-    registerChatHandler,
-    registerTikTokChatHandler,
     registerDisconnectHandler,
     registerSocketReconnectHandler,
   } = useConnectionContext();
@@ -33,12 +30,6 @@ export function PollPage () {
   useEffect(() => {
     autoReconnectRef.current = autoReconnect;
   }, [autoReconnect]);
-
-  // Keep poll state ref for stable handler callbacks
-  const pollStateRef = useRef(pollState);
-  useEffect(() => {
-    pollStateRef.current = pollState;
-  }, [pollState]);
 
   // Pending reconnect flag - set to true when we need to reconnect after socket comes back
   const [pendingReconnect, setPendingReconnect] = useState(false);
@@ -193,39 +184,8 @@ export function PollPage () {
     [setupConfig, broadcastSetupConfig, toast]
   );
 
-  // Handle unified chat from any platform
-  const handleUnifiedChat = useCallback((msg: UnifiedChatMessage) => {
-    if (pollStateRef.current.isRunning) {
-      // Convert unified message to chat message format for processVote
-      const chatMsg: ChatMessage = {
-        userId: msg.odlUserId,
-        uniqueId: msg.username,
-        nickname: msg.displayName,
-        profilePictureUrl: msg.profilePictureUrl || '',
-        followRole: 0,
-        userBadges: msg.badges?.map(b => ({ type: b.id, name: b.name || b.id })) || [],
-        isModerator: msg.isMod || false,
-        isNewGifter: false,
-        isSubscriber: msg.isSubscriber || false,
-        topGifterRank: null,
-        comment: msg.message,
-        timestamp: msg.timestamp,
-      };
-      processVote(chatMsg, msg.platform);
-    }
-  }, [processVote]);
-
-  // Handle chat from TikTok (original format, for backwards compatibility)
-  const handleTikTokChat = useCallback((msg: ChatMessage) => {
-    if (pollStateRef.current.isRunning) {
-      processVote(msg, 'tiktok' as PlatformType);
-    }
-  }, [processVote]);
-
   // Register event handlers from shared context
   useEffect(() => {
-    const unsubscribeChat = registerChatHandler(handleUnifiedChat);
-    const unsubscribeTikTokChat = registerTikTokChatHandler(handleTikTokChat);
     const unsubscribeDisconnect = registerDisconnectHandler((platform: PlatformType) => {
       console.log(`[PollPage] ${platform} connection lost, autoReconnect:`, autoReconnectRef.current);
     });
@@ -238,12 +198,10 @@ export function PollPage () {
     });
 
     return () => {
-      unsubscribeChat();
-      unsubscribeTikTokChat();
       unsubscribeDisconnect();
       unsubscribeSocketReconnect();
     };
-  }, [handleUnifiedChat, handleTikTokChat, registerChatHandler, registerTikTokChatHandler, registerDisconnectHandler, registerSocketReconnectHandler]);
+  }, [registerDisconnectHandler, registerSocketReconnectHandler]);
 
   // Handle pending reconnect when connection object is available
   useEffect(() => {

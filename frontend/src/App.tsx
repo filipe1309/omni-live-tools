@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header, ToastContainer, ErrorBoundary, ConnectionModal } from './components';
-import { ToastProvider, ConnectionProvider, useConnectionContext } from './hooks';
+import { ToastProvider, ConnectionProvider, useConnectionContext, PollProvider } from './hooks';
 import { LanguageProvider } from './i18n';
 import { HomePage, ChatPage, PollPage, PollResultsPage, OverlayPage, ObsOverlayPage, ObsFeaturedMessagePage, ObsChatPage, ObsGiftPage, ObsQueuePage } from './pages';
 
@@ -21,10 +21,11 @@ function App () {
       <LanguageProvider>
         <ToastProvider>
           <ConnectionProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* OBS Overlay - No header */}
-                <Route path="/obs" element={<ObsOverlayPage />} />
+            <PollProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* OBS Overlay - No header */}
+                  <Route path="/obs" element={<ObsOverlayPage />} />
 
                 {/* OBS Featured Message Overlay - No header */}
                 <Route path="/obs-featured" element={<ObsFeaturedMessagePage />} />
@@ -62,6 +63,7 @@ function App () {
               <ToastContainer />
               <ConnectionModalWrapper />
             </BrowserRouter>
+            </PollProvider>
           </ConnectionProvider>
         </ToastProvider>
       </LanguageProvider>

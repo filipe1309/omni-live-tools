@@ -6,6 +6,7 @@ export { useYouTubeConnection } from './useYouTubeConnection';
 export type { YouTubeConnectionStatus } from './useYouTubeConnection';
 export { useMultiPlatformConnection } from './useMultiPlatformConnection';
 export { ConnectionProvider, useConnectionContext } from './useConnectionContext';
+export { PollProvider, usePollContext } from './usePollContext';
 export { usePoll } from './usePoll';
 export { usePollTimer } from './usePollTimer';
 export type { TimerCallbacks } from './usePollTimer';

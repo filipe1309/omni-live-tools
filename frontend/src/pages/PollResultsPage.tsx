@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { PollState, PollOption, SerializablePollState, SetupConfig } from '@/types';
 import { PollSetup } from '@/components/poll/PollSetup';
 import { SpotlightTrophyCelebration } from '@/components/poll/SpotlightTrophyCelebration';
@@ -115,9 +115,13 @@ export function PollResultsPage () {
   const displayQuestion =
     pollState.isRunning ? pollState.question : setupConfig?.question || DEFAULT_QUESTION;
 
+  // Track if we've received connection status
+  const hasReceivedConnectionStatus = useRef(false);
+
+  // Initialize BroadcastChannel once on mount
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
-    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
 
     try {
       channel = new BroadcastChannel('poll-results-channel');
@@ -150,6 +154,7 @@ export function PollResultsPage () {
           }
           setIsWaiting(false);
         } else if (data.type === 'connection-status') {
+          hasReceivedConnectionStatus.current = true;
           setIsConnected(data.isConnected);
           // Reset reconnecting state when connection status changes
           if (data.isConnected) {
@@ -158,23 +163,18 @@ export function PollResultsPage () {
         }
       };
 
-      // Only the leader tab polls for updates to avoid race conditions
-      if (isLeader) {
-        channel.postMessage({ type: 'request-state' });
+      // Send initial request-state to get current status
+      channel.postMessage({ type: 'request-state' });
 
-        // Poll for updates every 2s as a backup for pushed updates
-        // Primary updates come via broadcast in real-time, this only catches edge cases
-        pollInterval = setInterval(() => {
-          if (channel) {
-            channel.postMessage({ type: 'request-state' });
-          }
-        }, 2000);
-      }
+      // Retry after a short delay in case the main app wasn't ready
+      retryTimeout = setTimeout(() => {
+        if (!hasReceivedConnectionStatus.current && channel) {
+          channel.postMessage({ type: 'request-state' });
+        }
+      }, 500);
 
       return () => {
-        if (pollInterval) {
-          clearInterval(pollInterval);
-        }
+        if (retryTimeout) clearTimeout(retryTimeout);
         channel?.close();
       };
     } catch (e) {
@@ -182,12 +182,27 @@ export function PollResultsPage () {
     }
 
     return () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
+      if (retryTimeout) clearTimeout(retryTimeout);
       channel?.close();
     };
-  }, [isLeader]);
+  }, []);
+
+  // Set up polling interval only when this tab is the leader
+  useEffect(() => {
+    if (!isLeader || !channelRef) return;
+
+    // Poll for updates every 2s as a backup for pushed updates
+    // Primary updates come via broadcast in real-time, this only catches edge cases
+    const pollInterval = setInterval(() => {
+      if (channelRef) {
+        channelRef.postMessage({ type: 'request-state' });
+      }
+    }, 2000);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [isLeader, channelRef]);
 
   const sendCommand = useCallback(
     (command: 'start' | 'stop' | 'reset') => {
