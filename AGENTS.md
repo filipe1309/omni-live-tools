@@ -13,7 +13,7 @@ Omni LIVE Tools is a multi-platform chat reader and poll application for **TikTo
 - Interactive polls where viewers vote by typing numbers
 - Poll profiles for saving/loading configurations
 - Multi-language support (PT-BR, EN, and ES)
-- Smart connection modal (auto-closes when all selected platforms connect)
+- Smart connection modal (auto-closes when all selected platforms connect, only if any was disconnected)
 
 ## Tech Stack
 
