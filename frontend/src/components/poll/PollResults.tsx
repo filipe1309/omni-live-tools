@@ -26,6 +26,10 @@ interface PollResultsProps {
   editable?: boolean;
   onQuestionChange?: (newQuestion: string) => void;
   onOptionTextChange?: (optionId: number, newText: string) => void;
+  // Wrapper styling
+  wrapperClassName?: string;
+  // Hide celebration/countdown overlays (for rendering them externally)
+  hideOverlays?: boolean;
 }
 
 export function PollResults ({
@@ -44,6 +48,8 @@ export function PollResults ({
   editable = false,
   onQuestionChange,
   onOptionTextChange,
+  wrapperClassName,
+  hideOverlays = false,
 }: PollResultsProps) {
   const totalVotes = getTotalVotes();
 
@@ -74,14 +80,14 @@ export function PollResults ({
   const status = getStatusDisplay();
 
   return (
-    <div className="space-y-4 relative">
+    <div className={`space-y-4 relative ${wrapperClassName || ''}`}>
       {/* Spotlight + Trophy Celebration */}
-      {showCelebration && (
+      {!hideOverlays && showCelebration && (
         <SpotlightTrophyCelebration onComplete={handleCelebrationComplete} winnerText={winnerText} />
       )}
 
       {/* Countdown Overlay - positioned within Results Section */}
-      {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
+      {!hideOverlays && isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
 
       {/* Control Buttons */}
       {showControlButtons && (onStart || onStop || onReset) && (

@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { PollState, PollOption, SerializablePollState, SetupConfig } from '@/types';
 import { PollSetup } from '@/components/poll/PollSetup';
-import { SpotlightTrophyCelebration } from '@/components/poll/SpotlightTrophyCelebration';
-import { CountdownOverlay } from '@/components/poll/CountdownOverlay';
-import { PollQuestion } from '@/components/poll/PollQuestion';
-import { PollOptionCard } from '@/components/poll/PollOptionCard';
+import { PollResults } from '@/components/poll/PollResults';
 import { PollControlButtons } from '@/components/poll/PollControlButtons';
 import { DisconnectedModal } from '@/components/poll/DisconnectedModal';
 import { AnimatedBorder } from '@/components/poll/AnimatedBorder';
+import { SpotlightTrophyCelebration } from '@/components/poll/SpotlightTrophyCelebration';
+import { CountdownOverlay } from '@/components/poll/CountdownOverlay';
 import { LoadScreen } from '@/components';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
@@ -96,36 +95,52 @@ export function PollResultsPage () {
     selectedOptions: boolean[];
   } | null>(loadFullOptionsConfig);
 
-  // Serialize options to string for stable comparison in useMemo
-  const pollOptionsKey = JSON.stringify(pollState.options);
-  const setupOptionsKey = JSON.stringify(setupConfig?.options || []);
+  // Check if countdown is active
+  const isCountingDown = pollState.countdown !== undefined;
 
-  // Use pollState.options ONLY when poll is actively running, otherwise use setupConfig for live preview
-  const displayOptions = useMemo<PollOption[]>(() => {
-    if (pollState.isRunning && pollState.options.length > 0) {
-      return pollState.options;
-    }
-    if (setupConfig?.options && setupConfig.options.length > 0) {
-      return setupConfig.options;
-    }
-    return DEFAULT_POLL_OPTIONS;
-    // Use serialized keys for stable dependency comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pollState.isRunning, pollOptionsKey, setupOptionsKey]);
+  // Determine if poll is actively running (for showing real vs preview data)
+  const isPollActive = pollState.isRunning || pollState.finished;
 
-  // Use shared hook for display logic
+  // Helper to calculate total votes
+  const getTotalVotes = useCallback(() => {
+    return Object.values(pollState.votes).reduce((sum, count) => sum + count, 0);
+  }, [pollState.votes]);
+
+  // Helper to calculate percentage for an option
+  const getPercentage = useCallback(
+    (optionId: number) => {
+      const total = getTotalVotes();
+      if (total === 0) return 0;
+      return ((pollState.votes[optionId] || 0) / total) * 100;
+    },
+    [pollState.votes, getTotalVotes]
+  );
+
+  // Build the effective poll state for PollResults component
+  // When poll is active, use real pollState; otherwise use preview data from setupConfig
+  const effectivePollState = useMemo<PollState>(() => {
+    if (isPollActive) {
+      return pollState;
+    }
+    // Preview mode: use setupConfig values
+    const previewOptions = setupConfig?.options && setupConfig.options.length > 0
+      ? setupConfig.options
+      : DEFAULT_POLL_OPTIONS;
+    return {
+      ...pollState,
+      question: setupConfig?.question || DEFAULT_QUESTION,
+      options: previewOptions,
+      votes: previewOptions.reduce((acc, opt) => ({ ...acc, [opt.id]: 0 }), {} as Record<number, number>),
+      timer: setupConfig?.timer ?? POLL_TIMER.DEFAULT,
+    };
+  }, [isPollActive, pollState, setupConfig]);
+
+  // Use usePollDisplay for celebration state (renders overlays at container level)
   const {
-    totalVotes,
-    getPercentage,
-    winnerIds,
     winnerText,
     showCelebration,
     handleCelebrationComplete,
-    isCountingDown,
-  } = usePollDisplay({ pollState, displayOptions });
-
-  const displayQuestion =
-    pollState.isRunning ? pollState.question : setupConfig?.question || DEFAULT_QUESTION;
+  } = usePollDisplay({ pollState: effectivePollState });
 
   // Track if we've received connection status
   const hasReceivedConnectionStatus = useRef(false);
@@ -448,8 +463,8 @@ export function PollResultsPage () {
 
           {/* Results Section with Animated Border */}
           <AnimatedBorder visible={setupConfig?.showBorder ?? false} borderWidth={6} className="flex-1">
-            <div className="flex-1 space-y-3 relative p-4 bg-slate-900 rounded-xl">
-              {/* Spotlight + Trophy Celebration */}
+            <div className="flex-1 relative p-4 bg-slate-900 rounded-xl min-h-[450px]">
+              {/* Spotlight + Trophy Celebration - rendered at container level for full coverage */}
               {showCelebration && (
                 <SpotlightTrophyCelebration
                   onComplete={handleCelebrationComplete}
@@ -460,38 +475,18 @@ export function PollResultsPage () {
               {/* Countdown Overlay */}
               {isCountingDown && <CountdownOverlay countdown={pollState.countdown!} />}
 
-              {/* Question */}
-              <PollQuestion
-                question={displayQuestion || t.pollResults.voteNow}
-                isRunning={pollState.isRunning}
-                timeLeft={pollState.timeLeft}
-                timer={pollState.timer}
-                className="[&_h3]:text-5xl"
-                editable={!pollState.isRunning && !isCountingDown}
+              <PollResults
+                pollState={effectivePollState}
+                getPercentage={isPollActive ? getPercentage : () => 0}
+                getTotalVotes={isPollActive ? getTotalVotes : () => 0}
+                showStatusBar={false}
+                size="large"
+                fontSize={setupConfig?.resultsFontSize}
+                editable={true}
                 onQuestionChange={handleQuestionInlineEdit}
+                onOptionTextChange={handleOptionInlineEdit}
+                hideOverlays={true}
               />
-
-              {/* Results */}
-              <div className="space-y-3 flex-1 min-h-[380px]">
-                {displayOptions.map((option) => {
-                  const percentage = pollState.options.length > 0 ? getPercentage(option.id) : 0;
-
-                  return (
-                    <PollOptionCard
-                      key={option.id}
-                      option={option}
-                      votes={pollState.votes[option.id] || 0}
-                      percentage={percentage}
-                      totalVotes={totalVotes}
-                      isWinner={winnerIds.includes(option.id)}
-                      size="large"
-                      fontSize={setupConfig?.resultsFontSize}
-                      editable={!pollState.isRunning && !isCountingDown}
-                      onOptionTextChange={handleOptionInlineEdit}
-                    />
-                  );
-                })}
-              </div>
             </div>
           </AnimatedBorder>
         </div>
