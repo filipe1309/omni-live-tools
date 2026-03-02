@@ -181,11 +181,18 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
 
   // Track when modal opens and capture if any platform was disconnected at that moment
   // This prevents auto-close when user just wants to view/manage existing connections
+  // Also reset when modal closes to ensure fresh state on next open
   useEffect(() => {
-    if (isControlled && isOpen) {
-      setHadDisconnectedOnOpen(hasAnySelectedDisconnected);
+    if (isControlled) {
+      if (isOpen) {
+        setHadDisconnectedOnOpen(hasAnySelectedDisconnected);
+      } else {
+        // Reset when modal closes so next open starts fresh
+        // This prevents race condition where auto-close fires immediately on next open
+        setHadDisconnectedOnOpen(false);
+      }
     }
-  // Only run when isOpen changes to true, not on connection status changes
+  // Only run when isOpen changes, not on connection status changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isControlled, isOpen]);
 
