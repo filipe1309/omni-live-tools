@@ -422,7 +422,7 @@ electron-dev ed: check-electron-deps check-backend-deps build
 
 .PHONY: electron-dist edist
 ## electron-dist: Build distributable installers [alias: edist]
-electron-dist edist: check-electron-deps check-backend-deps frontend-build bump-version-changelog-commit
+electron-dist edist: check-electron-deps check-backend-deps bump-version-changelog-commit frontend-build 
 	@printf "$(BLUE)🔨 Building Electron distributables...$(NC)\n"
 	@chmod +x scripts/build-exe-electron.sh
 	@./scripts/build-exe-electron.sh
