@@ -37,6 +37,7 @@ export const STORAGE_KEYS = {
   OPTION_HISTORY: 'omni-poll-optionHistory',
   PROFILES: 'omni-poll-profiles',
   SELECTED_PROFILE: 'omni-poll-selectedProfile',
+  CONNECTION_STATUS: 'omni-poll-connectionStatus',
 } as const;
 
 // Question history settings

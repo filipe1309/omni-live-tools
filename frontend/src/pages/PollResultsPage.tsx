@@ -28,6 +28,18 @@ const initialPollState: PollState = {
   countdown: undefined,
 };
 
+// Read connection status from localStorage (fallback for when BroadcastChannel is throttled)
+const getConnectionStatusFromStorage = (): { isConnected: boolean; timestamp: number } | null => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.CONNECTION_STATUS);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+};
 // Load full options config from localStorage (all options + selected state)
 const loadFullOptionsConfig = (): { allOptions: string[]; selectedOptions: boolean[] } | null => {
   const saved = localStorage.getItem(STORAGE_KEYS.FULL_OPTIONS);
@@ -203,6 +215,45 @@ export function PollResultsPage () {
       clearInterval(pollInterval);
     };
   }, [isLeader, channelRef]);
+
+  // Fallback: Check localStorage for connection status
+  // This handles browser throttling scenarios where BroadcastChannel messages don't arrive
+  useEffect(() => {
+    // Check localStorage every 5 seconds as a fallback
+    const checkLocalStorage = () => {
+      const storedStatus = getConnectionStatusFromStorage();
+      if (storedStatus) {
+        // Only use localStorage if it's recent (within 30 seconds)
+        const isRecent = Date.now() - storedStatus.timestamp < 30000;
+        if (isRecent && storedStatus.isConnected !== isConnected) {
+          console.log('[PollResultsPage] Using localStorage fallback for connection status:', storedStatus.isConnected);
+          setIsConnected(storedStatus.isConnected);
+          if (storedStatus.isConnected) {
+            setIsReconnecting(false);
+          }
+        }
+      }
+    };
+
+    // Listen for storage events (triggered when main window updates localStorage)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.CONNECTION_STATUS) {
+        checkLocalStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Check immediately on mount
+    checkLocalStorage();
+
+    // Then poll every 5 seconds
+    const fallbackInterval = setInterval(checkLocalStorage, 5000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(fallbackInterval);
+    };
+  }, [isConnected]);
 
   const sendCommand = useCallback(
     (command: 'start' | 'stop' | 'reset') => {

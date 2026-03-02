@@ -391,9 +391,17 @@ export function PollProvider({ children }: PollProviderProps) {
   }, [startPoll, stopPoll, resetPoll]);
 
   // Broadcast connection status to popup whenever it changes
+  // Also persist to localStorage as fallback for browser throttling scenarios
   useEffect(() => {
     broadcastConnectionStatus(isAnyConnected);
-  }, [isAnyConnected, broadcastConnectionStatus]);
+    // Store in localStorage for popup fallback (browser throttling can break BroadcastChannel)
+    if (isMainWindow) {
+      localStorage.setItem(STORAGE_KEYS.CONNECTION_STATUS, JSON.stringify({
+        isConnected: isAnyConnected,
+        timestamp: Date.now(),
+      }));
+    }
+  }, [isAnyConnected, broadcastConnectionStatus, isMainWindow]);
 
   // Set connection status and broadcast (kept for backward compatibility)
   const setConnectionStatus = useCallback(
