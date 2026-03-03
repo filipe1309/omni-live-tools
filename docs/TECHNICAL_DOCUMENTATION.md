@@ -385,7 +385,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
 - `components/poll/` - Poll UI components:
   - `PollSetup` - Poll configuration form with question, options, timer, and profile management
   - `PollOptionCard` - Individual poll option with vote count, percentage, and flash animation
-  - `PollResults` - Real-time poll results display
+  - `PollResults` - Reusable poll results display component used by both `PollPage` and `PollResultsPage`. Supports `hideOverlays` prop for external overlay rendering and `wrapperClassName` for custom styling
   - `PollQuestion` - Poll question display with inline editing
   - `PollStatusBar` - Poll timer and status indicator
   - `PollControlButtons` - Start/reset poll controls
