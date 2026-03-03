@@ -264,6 +264,12 @@ Poll constants are in `frontend/src/constants/poll.ts`:
 2. Export from the folder's `index.ts`
 3. Import using `@/components`
 
+### Reusing Components Across Pages
+Components like `PollResults` are designed to be reusable across multiple pages:
+- `PollPage` and `PollResultsPage` both use `PollResults` for displaying poll results
+- Use props like `hideOverlays` to control which internal elements render (when overlays need to be positioned externally)
+- Use `wrapperClassName` for custom styling when the component is used in different contexts
+
 ### Adding a New ESM Package (Electron)
 
 **Note:** Asar packaging is disabled for this project (`asar: false` in electron-builder.yml) due to the complexity of ESM/CJS module resolution with packages like `kick-js` that have deep puppeteer dependency trees. This simplifies ESM package handling.
