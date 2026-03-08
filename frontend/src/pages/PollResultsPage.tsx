@@ -13,7 +13,7 @@ import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { useLeaderElection } from '@/hooks/useLeaderElection';
 import { useBackgroundKeepAlive } from '@/hooks/useBackgroundKeepAlive';
 import { POLL_TIMER, DEFAULT_QUESTION, DEFAULT_POLL_OPTIONS, STORAGE_KEYS } from '@/constants';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 const initialPollState: PollState = {
   isRunning: false,
@@ -68,7 +68,7 @@ const loadSavedSetupConfig = (): SetupConfig | null => {
 const LEADER_KEY = 'poll-results-leader';
 
 export function PollResultsPage () {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [showLoadScreen, setShowLoadScreen] = useState(true);
   const [pollState, setPollState] = useState<PollState>(initialPollState);
   const [setupConfig, setSetupConfig] = useState<SetupConfig | null>(loadSavedSetupConfig);
@@ -494,3 +494,5 @@ export function PollResultsPage () {
     </>
   );
 }
+
+export default PollResultsPage;

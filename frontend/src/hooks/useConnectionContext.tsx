@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
 import { useMultiPlatformConnection, useToast } from '@/hooks';
-import { useLanguage, interpolate } from '@/i18n';
+import { useTranslation, interpolate } from '@/i18n';
 import type {
   PlatformType,
   ChatMessage,
@@ -103,7 +103,7 @@ interface ConnectionProviderProps {
 
 export function ConnectionProvider ({ children }: ConnectionProviderProps) {
   const toast = useToast();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Input state
   const [tiktokUsername, setTikTokUsername] = useState(() => {

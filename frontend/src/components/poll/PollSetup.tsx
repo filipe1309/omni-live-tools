@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useLanguage, interpolate } from '@/i18n';
+import { useTranslation, interpolate } from '@/i18n';
 import {
   POLL_TIMER,
   POLL_OPTIONS,
@@ -166,7 +166,7 @@ export function PollSetup ({
   const [showBorder, setShowBorder] = useState(initialShowBorder);
   const [resultsFontSize, setResultsFontSize] = useState(initialResultsFontSize);
   const hasSentInitialChange = useRef(false);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Question history state
   const [showSuggestions, setShowSuggestions] = useState(false);

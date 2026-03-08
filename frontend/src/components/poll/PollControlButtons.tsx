@@ -1,4 +1,4 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { POLL_SHORTCUT_LABELS } from '@/constants';
 
 interface PollControlButtonsProps {
@@ -20,7 +20,7 @@ export function PollControlButtons ({
   isCountingDown,
   size = 'sm',
 }: PollControlButtonsProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const isLarge = size === 'lg';
   const buttonSize = isLarge ? 'px-8 py-3 text-lg rounded-xl' : 'px-4 py-1 text-sm rounded-md';

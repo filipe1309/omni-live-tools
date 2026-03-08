@@ -7,9 +7,9 @@ export function LanguageSelector () {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const languages = [
-    { code: 'pt-BR' as Language, flag: '🇧🇷', label: t.language.portuguese },
-    { code: 'en' as Language, flag: '🇺🇸', label: t.language.english },
-    { code: 'es' as Language, flag: '🇪🇸', label: t.language.spanish },
+    { code: 'pt-BR' as Language, flag: '🇧🇷', label: t?.language.portuguese || 'Português' },
+    { code: 'en' as Language, flag: '🇺🇸', label: t?.language.english || 'English' },
+    { code: 'es' as Language, flag: '🇪🇸', label: t?.language.spanish || 'Español' },
   ];
 
   const currentLang = languages.find((l) => l.code === language) || languages[0];
@@ -34,7 +34,7 @@ export function LanguageSelector () {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="nav-item nav-language"
-        aria-label={t.language.label}
+        aria-label={t?.language.label || 'Language'}
         aria-expanded={isOpen}
       >
         <div className="nav-item-content">

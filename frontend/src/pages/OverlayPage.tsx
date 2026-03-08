@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { useConnectionContext } from '@/hooks';
 import { PlatformType } from '@/types';
 
@@ -14,8 +14,8 @@ function hexToRgb (hex: string): { r: number; g: number; b: number } {
     : { r: 0, g: 0, b: 0 };
 }
 
-export function OverlayPage () {
-  const { t } = useLanguage();
+function OverlayPage () {
+  const { t } = useTranslation();
   const { tiktok, twitch, youtube } = useConnectionContext();
 
   // Check which platforms are connected
@@ -402,3 +402,6 @@ export function OverlayPage () {
     </div>
   );
 }
+
+export { OverlayPage };
+export default OverlayPage;

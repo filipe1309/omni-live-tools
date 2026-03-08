@@ -1,7 +1,7 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 export function Footer () {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <footer className="px-4 py-6 bg-slate-800/50 border-t border-slate-700/50 backdrop-blur-sm">

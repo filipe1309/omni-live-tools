@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { GiftCard } from './GiftCard';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { GiftMessage } from '@/types';
 
 interface GiftData extends GiftMessage {
@@ -18,7 +18,7 @@ export function GiftContainer({ gifts, title, maxHeight = 'calc(100vh - 320px)' 
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
   const isScrollingProgrammatically = useRef(false);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Check if user is at the bottom of the container
   const isAtBottom = useCallback(() => {

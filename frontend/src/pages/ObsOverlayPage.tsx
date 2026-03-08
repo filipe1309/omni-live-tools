@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMultiPlatformConnection } from '@/hooks';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { ObsEventContainer } from '@/components/chat';
 import type { ChatItem, ChatMessage, GiftMessage, LikeMessage, MemberMessage, SocialMessage, RoomUserMessage, UnifiedChatMessage } from '@/types';
 import { PlatformType } from '@/types';
@@ -39,7 +39,7 @@ interface RoomStats {
   diamondsCount: number;
 }
 
-export function ObsOverlayPage () {
+function ObsOverlayPage () {
   const [searchParams] = useSearchParams();
   const [items, setItems] = useState<ChatItem[]>([]);
   const [roomStats, setRoomStats] = useState<RoomStats>({
@@ -48,7 +48,7 @@ export function ObsOverlayPage () {
     diamondsCount: 0,
   });
   const [connectionState, setConnectionState] = useState<string>('');
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Join message delay handling (matches public/app.js)
   const joinMsgDelayRef = useRef(0);
@@ -503,3 +503,6 @@ export function ObsOverlayPage () {
     </div>
   );
 }
+
+export { ObsOverlayPage };
+export default ObsOverlayPage;

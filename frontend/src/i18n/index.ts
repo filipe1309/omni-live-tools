@@ -1,2 +1,2 @@
-export { LanguageProvider, useLanguage, interpolate, type Language } from './LanguageContext';
-export { ptBR, en, es, type TranslationKeys } from './translations';
+export { LanguageProvider, useLanguage, useTranslation, interpolate, type Language, type LanguageContextLoaded } from './LanguageContext';
+export { loadTranslation, type TranslationKeys } from './translations';

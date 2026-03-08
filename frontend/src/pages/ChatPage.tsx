@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useConnectionContext, useChatBroadcaster } from '@/hooks';
 import { useFeaturedMessage } from '@/hooks/useFeaturedMessage';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { RoomStats, ChatContainer, GiftContainer, ChatQueueContainer } from '@/components';
 import type { ChatItem, GiftMessage, ChatMessage, LikeMessage, MemberMessage, SocialMessage, UnifiedChatMessage } from '@/types';
 import { PlatformType } from '@/types';
@@ -69,7 +69,7 @@ export function ChatPage () {
     const stored = localStorage.getItem(STORAGE_KEY_GIFT_VISIBLE);
     return stored !== null ? stored === 'true' : true;
   });
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { featuredMessageId, setFeaturedMessage, clearFeaturedMessage } = useFeaturedMessage();
   const { broadcastChatItems, broadcastGifts, broadcastQueueItems, broadcastFeaturedMessageId, setActionHandlers } = useChatBroadcaster();
 

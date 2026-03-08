@@ -1,6 +1,34 @@
+// Mock i18n/translation hooks FIRST before any imports
+// Vitest hoists vi.mock calls to the top automatically
+import { vi } from 'vitest';
+vi.mock('@/i18n', async () => {
+  const { ptBR } = await import('../i18n/translations/pt-BR');
+  return {
+    useTranslation: () => ({
+      language: 'pt-BR' as const,
+      setLanguage: vi.fn(),
+      t: ptBR,
+      isLoading: false,
+    }),
+    useLanguage: () => ({
+      language: 'pt-BR' as const,
+      setLanguage: vi.fn(),
+      t: ptBR,
+      isLoading: false,
+    }),
+    LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
+    interpolate: (template: string, values: Record<string, string | number>) => {
+      return Object.entries(values).reduce(
+        (result, [key, value]) => result.replace(`{${key}}`, String(value)),
+        template
+      );
+    },
+  };
+});
+
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach } from 'vitest';
 
 // Cleanup after each test
 afterEach(() => {

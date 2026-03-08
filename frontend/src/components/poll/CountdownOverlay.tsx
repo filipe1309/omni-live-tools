@@ -1,11 +1,11 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface CountdownOverlayProps {
   countdown: number;
 }
 
 export function CountdownOverlay ({ countdown }: CountdownOverlayProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden rounded-xl">

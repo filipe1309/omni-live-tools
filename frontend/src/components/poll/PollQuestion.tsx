@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { TIMER_THRESHOLDS } from '@/constants';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface PollQuestionProps {
   question: string;
@@ -13,7 +13,7 @@ interface PollQuestionProps {
 }
 
 export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', editable = false, onQuestionChange }: PollQuestionProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(question);
   const inputRef = useRef<HTMLInputElement>(null);

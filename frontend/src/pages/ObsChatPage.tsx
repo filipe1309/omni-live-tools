@@ -2,15 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChatContainer } from '@/components';
 import { useChatReceiver } from '@/hooks/useChatBroadcast';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { ChatItem } from '@/types';
 
-export function ObsChatPage() {
+function ObsChatPage () {
   const [searchParams] = useSearchParams();
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
   const [featuredMessageId, setFeaturedMessageId] = useState<string | null>(null);
   const { subscribe, sendAddToQueue, sendToOverlay } = useChatReceiver();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Parse settings from URL
   const bgColor = searchParams.get('bgColor') || 'transparent';
@@ -50,3 +50,6 @@ export function ObsChatPage() {
     </div>
   );
 }
+
+export { ObsChatPage };
+export default ObsChatPage;

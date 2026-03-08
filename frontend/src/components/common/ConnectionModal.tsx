@@ -1,6 +1,6 @@
 import { FormEvent, KeyboardEvent, useRef, useState, useEffect } from 'react';
 import { useConnectionContext } from '@/hooks';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { PlatformType } from '@/types';
 import { PlatformSelector, TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from './PlatformSelector';
 import { LanguageSelector } from './LanguageSelector';
@@ -34,7 +34,7 @@ export function ConnectionModal ({ isOpen, onClose }: ConnectionModalProps) {
     setAutoReconnect,
   } = useConnectionContext();
 
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
   const youtubeInputRef = useRef<HTMLInputElement>(null);

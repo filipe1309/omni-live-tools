@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { PollOption } from '@/types';
 import { useRecentPollOptions } from '@/hooks/useRecentPollOptions';
 import { AutocompleteInput } from './AutocompleteInput';
@@ -56,7 +56,7 @@ export function PollOptionCard ({
   editable = false,
   onOptionTextChange,
 }: PollOptionCardProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const config = sizeConfig[size];
   const percentageFixed = totalVotes > 0 ? percentage.toFixed(1) : '0.0';
   // fontSize multiplier: 1x = base size (matches config.text), 2x = double, etc.

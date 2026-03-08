@@ -141,14 +141,25 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.whenReady().then(async () => {
-  // Start the backend first
+  // Create the window immediately for faster perceived startup
+  createWindow();
+  
+  // Start the backend in parallel
   startBackendServer();
 
-  // Wait until the server responds
-  await waitForServer(SERVER_URL);
+  // Load a simple loading page first
+  mainWindow?.loadURL('data:text/html,<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#1e293b,#0f172a);color:white;font-family:system-ui}</style></head><body><div><h1>Omni LIVE Tools</h1><p>Starting server...</p></div></body></html>');
 
-  // Now open the window
-  createWindow();
+  // Wait until the server responds (but window is already visible)
+  try {
+    await waitForServer(SERVER_URL);
+    // Now load the actual application
+    mainWindow?.loadURL(SERVER_URL);
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    // Show error page
+    mainWindow?.loadURL(`data:text/html,<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#1e293b,#0f172a);color:white;font-family:system-ui}</style></head><body><div><h1>Error</h1><p>Failed to start server. Please restart the application.</p></div></body></html>`);
+  }
 
   app.on('activate', () => {
     // macOS: re-create window when dock icon is clicked

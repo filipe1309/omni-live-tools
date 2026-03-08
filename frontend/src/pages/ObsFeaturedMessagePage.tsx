@@ -21,7 +21,7 @@ function PlatformBadge({ platform }: { platform?: PlatformType }) {
   return <TwitchIcon className="w-8 h-8 text-purple-400 flex-shrink-0" />;
 }
 
-export function ObsFeaturedMessagePage() {
+function ObsFeaturedMessagePage () {
   const [searchParams] = useSearchParams();
   const [featuredMessage, setFeaturedMessage] = useState<ChatItem | null>(null);
 
@@ -129,3 +129,6 @@ export function ObsFeaturedMessagePage() {
     </div>
   );
 }
+
+export { ObsFeaturedMessagePage };
+export default ObsFeaturedMessagePage;

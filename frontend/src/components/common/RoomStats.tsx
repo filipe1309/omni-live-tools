@@ -1,4 +1,4 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface RoomStatsProps {
   viewerCount: number;
@@ -8,7 +8,7 @@ interface RoomStatsProps {
 }
 
 export function RoomStats({ viewerCount, likeCount, diamondsCount, roomId }: RoomStatsProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-wrap items-center gap-4 text-sm">

@@ -1,6 +1,6 @@
 import { useRef, FormEvent, KeyboardEvent } from 'react';
 import type { ConnectionStatus } from '@/hooks';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { PlatformType } from '@/types';
 import { PlatformSelector, TikTokIcon, TwitchIcon } from './PlatformSelector';
 
@@ -45,7 +45,7 @@ export function MultiPlatformConnectionForm ({
 }: MultiPlatformConnectionFormProps) {
   const tiktokInputRef = useRef<HTMLInputElement>(null);
   const twitchInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const statusConfig = {
     disconnected: {

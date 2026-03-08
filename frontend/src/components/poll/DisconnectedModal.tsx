@@ -1,4 +1,4 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface DisconnectedModalProps {
   isReconnecting: boolean;
@@ -42,7 +42,7 @@ export function DisconnectedModal ({
 }
 
 function ReconnectingContent ({ isAutoReconnectEnabled }: { isAutoReconnectEnabled: boolean }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -81,7 +81,7 @@ function ReconnectingContent ({ isAutoReconnectEnabled }: { isAutoReconnectEnabl
 }
 
 function DisconnectedContent ({ onReconnect }: { onReconnect: () => void }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <>

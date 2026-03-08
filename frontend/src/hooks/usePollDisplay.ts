@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { PollState, PollOption } from '@/types';
 import { TIMER_THRESHOLDS } from '@/constants';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { useNotificationSound } from './useNotificationSound';
 
 interface UsePollDisplayOptions {
@@ -15,7 +15,7 @@ interface StatusDisplay {
 }
 
 export function usePollDisplay ({ pollState, displayOptions }: UsePollDisplayOptions) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [showCelebration, setShowCelebration] = useState(false);
   const hasTriggeredCelebration = useRef(false);
   const { playNotificationSound } = useNotificationSound();

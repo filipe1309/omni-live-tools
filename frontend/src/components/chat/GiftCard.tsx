@@ -1,6 +1,6 @@
 import { ProfilePicture } from '../common/ProfilePicture';
 import { Username } from '../common/Username';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { GiftMessage } from '@/types';
 
 interface GiftCardProps {
@@ -11,7 +11,7 @@ interface GiftCardProps {
 
 export function GiftCard({ gift, isPending = false, timestamp = new Date() }: GiftCardProps) {
   const totalCost = gift.diamondCount * gift.repeatCount;
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (

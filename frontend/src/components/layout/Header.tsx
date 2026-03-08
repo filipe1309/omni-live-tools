@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { useConnectionContext } from '@/hooks';
 import { LanguageSelector } from '../common/LanguageSelector';
 import { TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '../common';
 
 export function Header () {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { tiktok, twitch, youtube, kick, isAnyConnected, setShowConnectionModal } = useConnectionContext();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);

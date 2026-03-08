@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePollContext, useToast, useBackgroundKeepAlive } from '@/hooks';
-import { useLanguage, interpolate } from '@/i18n';
+import { useTranslation, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
 import type { PollOption, PlatformType, FullOptionsConfig, SetupConfig } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS, POLL_FONT_SIZE } from '@/constants';
@@ -9,7 +9,7 @@ import { safeSetItem } from '@/utils';
 export function PollPage () {
   const { pollState, voteLog, startPoll, stopPoll, resetPoll, clearVoteLog, getTotalVotes, getPercentage, openResultsPopup, broadcastSetupConfig, setConnectionStatus, onConfigUpdate, onReconnect } = usePollContext();
   const toast = useToast();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Keep animations and timers running even when window is in background (for screen sharing)
   useBackgroundKeepAlive(pollState.isRunning);

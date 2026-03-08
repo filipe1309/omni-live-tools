@@ -29,6 +29,33 @@ export default defineConfig({
   build: {
     outDir: '../dist-frontend',
     emptyOutDir: true,
+    // Optimize chunk splitting for faster initial load
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Vendor chunks for better caching
+          if (id.includes('node_modules')) {
+            // Separate React and React Router into their own chunk
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            // Socket.io client in separate chunk
+            if (id.includes('socket.io-client')) {
+              return 'socket-vendor';
+            }
+            // Other vendors
+            return 'vendor';
+          }
+          // Separate translation files into their own chunks
+          if (id.includes('/i18n/translations/')) {
+            const lang = id.match(/translations\/(.*?)\.ts/)?.[1];
+            return lang ? `lang-${lang}` : 'translations';
+          }
+        },
+      },
+    },
+    // Optimize chunk size warnings
+    chunkSizeWarningLimit: 600,
   },
   test: {
     globals: true,

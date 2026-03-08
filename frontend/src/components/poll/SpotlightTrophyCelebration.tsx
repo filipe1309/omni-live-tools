@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { CONFETTI } from '@/constants';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface SpotlightTrophyCelebrationProps {
   onComplete: () => void;
@@ -8,7 +8,7 @@ interface SpotlightTrophyCelebrationProps {
 }
 
 export function SpotlightTrophyCelebration ({ onComplete, winnerText }: SpotlightTrophyCelebrationProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   useEffect(() => {
     const timer = setTimeout(onComplete, CONFETTI.DURATION);
     return () => clearTimeout(timer);

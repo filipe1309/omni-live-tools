@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { ProfilePicture } from '../common/ProfilePicture';
 import { Username } from '../common/Username';
 import { TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '../common/PlatformSelector';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { ChatItem } from '@/types';
 import { PlatformType } from '@/types';
 
@@ -100,7 +100,7 @@ function QueueMessage({ item, onRemove, onSendToOverlay, isOnOverlay }: QueueMes
 
 export function ChatQueueContainer({ items, title, onRemove, onSendToOverlay, featuredMessageId, maxHeight = 'calc(100vh - 320px)' }: ChatQueueContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Auto-scroll to bottom when new items arrive
   useEffect(() => {

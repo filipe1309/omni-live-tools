@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import { SplashScreen, ConnectionModal, Footer } from '@/components';
 import { useConnectionContext } from '@/hooks';
 
 export function HomePage () {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { isAnyConnected } = useConnectionContext();
   const [showSplash, setShowSplash] = useState(() => {
     // Only show splash once per session

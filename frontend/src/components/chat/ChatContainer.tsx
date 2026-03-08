@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { ChatMessage } from './ChatMessage';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { ChatItem } from '@/types';
 
 interface ChatContainerProps {
@@ -18,7 +18,7 @@ export function ChatContainer({ items, title, maxHeight = 'calc(100vh - 320px)',
   const [searchQuery, setSearchQuery] = useState('');
   const isScrollingProgrammatically = useRef(false);
   const lastItemsLength = useRef(items.length);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {

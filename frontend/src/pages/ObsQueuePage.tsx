@@ -2,15 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChatQueueContainer } from '@/components';
 import { useChatReceiver } from '@/hooks/useChatBroadcast';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { ChatItem } from '@/types';
 
-export function ObsQueuePage() {
+function ObsQueuePage () {
   const [searchParams] = useSearchParams();
   const [queueItems, setQueueItems] = useState<ChatItem[]>([]);
   const [featuredMessageId, setFeaturedMessageId] = useState<string | null>(null);
   const { subscribe, sendToOverlay, sendRemoveFromQueue } = useChatReceiver();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Parse settings from URL
   const bgColor = searchParams.get('bgColor') || 'transparent';
@@ -51,3 +51,6 @@ export function ObsQueuePage() {
     </div>
   );
 }
+
+export { ObsQueuePage };
+export default ObsQueuePage;

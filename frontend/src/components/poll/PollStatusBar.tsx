@@ -1,4 +1,4 @@
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 
 interface PollStatusBarProps {
   isRunning: boolean;
@@ -20,7 +20,7 @@ export function PollStatusBar ({
   timerClasses,
   status,
 }: PollStatusBarProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const timerDisplay = isRunning
     ? `${timeLeft}s`

@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { ProfilePicture, TikTokIcon, TwitchIcon, YouTubeIcon, KickIcon } from '../common';
-import { useLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
 import type { VoteEntry } from '@/types';
 import { PlatformType } from '@/types';
 
@@ -46,7 +46,7 @@ function PlatformBadge({ platform }: { platform?: PlatformType }) {
 export function VoteLog({ entries, maxHeight = '300px', onClear }: VoteLogProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showVotes, setShowVotes] = useState(true);
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   // Auto-scroll to top when new entries arrive (newest first)
   useEffect(() => {
