@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.21.0] - 2026-03-24
+
+### Added
+
+- Add theme color customization with per-element color pickers saved in profiles
+- Add hover pencil icon to editable question and option texts
+- Separate question and options font size controls with inline +/- buttons
+- Add collapsible setup panel with auto-collapse toggle
+
+### Changed
+
+- V1.20.1
+
+### Documentation
+
+- Update documentation prompt to reflect current codebase state and improve clarity
+
 ## [1.20.1] - 2026-03-07
 
 ### Changed
@@ -499,6 +516,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.21.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.20.1...v1.21.0
 [1.20.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.19.0...v1.20.0
 [1.19.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.18.0...v1.19.0
