@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { TIMER_THRESHOLDS } from '@/constants';
 import { useTranslation } from '@/i18n';
+import { hexToRgba } from '@/utils';
 
 interface PollQuestionProps {
   question: string;
@@ -9,11 +10,12 @@ interface PollQuestionProps {
   timer: number;
   className?: string;
   fontSize?: number;
+  themeColor?: string;
   editable?: boolean;
   onQuestionChange?: (newQuestion: string) => void;
 }
 
-export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', fontSize, editable = false, onQuestionChange }: PollQuestionProps) {
+export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', fontSize, themeColor, editable = false, onQuestionChange }: PollQuestionProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(question);
@@ -70,6 +72,16 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
     return 'bg-purple-500/10 border-purple-500';
   };
 
+  const getContainerStyle = (): React.CSSProperties | undefined => {
+    if (isRunning || !themeColor) return undefined;
+    return { backgroundColor: hexToRgba(themeColor, 0.1), borderColor: themeColor };
+  };
+
+  const getStaticBarStyle = (): React.CSSProperties | undefined => {
+    if (!themeColor) return undefined;
+    return { background: `linear-gradient(to right, ${hexToRgba(themeColor, 0.3)}, ${hexToRgba(themeColor, 0.3)})` };
+  };
+
   const getTimerBarClasses = () => {
     if (timeLeft <= TIMER_THRESHOLDS.CRITICAL) {
       return 'bg-gradient-to-r from-red-600 to-red-400 animate-pulse';
@@ -99,6 +111,7 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
   return (
     <div
       className={`relative overflow-hidden rounded-xl border-l-4 transition-all duration-500 ${getContainerClasses()} ${className}`}
+      style={getContainerStyle()}
     >
       {/* Animated Timer Bar - Full Background */}
       {isRunning && timer > 0 && (
@@ -111,7 +124,10 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
       )}
       {/* Static bar when not running */}
       {!isRunning && (
-        <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-purple-600/30 to-purple-400/30" />
+        <div
+          className="absolute inset-0 h-full w-full bg-gradient-to-r from-purple-600/30 to-purple-400/30"
+          style={getStaticBarStyle()}
+        />
       )}
       <div className={`relative z-10 text-center py-5 px-6 ${getShakeClass()}`}>
         {isEditing ? (

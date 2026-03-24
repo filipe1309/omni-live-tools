@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation, interpolate } from '@/i18n';
+import type { PollTheme } from '@/types';
 import {
   POLL_TIMER,
   POLL_OPTIONS,
@@ -9,7 +10,8 @@ import {
   POLL_PROFILES,
   DEFAULT_OPTIONS,
   DEFAULT_SELECTED_OPTIONS,
-  DEFAULT_QUESTION
+  DEFAULT_QUESTION,
+  DEFAULT_POLL_THEME,
 } from '@/constants';
 
 // Load question history from localStorage
@@ -79,6 +81,7 @@ interface PollProfile {
   selectedOptions: boolean[];
   timer: number;
   showBorder?: boolean;
+  theme?: PollTheme;
 }
 
 // Load profiles from localStorage
@@ -123,7 +126,7 @@ interface OptionWithId {
 
 interface PollSetupProps {
   onStart: (question: string, options: OptionWithId[], timer: number) => void;
-  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number) => void;
+  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number, theme?: PollTheme) => void;
   disabled?: boolean;
   initialQuestion?: string;
   initialOptions?: string[];
@@ -133,11 +136,12 @@ interface PollSetupProps {
   initialShowBorder?: boolean;
   initialQuestionFontSize?: number;
   initialOptionsFontSize?: number;
+  initialTheme?: PollTheme;
   showStartButton?: boolean;
   hideStatusBarToggle?: boolean;
   hideBorderToggle?: boolean;
   hideFontSizeControls?: boolean;
-  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean; questionFontSize?: number; optionsFontSize?: number } | null;
+  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean; questionFontSize?: number; optionsFontSize?: number; theme?: PollTheme } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
 
@@ -153,6 +157,7 @@ export function PollSetup ({
   initialShowBorder = false,
   initialQuestionFontSize = POLL_FONT_SIZE.QUESTION.DEFAULT,
   initialOptionsFontSize = POLL_FONT_SIZE.OPTIONS.DEFAULT,
+  initialTheme,
   showStartButton = true,
   hideStatusBarToggle = false,
   hideBorderToggle = false,
@@ -168,6 +173,7 @@ export function PollSetup ({
   const [showBorder, setShowBorder] = useState(initialShowBorder);
   const [questionFontSize, setQuestionFontSize] = useState(initialQuestionFontSize);
   const [optionsFontSize, setOptionsFontSize] = useState(initialOptionsFontSize);
+  const [theme, setTheme] = useState<PollTheme>(initialTheme ?? {});
   const hasSentInitialChange = useRef(false);
   const { t } = useTranslation();
 
@@ -228,7 +234,7 @@ export function PollSetup ({
     const timeoutId = setTimeout(() => {
       const updatedProfiles = profiles.map(p =>
         p.id === selectedProfileId
-          ? { ...p, question, options: [...options], selectedOptions: [...selectedOptions], timer, showBorder }
+          ? { ...p, question, options: [...options], selectedOptions: [...selectedOptions], timer, showBorder, theme }
           : p
       );
       setProfiles(updatedProfiles);
@@ -236,7 +242,7 @@ export function PollSetup ({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [question, options, selectedOptions, selectedProfileId, timer, showBorder]);
+  }, [question, options, selectedOptions, selectedProfileId, timer, showBorder, theme]);
 
   // Click outside handler for profile dropdown
   useEffect(() => {
@@ -348,6 +354,9 @@ export function PollSetup ({
       if (externalConfig.optionsFontSize !== undefined) {
         setOptionsFontSize(externalConfig.optionsFontSize);
       }
+      if (externalConfig.theme !== undefined) {
+        setTheme(externalConfig.theme);
+      }
 
       // Only rebuild options from externalConfig if we don't have externalFullOptions
       // (externalFullOptions is more complete and should take precedence for options)
@@ -400,7 +409,7 @@ export function PollSetup ({
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
       console.log('[PollSetup] Sending initial onChange with options:', selectedPollOptionsWithIds);
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
       hasSentInitialChange.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -430,7 +439,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -490,7 +499,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(options, newSelected);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -502,7 +511,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -514,7 +523,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -527,7 +536,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, newSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, newSize, optionsFontSize, theme);
     }
   };
 
@@ -540,7 +549,29 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, newSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, newSize, theme);
+    }
+  };
+
+  // Handle theme color change
+  const handleThemeChange = (key: keyof PollTheme, value: string) => {
+    const newTheme = { ...theme, [key]: value };
+    setTheme(newTheme);
+
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, newTheme);
+    }
+  };
+
+  const handleResetTheme = () => {
+    setTheme({});
+
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, {});
     }
   };
 
@@ -566,7 +597,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = value.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -578,7 +609,7 @@ export function PollSetup ({
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
-      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -613,7 +644,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme);
     }
   };
 
@@ -633,6 +664,7 @@ export function PollSetup ({
     let newSelectedOptions: boolean[];
     let newTimer: number;
     let newShowBorder: boolean;
+    let newTheme: PollTheme;
 
     if (profileId === null) {
       // Load defaults
@@ -641,6 +673,7 @@ export function PollSetup ({
       newSelectedOptions = [...DEFAULT_SELECTED_OPTIONS];
       newTimer = POLL_TIMER.DEFAULT;
       newShowBorder = false;
+      newTheme = {};
     } else {
       const profile = profiles.find(p => p.id === profileId);
       if (profile) {
@@ -649,6 +682,7 @@ export function PollSetup ({
         newSelectedOptions = [...profile.selectedOptions];
         newTimer = profile.timer ?? POLL_TIMER.DEFAULT;
         newShowBorder = profile.showBorder ?? false;
+        newTheme = profile.theme ?? {};
       } else {
         return;
       }
@@ -659,6 +693,7 @@ export function PollSetup ({
     setSelectedOptions(newSelectedOptions);
     setTimer(newTimer);
     setShowBorder(newShowBorder);
+    setTheme(newTheme);
 
     // Clear the loading flag after state updates are applied
     setTimeout(() => {
@@ -676,7 +711,7 @@ export function PollSetup ({
         .filter(opt => opt.selected && opt.text)
         .map(opt => ({ id: opt.id, text: opt.text }));
 
-      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder, questionFontSize, optionsFontSize);
+      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder, questionFontSize, optionsFontSize, newTheme);
     }
   };
 
@@ -691,6 +726,7 @@ export function PollSetup ({
       selectedOptions: [...selectedOptions],
       timer,
       showBorder,
+      theme,
     };
 
     const updatedProfiles = [...profiles, newProfile].slice(-POLL_PROFILES.MAX_PROFILES);
@@ -1179,6 +1215,59 @@ export function PollSetup ({
           </p>
         )}
       </div>
+
+      {/* Theme Colors */}
+      {!hideFontSizeControls && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-slate-300">
+              🎨 {t.poll.themeColors}
+            </label>
+            {(theme.questionBg || theme.optionBar || theme.resultsBg) && (
+              <button
+                type="button"
+                onClick={handleResetTheme}
+                disabled={disabled}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
+              >
+                {t.poll.resetTheme}
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            <label className={`flex items-center gap-2 ${disabled ? 'opacity-50' : ''}`}>
+              <input
+                type="color"
+                value={theme.questionBg || DEFAULT_POLL_THEME.questionBg}
+                onChange={e => handleThemeChange('questionBg', e.target.value)}
+                disabled={disabled}
+                className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+              />
+              <span className="text-xs text-slate-400">{t.poll.questionColor}</span>
+            </label>
+            <label className={`flex items-center gap-2 ${disabled ? 'opacity-50' : ''}`}>
+              <input
+                type="color"
+                value={theme.optionBar || DEFAULT_POLL_THEME.optionBar}
+                onChange={e => handleThemeChange('optionBar', e.target.value)}
+                disabled={disabled}
+                className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+              />
+              <span className="text-xs text-slate-400">{t.poll.optionBarColor}</span>
+            </label>
+            <label className={`flex items-center gap-2 ${disabled ? 'opacity-50' : ''}`}>
+              <input
+                type="color"
+                value={theme.resultsBg || DEFAULT_POLL_THEME.resultsBg}
+                onChange={e => handleThemeChange('resultsBg', e.target.value)}
+                disabled={disabled}
+                className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+              />
+              <span className="text-xs text-slate-400">{t.poll.resultsBgColor}</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       {showStartButton && (
         <button

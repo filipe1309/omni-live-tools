@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { PollState, PollOption, SerializablePollState, SetupConfig } from '@/types';
+import type { PollState, PollOption, SerializablePollState, SetupConfig, PollTheme } from '@/types';
 import { PollSetup } from '@/components/poll/PollSetup';
 import { PollResults } from '@/components/poll/PollResults';
 import { PollControlButtons } from '@/components/poll/PollControlButtons';
@@ -340,13 +340,14 @@ export function PollResultsPage () {
       showStatusBar?: boolean,
       showBorder?: boolean,
       questionFontSize?: number,
-      optionsFontSize?: number
+      optionsFontSize?: number,
+      theme?: PollTheme
     ) => {
       if (!channelRef) return;
       const newFullOptions = allOptions && selectedOptions 
         ? { allOptions, selectedOptions } 
         : undefined;
-      const newConfig = { question, options, timer, showStatusBar, showBorder, questionFontSize, optionsFontSize };
+      const newConfig = { question, options, timer, showStatusBar, showBorder, questionFontSize, optionsFontSize, theme };
       channelRef.postMessage({
         type: 'config-update',
         config: newConfig,
@@ -506,6 +507,7 @@ export function PollResultsPage () {
                   initialShowBorder={setupConfig?.showBorder}
                   initialQuestionFontSize={setupConfig?.questionFontSize}
                   initialOptionsFontSize={setupConfig?.optionsFontSize}
+                  initialTheme={setupConfig?.theme}
                 />
               </div>
             </div>
@@ -523,7 +525,10 @@ export function PollResultsPage () {
 
           {/* Results Section with Animated Border */}
           <AnimatedBorder visible={setupConfig?.showBorder ?? false} borderWidth={6} className="flex-1">
-            <div className="flex-1 relative p-4 bg-slate-900 rounded-xl min-h-[450px]">
+            <div
+              className="flex-1 relative p-4 bg-slate-900 rounded-xl min-h-[450px]"
+              style={setupConfig?.theme?.resultsBg ? { backgroundColor: setupConfig.theme.resultsBg } : undefined}
+            >
               {/* Spotlight + Trophy Celebration - rendered at container level for full coverage */}
               {showCelebration && (
                 <SpotlightTrophyCelebration
@@ -543,6 +548,7 @@ export function PollResultsPage () {
                 size="large"
                 questionFontSize={setupConfig?.questionFontSize}
                 optionsFontSize={setupConfig?.optionsFontSize}
+                theme={setupConfig?.theme}
                 editable={true}
                 onQuestionChange={handleQuestionInlineEdit}
                 onOptionTextChange={handleOptionInlineEdit}

@@ -92,6 +92,13 @@ export const DEFAULT_POLL_OPTIONS: PollOption[] = [
 // Default poll question
 export const DEFAULT_QUESTION = 'Votar agora!';
 
+// Default poll theme colors
+export const DEFAULT_POLL_THEME = {
+  questionBg: '#8b5cf6',
+  optionBar: '#9333ea',
+  resultsBg: '#0f172a',
+} as const;
+
 // Confetti settings
 export const CONFETTI = {
   DURATION: 3000,

@@ -1,4 +1,4 @@
-import type { PollState } from '@/types';
+import type { PollState, PollTheme } from '@/types';
 import { usePollDisplay } from '@/hooks/usePollDisplay';
 import { usePollKeyboardShortcuts } from '@/hooks/usePollKeyboardShortcuts';
 import { SpotlightTrophyCelebration } from './SpotlightTrophyCelebration';
@@ -17,6 +17,7 @@ interface PollResultsProps {
   size?: 'normal' | 'large';
   questionFontSize?: number;
   optionsFontSize?: number;
+  theme?: PollTheme;
   // Optional control callbacks for keyboard shortcuts
   onStart?: () => void;
   onStop?: () => void;
@@ -42,6 +43,7 @@ export function PollResults ({
   size = 'normal',
   questionFontSize,
   optionsFontSize,
+  theme,
   onStart,
   onStop,
   onReset,
@@ -124,6 +126,7 @@ export function PollResults ({
           timer={pollState.timer}
           className={questionClass}
           fontSize={questionFontSize}
+          themeColor={theme?.questionBg}
           editable={editable && !pollState.isRunning && !isCountingDown}
           onQuestionChange={onQuestionChange}
         />
@@ -141,6 +144,7 @@ export function PollResults ({
             isWinner={winnerIds.includes(option.id)}
             size={optionSize}
             fontSize={optionsFontSize}
+            themeColor={theme?.optionBar}
             editable={editable && !pollState.isRunning && !isCountingDown}
             onOptionTextChange={onOptionTextChange}
           />

@@ -22,6 +22,15 @@ export interface SerializablePollState {
 }
 
 /**
+ * Theme colors for poll customization
+ */
+export interface PollTheme {
+  questionBg?: string;
+  optionBar?: string;
+  resultsBg?: string;
+}
+
+/**
  * Poll setup configuration for preview and initialization
  */
 export interface SetupConfig {
@@ -32,6 +41,7 @@ export interface SetupConfig {
   showBorder?: boolean;
   questionFontSize?: number;
   optionsFontSize?: number;
+  theme?: PollTheme;
 }
 
 /**

@@ -190,6 +190,12 @@ export const es: TranslationKeys = {
     duplicateOptionsWarning: 'Opciones duplicadas detectadas: {options}',
     questionFontSize: 'Tamaño Pregunta',
     optionsFontSize: 'Tamaño Opciones',
+    // Theme
+    themeColors: 'Colores del Tema',
+    questionColor: 'Pregunta',
+    optionBarColor: 'Opciones',
+    resultsBgColor: 'Fondo',
+    resetTheme: 'Resetear',
     // Profiles
     profile: 'Perfil',
     selectProfile: 'Seleccionar perfil',

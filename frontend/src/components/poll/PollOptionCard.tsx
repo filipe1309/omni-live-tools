@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import type { PollOption } from '@/types';
 import { useRecentPollOptions } from '@/hooks/useRecentPollOptions';
+import { hexToRgba } from '@/utils';
 import { AutocompleteInput } from './AutocompleteInput';
 
 type PollOptionCardSize = 'compact' | 'normal' | 'large';
@@ -14,6 +15,7 @@ interface PollOptionCardProps {
   isWinner: boolean;
   size?: PollOptionCardSize;
   fontSize?: number;
+  themeColor?: string;
   editable?: boolean;
   onOptionTextChange?: (optionId: number, newText: string) => void;
 }
@@ -53,6 +55,7 @@ export function PollOptionCard ({
   isWinner,
   size = 'normal',
   fontSize,
+  themeColor,
   editable = false,
   onOptionTextChange,
 }: PollOptionCardProps) {
@@ -140,7 +143,10 @@ export function PollOptionCard ({
           ? 'bg-gradient-to-r from-yellow-500/30 to-yellow-400/10'
           : 'bg-gradient-to-r from-purple-600/30 to-purple-400/10'
           }`}
-        style={{ width: `${percentage}%` }}
+        style={{
+          width: `${percentage}%`,
+          ...(!isWinner && themeColor ? { background: `linear-gradient(to right, ${hexToRgba(themeColor, 0.3)}, ${hexToRgba(themeColor, 0.1)})` } : {}),
+        }}
       />
 
       {/* Content */}
@@ -151,6 +157,7 @@ export function PollOptionCard ({
               ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-slate-900'
               : 'bg-gradient-to-br from-purple-600 to-purple-400'
               }`}
+            style={!isWinner && themeColor ? { background: `linear-gradient(to bottom right, ${themeColor}, ${hexToRgba(themeColor, 0.7)})` } : undefined}
           >
             {option.id}
           </span>
@@ -200,7 +207,10 @@ export function PollOptionCard ({
             ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
             : 'bg-gradient-to-r from-purple-600 to-purple-400'
             }`}
-          style={{ width: `${percentage}%` }}
+          style={{
+            width: `${percentage}%`,
+            ...(!isWinner && themeColor ? { background: `linear-gradient(to right, ${themeColor}, ${hexToRgba(themeColor, 0.7)})` } : {}),
+          }}
         />
       </div>
     </div>

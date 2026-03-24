@@ -188,6 +188,12 @@ export const ptBR = {
     duplicateOptionsWarning: 'Opções duplicadas detectadas: {options}',
     questionFontSize: 'Tamanho da Pergunta',
     optionsFontSize: 'Tamanho das Opções',
+    // Theme
+    themeColors: 'Cores do Tema',
+    questionColor: 'Pergunta',
+    optionBarColor: 'Opções',
+    resultsBgColor: 'Fundo',
+    resetTheme: 'Resetar',
     // Profiles
     profile: 'Perfil',
     selectProfile: 'Selecionar perfil',

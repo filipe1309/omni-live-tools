@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { useConnectionContext, usePollContext, useToast, useBackgroundKeepAlive } from '@/hooks';
 import { useTranslation, interpolate } from '@/i18n';
 import { PollSetup, PollResults, VoteLog, PollControlButtons, AnimatedBorder } from '@/components';
-import type { PollOption, PlatformType, FullOptionsConfig, SetupConfig } from '@/types';
+import type { PollOption, PlatformType, FullOptionsConfig, SetupConfig, PollTheme } from '@/types';
 import { POLL_TIMER, DEFAULT_QUESTION, POLL_SHORTCUTS, matchesShortcut, STORAGE_KEYS, POLL_FONT_SIZE } from '@/constants';
 import { safeSetItem } from '@/utils';
 
@@ -88,7 +88,7 @@ export function PollPage () {
     });
   }, [onConfigUpdate]);
 
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number) => {
+  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number, theme?: PollTheme) => {
     // Skip the first onChange if we have saved config (PollSetup sends default values on mount)
     if (hasSavedConfig.current && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
@@ -104,6 +104,7 @@ export function PollPage () {
       showBorder: showBorder ?? false,
       questionFontSize: questionFontSize ?? POLL_FONT_SIZE.QUESTION.DEFAULT,
       optionsFontSize: optionsFontSize ?? POLL_FONT_SIZE.OPTIONS.DEFAULT,
+      theme,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
@@ -357,6 +358,7 @@ export function PollPage () {
             initialShowBorder={loadSavedSetupConfig()?.showBorder}
             initialQuestionFontSize={loadSavedSetupConfig()?.questionFontSize}
             initialOptionsFontSize={loadSavedSetupConfig()?.optionsFontSize}
+            initialTheme={loadSavedSetupConfig()?.theme}
           />
         </div>
 
@@ -390,7 +392,10 @@ export function PollPage () {
           </div>
 
           <AnimatedBorder visible={currentSetupConfig.showBorder ?? false} borderWidth={4}>
-            <div className={currentSetupConfig.showBorder ? 'p-3 bg-slate-900 rounded-xl' : ''}>
+            <div
+              className={currentSetupConfig.showBorder ? 'p-3 bg-slate-900 rounded-xl' : ''}
+              style={currentSetupConfig.theme?.resultsBg ? { backgroundColor: currentSetupConfig.theme.resultsBg } : undefined}
+            >
               {isPollActive ? (
                 <PollResults
                   pollState={pollState}
@@ -400,6 +405,7 @@ export function PollPage () {
                   size="large"
                   questionFontSize={currentSetupConfig.questionFontSize}
                   optionsFontSize={currentSetupConfig.optionsFontSize}
+                  theme={currentSetupConfig.theme}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}
@@ -419,6 +425,7 @@ export function PollPage () {
                   size="large"
                   questionFontSize={currentSetupConfig.questionFontSize}
                   optionsFontSize={currentSetupConfig.optionsFontSize}
+                  theme={currentSetupConfig.theme}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}
