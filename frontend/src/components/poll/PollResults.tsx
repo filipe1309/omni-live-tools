@@ -15,7 +15,8 @@ interface PollResultsProps {
   showStatusBar?: boolean;
   compact?: boolean;
   size?: 'normal' | 'large';
-  fontSize?: number;
+  questionFontSize?: number;
+  optionsFontSize?: number;
   // Optional control callbacks for keyboard shortcuts
   onStart?: () => void;
   onStop?: () => void;
@@ -39,7 +40,8 @@ export function PollResults ({
   showStatusBar = true,
   compact = false,
   size = 'normal',
-  fontSize,
+  questionFontSize,
+  optionsFontSize,
   onStart,
   onStop,
   onReset,
@@ -121,6 +123,7 @@ export function PollResults ({
           timeLeft={pollState.timeLeft}
           timer={pollState.timer}
           className={questionClass}
+          fontSize={questionFontSize}
           editable={editable && !pollState.isRunning && !isCountingDown}
           onQuestionChange={onQuestionChange}
         />
@@ -137,7 +140,7 @@ export function PollResults ({
             totalVotes={totalVotes}
             isWinner={winnerIds.includes(option.id)}
             size={optionSize}
-            fontSize={fontSize}
+            fontSize={optionsFontSize}
             editable={editable && !pollState.isRunning && !isCountingDown}
             onOptionTextChange={onOptionTextChange}
           />

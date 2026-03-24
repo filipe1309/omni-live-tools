@@ -123,7 +123,7 @@ interface OptionWithId {
 
 interface PollSetupProps {
   onStart: (question: string, options: OptionWithId[], timer: number) => void;
-  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, resultsFontSize?: number) => void;
+  onChange?: (question: string, options: OptionWithId[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number) => void;
   disabled?: boolean;
   initialQuestion?: string;
   initialOptions?: string[];
@@ -131,12 +131,13 @@ interface PollSetupProps {
   initialTimer?: number;
   initialShowStatusBar?: boolean;
   initialShowBorder?: boolean;
-  initialResultsFontSize?: number;
+  initialQuestionFontSize?: number;
+  initialOptionsFontSize?: number;
   showStartButton?: boolean;
   hideStatusBarToggle?: boolean;
   hideBorderToggle?: boolean;
   hideFontSizeControls?: boolean;
-  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean; resultsFontSize?: number } | null;
+  externalConfig?: { question: string; options: OptionWithId[]; timer: number; showStatusBar?: boolean; showBorder?: boolean; questionFontSize?: number; optionsFontSize?: number } | null;
   externalFullOptions?: { allOptions: string[]; selectedOptions: boolean[] } | null;
 }
 
@@ -150,7 +151,8 @@ export function PollSetup ({
   initialTimer = POLL_TIMER.DEFAULT,
   initialShowStatusBar = true,
   initialShowBorder = false,
-  initialResultsFontSize = POLL_FONT_SIZE.DEFAULT,
+  initialQuestionFontSize = POLL_FONT_SIZE.QUESTION.DEFAULT,
+  initialOptionsFontSize = POLL_FONT_SIZE.OPTIONS.DEFAULT,
   showStartButton = true,
   hideStatusBarToggle = false,
   hideBorderToggle = false,
@@ -164,7 +166,8 @@ export function PollSetup ({
   const [timer, setTimer] = useState(initialTimer);
   const [showStatusBar, setShowStatusBar] = useState(initialShowStatusBar);
   const [showBorder, setShowBorder] = useState(initialShowBorder);
-  const [resultsFontSize, setResultsFontSize] = useState(initialResultsFontSize);
+  const [questionFontSize, setQuestionFontSize] = useState(initialQuestionFontSize);
+  const [optionsFontSize, setOptionsFontSize] = useState(initialOptionsFontSize);
   const hasSentInitialChange = useRef(false);
   const { t } = useTranslation();
 
@@ -339,8 +342,11 @@ export function PollSetup ({
       if (externalConfig.showBorder !== undefined) {
         setShowBorder(externalConfig.showBorder);
       }
-      if (externalConfig.resultsFontSize !== undefined) {
-        setResultsFontSize(externalConfig.resultsFontSize);
+      if (externalConfig.questionFontSize !== undefined) {
+        setQuestionFontSize(externalConfig.questionFontSize);
+      }
+      if (externalConfig.optionsFontSize !== undefined) {
+        setOptionsFontSize(externalConfig.optionsFontSize);
       }
 
       // Only rebuild options from externalConfig if we don't have externalFullOptions
@@ -394,7 +400,7 @@ export function PollSetup ({
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
       console.log('[PollSetup] Sending initial onChange with options:', selectedPollOptionsWithIds);
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
       hasSentInitialChange.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -424,7 +430,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(newOptions, selectedOptions);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, newOptions, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -484,7 +490,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds(options, newSelected);
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, newSelected, showStatusBar, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -496,7 +502,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, value, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -508,20 +514,33 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, value, questionFontSize, optionsFontSize);
     }
   };
 
-  // Handle resultsFontSize change
-  const handleResultsFontSizeChange = (delta: number) => {
-    const newSize = Math.min(POLL_FONT_SIZE.MAX, Math.max(POLL_FONT_SIZE.MIN, Number((resultsFontSize + delta).toFixed(1))));
-    setResultsFontSize(newSize);
+  // Handle questionFontSize change
+  const handleQuestionFontSizeChange = (delta: number) => {
+    const newSize = Math.min(POLL_FONT_SIZE.QUESTION.MAX, Math.max(POLL_FONT_SIZE.QUESTION.MIN, Number((questionFontSize + delta).toFixed(1))));
+    setQuestionFontSize(newSize);
 
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, newSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, newSize, optionsFontSize);
+    }
+  };
+
+  // Handle optionsFontSize change
+  const handleOptionsFontSizeChange = (delta: number) => {
+    const newSize = Math.min(POLL_FONT_SIZE.OPTIONS.MAX, Math.max(POLL_FONT_SIZE.OPTIONS.MIN, Number((optionsFontSize + delta).toFixed(1))));
+    setOptionsFontSize(newSize);
+
+    // Notify parent of change
+    if (onChange && hasSentInitialChange.current) {
+      const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
+      const questionText = question.trim() || DEFAULT_QUESTION;
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, newSize);
     }
   };
 
@@ -547,7 +566,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = value.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -559,7 +578,7 @@ export function PollSetup ({
     // Notify parent of change
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
-      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
+      onChange(suggestion, selectedPollOptionsWithIds, timer, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -594,7 +613,7 @@ export function PollSetup ({
     if (onChange && hasSentInitialChange.current) {
       const selectedPollOptionsWithIds = getSelectedPollOptionsWithIds();
       const questionText = question.trim() || DEFAULT_QUESTION;
-      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder, resultsFontSize);
+      onChange(questionText, selectedPollOptionsWithIds, clampedValue, options, selectedOptions, showStatusBar, showBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -657,7 +676,7 @@ export function PollSetup ({
         .filter(opt => opt.selected && opt.text)
         .map(opt => ({ id: opt.id, text: opt.text }));
 
-      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder, resultsFontSize);
+      onChange(newQuestion, selectedPollOptionsWithIds, newTimer, newOptions, newSelectedOptions, showStatusBar, newShowBorder, questionFontSize, optionsFontSize);
     }
   };
 
@@ -874,47 +893,42 @@ export function PollSetup ({
             </span>
           </div>
         )}
-
-        {/* Results Font Size Controls */}
-        {!hideFontSizeControls && (
-          <div
-            className={`flex items-center gap-2 p-2 rounded-lg border transition-all h-[42px] bg-slate-900/50 border-slate-700/50 ${disabled ? 'opacity-50' : ''}`}
-          >
-            <span className="text-sm text-slate-300 whitespace-nowrap">
-              🔤 {t.poll.resultsFontSize}
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => handleResultsFontSizeChange(-POLL_FONT_SIZE.STEP)}
-                disabled={disabled || resultsFontSize <= POLL_FONT_SIZE.MIN}
-                className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                −
-              </button>
-              <span className="w-12 text-center text-sm text-slate-200 font-medium">
-                {resultsFontSize.toFixed(1)}x
-              </span>
-              <button
-                type="button"
-                onClick={() => handleResultsFontSizeChange(POLL_FONT_SIZE.STEP)}
-                disabled={disabled || resultsFontSize >= POLL_FONT_SIZE.MAX}
-                className="w-7 h-7 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Question and Timer Row */}
       <div className="flex flex-wrap gap-4 items-end">
         {/* Question Input */}
         <div ref={questionContainerRef} className="flex-1 min-w-[300px] relative">
-          <label className="block text-sm font-medium text-slate-300 mb-1">
-            {t.poll.question} {loadQuestionHistory().length > 0 && <span className="text-slate-500 text-xs">({t.poll.historyAvailable})</span>}
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-slate-300">
+              {t.poll.question} {loadQuestionHistory().length > 0 && <span className="text-slate-500 text-xs">({t.poll.historyAvailable})</span>}
+            </label>
+            {!hideFontSizeControls && (
+              <div className={`flex items-center gap-1 ${disabled ? 'opacity-50' : ''}`}>
+                <button
+                  type="button"
+                  onClick={() => handleQuestionFontSizeChange(-POLL_FONT_SIZE.QUESTION.STEP)}
+                  disabled={disabled || questionFontSize <= POLL_FONT_SIZE.QUESTION.MIN}
+                  className="w-5 h-5 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  title={t.poll.questionFontSize}
+                >
+                  −
+                </button>
+                <span className="w-9 text-center text-xs text-slate-400 font-medium">
+                  {questionFontSize.toFixed(1)}x
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleQuestionFontSizeChange(POLL_FONT_SIZE.QUESTION.STEP)}
+                  disabled={disabled || questionFontSize >= POLL_FONT_SIZE.QUESTION.MAX}
+                  className="w-5 h-5 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  title={t.poll.questionFontSize}
+                >
+                  +
+                </button>
+              </div>
+            )}
+          </div>
           <div className="relative">
             <input
               ref={questionInputRef}
@@ -1050,9 +1064,36 @@ export function PollSetup ({
 
       {/* Options Grid with Checkboxes */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1">
-          {t.poll.options} ({t.poll.optionsHint})
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-sm font-medium text-slate-300">
+            {t.poll.options} ({t.poll.optionsHint})
+          </label>
+          {!hideFontSizeControls && (
+            <div className={`flex items-center gap-1 ${disabled ? 'opacity-50' : ''}`}>
+              <button
+                type="button"
+                onClick={() => handleOptionsFontSizeChange(-POLL_FONT_SIZE.OPTIONS.STEP)}
+                disabled={disabled || optionsFontSize <= POLL_FONT_SIZE.OPTIONS.MIN}
+                className="w-5 h-5 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                title={t.poll.optionsFontSize}
+              >
+                −
+              </button>
+              <span className="w-9 text-center text-xs text-slate-400 font-medium">
+                {optionsFontSize.toFixed(1)}x
+              </span>
+              <button
+                type="button"
+                onClick={() => handleOptionsFontSizeChange(POLL_FONT_SIZE.OPTIONS.STEP)}
+                disabled={disabled || optionsFontSize >= POLL_FONT_SIZE.OPTIONS.MAX}
+                className="w-5 h-5 flex items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                title={t.poll.optionsFontSize}
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
         <div className="grid grid-cols-3 gap-2">
           {options.map((option, index) => (
             <div

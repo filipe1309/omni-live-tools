@@ -188,7 +188,8 @@ export const es: TranslationKeys = {
     optionPlaceholder: 'Opción',
     minOptionsWarning: 'Selecciona al menos {count} opciones para la encuesta',
     duplicateOptionsWarning: 'Opciones duplicadas detectadas: {options}',
-    resultsFontSize: 'Tamaño de Fuente',
+    questionFontSize: 'Tamaño Pregunta',
+    optionsFontSize: 'Tamaño Opciones',
     // Profiles
     profile: 'Perfil',
     selectProfile: 'Seleccionar perfil',

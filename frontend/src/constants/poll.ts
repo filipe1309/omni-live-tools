@@ -15,10 +15,18 @@ export const POLL_TIMER = {
 
 // Font size settings for poll results (multiplier: 1x = normal size)
 export const POLL_FONT_SIZE = {
-  DEFAULT: 1,
-  MIN: 1,
-  MAX: 3,
-  STEP: 0.5,
+  QUESTION: {
+    DEFAULT: 1,
+    MIN: 1,
+    MAX: 3,
+    STEP: 0.5,
+  },
+  OPTIONS: {
+    DEFAULT: 1,
+    MIN: 1,
+    MAX: 3,
+    STEP: 0.5,
+  },
 } as const;
 
 // Options settings

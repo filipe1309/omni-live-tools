@@ -8,11 +8,12 @@ interface PollQuestionProps {
   timeLeft: number;
   timer: number;
   className?: string;
+  fontSize?: number;
   editable?: boolean;
   onQuestionChange?: (newQuestion: string) => void;
 }
 
-export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', editable = false, onQuestionChange }: PollQuestionProps) {
+export function PollQuestion ({ question, isRunning, timeLeft, timer, className = '', fontSize, editable = false, onQuestionChange }: PollQuestionProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(question);
@@ -122,13 +123,14 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             className="w-full bg-transparent border-b-2 border-tiktok-cyan text-white text-center font-bold outline-none"
-            style={{ fontSize: 'inherit' }}
+            style={fontSize ? { fontSize: `${fontSize * 1.875}rem` } : { fontSize: 'inherit' }}
           />
         ) : (
           <h3
             className={`font-bold transition-colors duration-500 ${getTextClasses()} ${editable && !isRunning ? 'cursor-pointer hover:text-tiktok-cyan' : ''}`}
             onDoubleClick={handleDoubleClick}
             title={editable && !isRunning ? t.pollResults.doubleClickToEdit : undefined}
+            style={fontSize ? { fontSize: `${fontSize * 1.875}rem` } : undefined}
           >
             {question}
           </h3>

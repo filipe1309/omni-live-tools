@@ -30,7 +30,8 @@ export interface SetupConfig {
   timer: number;
   showStatusBar?: boolean;
   showBorder?: boolean;
-  resultsFontSize?: number;
+  questionFontSize?: number;
+  optionsFontSize?: number;
 }
 
 /**

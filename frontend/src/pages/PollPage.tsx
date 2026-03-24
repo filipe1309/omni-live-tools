@@ -88,7 +88,7 @@ export function PollPage () {
     });
   }, [onConfigUpdate]);
 
-  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, resultsFontSize?: number) => {
+  const handleSetupChange = useCallback((question: string, options: PollOption[], timer: number, allOptions?: string[], selectedOptions?: boolean[], showStatusBar?: boolean, showBorder?: boolean, questionFontSize?: number, optionsFontSize?: number) => {
     // Skip the first onChange if we have saved config (PollSetup sends default values on mount)
     if (hasSavedConfig.current && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
@@ -102,7 +102,8 @@ export function PollPage () {
       timer,
       showStatusBar: showStatusBar ?? true,
       showBorder: showBorder ?? false,
-      resultsFontSize: resultsFontSize ?? POLL_FONT_SIZE.DEFAULT,
+      questionFontSize: questionFontSize ?? POLL_FONT_SIZE.QUESTION.DEFAULT,
+      optionsFontSize: optionsFontSize ?? POLL_FONT_SIZE.OPTIONS.DEFAULT,
     };
     setSetupConfig(newConfig);
     // Save to localStorage for persistence across reloads
@@ -354,7 +355,8 @@ export function PollPage () {
             initialTimer={loadSavedSetupConfig()?.timer}
             initialShowStatusBar={loadSavedSetupConfig()?.showStatusBar}
             initialShowBorder={loadSavedSetupConfig()?.showBorder}
-            initialResultsFontSize={loadSavedSetupConfig()?.resultsFontSize}
+            initialQuestionFontSize={loadSavedSetupConfig()?.questionFontSize}
+            initialOptionsFontSize={loadSavedSetupConfig()?.optionsFontSize}
           />
         </div>
 
@@ -396,7 +398,8 @@ export function PollPage () {
                   getTotalVotes={getTotalVotes}
                   showStatusBar={currentSetupConfig.showStatusBar ?? true}
                   size="large"
-                  fontSize={currentSetupConfig.resultsFontSize}
+                  questionFontSize={currentSetupConfig.questionFontSize}
+                  optionsFontSize={currentSetupConfig.optionsFontSize}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}
@@ -414,7 +417,8 @@ export function PollPage () {
                   getTotalVotes={() => 0}
                   showStatusBar={currentSetupConfig.showStatusBar ?? true}
                   size="large"
-                  fontSize={currentSetupConfig.resultsFontSize}
+                  questionFontSize={currentSetupConfig.questionFontSize}
+                  optionsFontSize={currentSetupConfig.optionsFontSize}
                   editable={true}
                   onQuestionChange={handleQuestionInlineEdit}
                   onOptionTextChange={handleOptionInlineEdit}

@@ -339,13 +339,14 @@ export function PollResultsPage () {
       selectedOptions?: boolean[],
       showStatusBar?: boolean,
       showBorder?: boolean,
-      resultsFontSize?: number
+      questionFontSize?: number,
+      optionsFontSize?: number
     ) => {
       if (!channelRef) return;
       const newFullOptions = allOptions && selectedOptions 
         ? { allOptions, selectedOptions } 
         : undefined;
-      const newConfig = { question, options, timer, showStatusBar, showBorder, resultsFontSize };
+      const newConfig = { question, options, timer, showStatusBar, showBorder, questionFontSize, optionsFontSize };
       channelRef.postMessage({
         type: 'config-update',
         config: newConfig,
@@ -503,7 +504,8 @@ export function PollResultsPage () {
                   initialSelectedOptions={fullOptionsConfig?.selectedOptions}
                   initialTimer={setupConfig?.timer}
                   initialShowBorder={setupConfig?.showBorder}
-                  initialResultsFontSize={setupConfig?.resultsFontSize}
+                  initialQuestionFontSize={setupConfig?.questionFontSize}
+                  initialOptionsFontSize={setupConfig?.optionsFontSize}
                 />
               </div>
             </div>
@@ -539,7 +541,8 @@ export function PollResultsPage () {
                 getTotalVotes={isPollActive ? getTotalVotes : () => 0}
                 showStatusBar={false}
                 size="large"
-                fontSize={setupConfig?.resultsFontSize}
+                questionFontSize={setupConfig?.questionFontSize}
+                optionsFontSize={setupConfig?.optionsFontSize}
                 editable={true}
                 onQuestionChange={handleQuestionInlineEdit}
                 onOptionTextChange={handleOptionInlineEdit}
