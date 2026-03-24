@@ -79,6 +79,10 @@ export function PollResultsPage () {
     return localStorage.getItem(STORAGE_KEYS.AUTO_RECONNECT) === 'true';
   });
   const [channelRef, setChannelRef] = useState<BroadcastChannel | null>(null);
+  const [isSetupCollapsed, setIsSetupCollapsed] = useState(false);
+  const [autoCollapseSetup, setAutoCollapseSetup] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.AUTO_COLLAPSE_SETUP) === 'true';
+  });
 
   // Keep animations running even when window is in background (for screen sharing)
   useBackgroundKeepAlive(true);
@@ -100,6 +104,16 @@ export function PollResultsPage () {
 
   // Determine if poll is actively running (for showing real vs preview data)
   const isPollActive = pollState.isRunning || pollState.finished;
+
+  // Auto-collapse setup panel when poll starts (if enabled)
+  useEffect(() => {
+    if (!autoCollapseSetup) return;
+    if (pollState.isRunning || isCountingDown) {
+      setIsSetupCollapsed(true);
+    } else if (!pollState.isRunning && !pollState.finished && !isCountingDown) {
+      setIsSetupCollapsed(false);
+    }
+  }, [pollState.isRunning, pollState.finished, isCountingDown, autoCollapseSetup]);
 
   // Helper to calculate total votes
   const getTotalVotes = useCallback(() => {
@@ -304,6 +318,17 @@ export function PollResultsPage () {
     }, 10000);
   };
 
+  const toggleAutoCollapseSetup = useCallback(() => {
+    setAutoCollapseSetup(prev => {
+      const newValue = !prev;
+      localStorage.setItem(STORAGE_KEYS.AUTO_COLLAPSE_SETUP, String(newValue));
+      if (!newValue) {
+        setIsSetupCollapsed(false);
+      }
+      return newValue;
+    });
+  }, []);
+
   // Broadcast config changes back to PollPage (used by PollSetup onChange)
   const handleSetupChange = useCallback(
     (
@@ -432,23 +457,56 @@ export function PollResultsPage () {
         )}
 
         <div className="flex-1 flex flex-col gap-4">
-          {/* Setup Section - Above Results */}
-          <div className={`p-4 bg-slate-800/50 rounded-xl border border-tiktok-cyan/30 ${pollState.isRunning || isCountingDown ? 'cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
-            <PollSetup
-              onStart={() => { }} // Not used - we have separate control buttons
-              onChange={handleSetupChange}
-              disabled={pollState.isRunning || isCountingDown}
-              showStartButton={false}
-              hideStatusBarToggle={true}
-              externalConfig={setupConfig}
-              externalFullOptions={fullOptionsConfig}
-              initialQuestion={setupConfig?.question}
-              initialOptions={fullOptionsConfig?.allOptions}
-              initialSelectedOptions={fullOptionsConfig?.selectedOptions}
-              initialTimer={setupConfig?.timer}
-              initialShowBorder={setupConfig?.showBorder}
-              initialResultsFontSize={setupConfig?.resultsFontSize}
-            />
+          {/* Setup Section - Collapsible */}
+          <div className={`bg-slate-800/50 rounded-xl border border-tiktok-cyan/30 ${pollState.isRunning || isCountingDown ? 'cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
+            {/* Setup Header with collapse toggle */}
+            <div
+              className="flex items-center justify-between px-4 py-2 cursor-pointer select-none"
+              onClick={() => setIsSetupCollapsed(prev => !prev)}
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-tiktok-cyan transition-transform duration-300 ${isSetupCollapsed ? '-rotate-90' : 'rotate-0'}`}
+                >
+                  ▼
+                </span>
+                <span className="text-sm font-medium text-slate-300">{t.pollResults.setupSection}</span>
+              </div>
+              <label
+                className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer"
+                onClick={e => e.stopPropagation()}
+              >
+                <input
+                  type="checkbox"
+                  checked={autoCollapseSetup}
+                  onChange={toggleAutoCollapseSetup}
+                  className="accent-tiktok-cyan w-3.5 h-3.5"
+                />
+                {t.pollResults.autoCollapseSetup}
+              </label>
+            </div>
+            {/* Collapsible content */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${isSetupCollapsed ? 'max-h-0 opacity-0' : 'max-h-[1000px] opacity-100'}`}
+            >
+              <div className="px-4 pb-4">
+                <PollSetup
+                  onStart={() => { }} // Not used - we have separate control buttons
+                  onChange={handleSetupChange}
+                  disabled={pollState.isRunning || isCountingDown}
+                  showStartButton={false}
+                  hideStatusBarToggle={true}
+                  externalConfig={setupConfig}
+                  externalFullOptions={fullOptionsConfig}
+                  initialQuestion={setupConfig?.question}
+                  initialOptions={fullOptionsConfig?.allOptions}
+                  initialSelectedOptions={fullOptionsConfig?.selectedOptions}
+                  initialTimer={setupConfig?.timer}
+                  initialShowBorder={setupConfig?.showBorder}
+                  initialResultsFontSize={setupConfig?.resultsFontSize}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Control Buttons */}

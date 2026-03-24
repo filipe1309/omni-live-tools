@@ -246,6 +246,8 @@ export const ptBR = {
     doubleClickToEdit: 'Duplo clique para editar',
     showBorder: 'Mostrar Borda',
     hideBorder: 'Ocultar Borda',
+    autoCollapseSetup: 'Recolher config. automaticamente',
+    setupSection: 'Configuração',
   },
 
   // Toast messages

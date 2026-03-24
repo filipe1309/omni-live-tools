@@ -33,6 +33,7 @@ export const STORAGE_KEYS = {
   SETUP_CONFIG: 'omni-poll-setupConfig',
   FULL_OPTIONS: 'omni-poll-fullOptions',
   AUTO_RECONNECT: 'omni-poll-autoReconnect',
+  AUTO_COLLAPSE_SETUP: 'omni-poll-autoCollapseSetup',
   QUESTION_HISTORY: 'omni-poll-questionHistory',
   OPTION_HISTORY: 'omni-poll-optionHistory',
   PROFILES: 'omni-poll-profiles',

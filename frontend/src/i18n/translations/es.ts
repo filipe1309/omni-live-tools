@@ -248,6 +248,8 @@ export const es: TranslationKeys = {
     doubleClickToEdit: 'Doble clic para editar',
     showBorder: 'Mostrar Borde',
     hideBorder: 'Ocultar Borde',
+    autoCollapseSetup: 'Colapsar config. automáticamente',
+    setupSection: 'Configuración',
   },
 
   // Toast messages
