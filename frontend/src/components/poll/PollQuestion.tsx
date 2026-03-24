@@ -127,12 +127,17 @@ export function PollQuestion ({ question, isRunning, timeLeft, timer, className 
           />
         ) : (
           <h3
-            className={`font-bold transition-colors duration-500 ${getTextClasses()} ${editable && !isRunning ? 'cursor-pointer hover:text-tiktok-cyan' : ''}`}
+            className={`font-bold transition-colors duration-500 ${getTextClasses()} ${editable && !isRunning ? 'cursor-pointer hover:text-tiktok-cyan group' : ''}`}
             onDoubleClick={handleDoubleClick}
             title={editable && !isRunning ? t.pollResults.doubleClickToEdit : undefined}
             style={fontSize ? { fontSize: `${fontSize * 1.875}rem` } : undefined}
           >
             {question}
+            {editable && !isRunning && (
+              <svg className="inline-block ml-2 w-4 h-4 opacity-0 group-hover:opacity-60 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            )}
           </h3>
         )}
       </div>
