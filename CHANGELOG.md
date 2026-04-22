@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.22.0] - 2026-04-21
+
+### Added
+
+- Enhance opacity transitions for setup section and control buttons
+- Replace trophy zoom animation with Lottie animation for winner badge
+
+## [1.21.1] - 2026-03-31
+
+### Changed
+
+- Update script source in index.html to new version for improved functionality
+- V1.21.0
+
 ## [1.21.0] - 2026-03-24
 
 ### Added
@@ -516,6 +530,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhance README with detailed language support and updated poll feature instructions
 - Add link to tikTok-chat-reader-jb in Credits section
 
+[1.22.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.21.1...v1.22.0
+[1.21.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.20.1...v1.21.0
 [1.20.1]: https://github.com/filipe1309/omni-live-tools/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/filipe1309/omni-live-tools/compare/v1.19.0...v1.20.0
