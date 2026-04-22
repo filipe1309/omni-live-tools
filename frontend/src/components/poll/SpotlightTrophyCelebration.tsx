@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import Lottie from 'lottie-react';
 import { CONFETTI } from '@/constants';
 import { useTranslation } from '@/i18n';
+import winnerBadgeAnimation from '@/assets/animations/winner-badge.json';
 
 interface SpotlightTrophyCelebrationProps {
   onComplete: () => void;
@@ -48,11 +50,15 @@ export function SpotlightTrophyCelebration ({ onComplete, winnerText }: Spotligh
         ))}
       </div>
 
-      {/* Trophy zoom animation */}
+      {/* Trophy Lottie animation + winner text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="animate-trophy-zoom text-center">
-          <div className="text-[8rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.8)] animate-trophy-glow">
-            🏆
+        <div className="text-center">
+          <div className="w-48 h-48 mx-auto drop-shadow-[0_0_60px_rgba(255,215,0,0.8)]">
+            <Lottie
+              animationData={winnerBadgeAnimation}
+              loop={false}
+              autoplay
+            />
           </div>
           <div className="text-3xl font-black text-yellow-400 mt-1 animate-bounce drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
             {t.poll.winner}
@@ -79,32 +85,6 @@ export function SpotlightTrophyCelebration ({ onComplete, winnerText }: Spotligh
 
       {/* CSS for animations */}
       <style>{`
-        @keyframes trophy-zoom {
-          0% {
-            transform: scale(0) rotate(-180deg);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.2) rotate(10deg);
-          }
-          70% {
-            transform: scale(0.9) rotate(-5deg);
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes trophy-glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 60px rgba(255,215,0,0.8));
-          }
-          50% {
-            filter: drop-shadow(0 0 100px rgba(255,215,0,1)) drop-shadow(0 0 150px rgba(255,215,0,0.5));
-          }
-        }
-        
         @keyframes sparkle {
           0%, 100% {
             opacity: 0;
@@ -145,12 +125,8 @@ export function SpotlightTrophyCelebration ({ onComplete, winnerText }: Spotligh
           }
         }
         
-        .animate-trophy-zoom {
-          animation: trophy-zoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        
-        .animate-trophy-glow {
-          animation: trophy-glow 1.5s ease-in-out infinite;
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
         }
         
         .animate-sparkle {
@@ -159,10 +135,6 @@ export function SpotlightTrophyCelebration ({ onComplete, winnerText }: Spotligh
         
         .animate-ray {
           animation: ray 2s ease-in-out infinite;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out forwards;
         }
         
         .animate-winner-text {
