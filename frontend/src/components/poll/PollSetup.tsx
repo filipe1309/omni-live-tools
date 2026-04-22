@@ -929,6 +929,55 @@ export function PollSetup ({
             </span>
           </div>
         )}
+
+        {/* Theme Colors - inline in top row when hideStatusBarToggle is true */}
+        {hideStatusBarToggle && !hideFontSizeControls && (
+          <div className="flex items-center gap-3 h-[42px] px-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
+            <span className="text-sm font-medium text-slate-300 whitespace-nowrap">🎨 {t.poll.themeColors}</span>
+            <div className="flex items-center gap-3">
+              <label className={`flex items-center gap-1 ${disabled ? 'opacity-50' : ''}`}>
+                <input
+                  type="color"
+                  value={theme.questionBg || DEFAULT_POLL_THEME.questionBg}
+                  onChange={e => handleThemeChange('questionBg', e.target.value)}
+                  disabled={disabled}
+                  className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+                />
+                <span className="text-xs text-slate-400">{t.poll.questionColor}</span>
+              </label>
+              <label className={`flex items-center gap-1 ${disabled ? 'opacity-50' : ''}`}>
+                <input
+                  type="color"
+                  value={theme.optionBar || DEFAULT_POLL_THEME.optionBar}
+                  onChange={e => handleThemeChange('optionBar', e.target.value)}
+                  disabled={disabled}
+                  className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+                />
+                <span className="text-xs text-slate-400">{t.poll.optionBarColor}</span>
+              </label>
+              <label className={`flex items-center gap-1 ${disabled ? 'opacity-50' : ''}`}>
+                <input
+                  type="color"
+                  value={theme.resultsBg || DEFAULT_POLL_THEME.resultsBg}
+                  onChange={e => handleThemeChange('resultsBg', e.target.value)}
+                  disabled={disabled}
+                  className="w-7 h-7 rounded cursor-pointer border border-slate-600 bg-transparent"
+                />
+                <span className="text-xs text-slate-400">{t.poll.resultsBgColor}</span>
+              </label>
+            </div>
+            {(theme.questionBg || theme.optionBar || theme.resultsBg) && (
+              <button
+                type="button"
+                onClick={handleResetTheme}
+                disabled={disabled}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50 whitespace-nowrap"
+              >
+                {t.poll.resetTheme}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Question and Timer Row */}
@@ -1216,8 +1265,8 @@ export function PollSetup ({
         )}
       </div>
 
-      {/* Theme Colors */}
-      {!hideFontSizeControls && (
+      {/* Theme Colors - shown here only when NOT in hideStatusBarToggle mode (it's inline in top row otherwise) */}
+      {!hideStatusBarToggle && !hideFontSizeControls && (
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-medium text-slate-300">
