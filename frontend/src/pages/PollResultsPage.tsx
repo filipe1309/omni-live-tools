@@ -460,7 +460,7 @@ export function PollResultsPage () {
 
         <div className="flex-1 flex flex-col gap-4">
           {/* Setup Section - Collapsible */}
-          <div className={`bg-slate-800/50 rounded-xl border border-tiktok-cyan/30 ${pollState.isRunning || isCountingDown ? 'cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
+          <div className={`bg-slate-800/50 rounded-xl border border-tiktok-cyan/30 transition-opacity duration-500 ${pollState.isRunning || isCountingDown ? 'opacity-10 hover:opacity-80 cursor-not-allowed [&_*]:cursor-not-allowed' : ''}`}>
             {/* Setup Header with collapse toggle */}
             <div
               className="flex items-center justify-between px-4 py-2 cursor-pointer select-none"
@@ -514,6 +514,7 @@ export function PollResultsPage () {
           </div>
 
           {/* Control Buttons */}
+          <div className={`transition-opacity duration-500 ${pollState.isRunning || isCountingDown ? 'opacity-10 hover:opacity-80' : ''}`}>
           <PollControlButtons
             onStart={() => sendCommand('start')}
             onStop={() => sendCommand('stop')}
@@ -522,6 +523,7 @@ export function PollResultsPage () {
             isRunning={pollState.isRunning}
             isCountingDown={isCountingDown}
           />
+          </div>
 
           {/* Results Section with Animated Border */}
           <AnimatedBorder visible={setupConfig?.showBorder ?? false} borderWidth={6} className="flex-1">
